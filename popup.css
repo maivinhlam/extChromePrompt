@@ -15,7 +15,7 @@
 body {
   margin: 0;
   width: 420px;
-  min-height: 560px;
+  min-height: 860px;
   background: var(--bg);
   color: var(--ink);
   font-family: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
@@ -24,7 +24,7 @@ body {
 .panel {
   margin: 0;
   padding: 16px;
-  min-height: 560px;
+  min-height: 860px;
   display: flex;
   flex-direction: column;
   border: none;

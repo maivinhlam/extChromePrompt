@@ -1,4 +1,11 @@
-const pendingDownloads = [];
+export {};
+
+type PendingDownload = {
+  sceneName: string;
+  mediaType: string;
+};
+
+const pendingDownloads: PendingDownload[] = [];
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type === "REGISTER_DOWNLOAD_NAME") {
@@ -26,6 +33,11 @@ chrome.downloads.onDeterminingFilename.addListener((item, suggest) => {
   }
 
   const payload = pendingDownloads.shift();
+  if (!payload) {
+    suggest();
+    return;
+  }
+
   const extension = detectFileExtension(item);
   const sceneSlug = toSceneSlug(payload.sceneName);
   const fileName = `${sceneSlug}_${payload.mediaType}_${Date.now()}.${extension}`;
@@ -36,7 +48,7 @@ chrome.downloads.onDeterminingFilename.addListener((item, suggest) => {
   });
 });
 
-function toSceneSlug(sceneName) {
+function toSceneSlug(sceneName: string) {
   const clean = String(sceneName || "scene")
     .replace(/^\s+|\s+$/g, "")
     .replace(/\s+/g, "_")
@@ -46,7 +58,7 @@ function toSceneSlug(sceneName) {
   return clean || "scene";
 }
 
-function detectFileExtension(item) {
+function detectFileExtension(item: chrome.downloads.DownloadItem) {
   const filename = item.filename || "";
   const fromName = filename.split(".").pop();
   if (fromName && fromName.length <= 5 && fromName !== filename) {

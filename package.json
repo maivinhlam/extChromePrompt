@@ -1,0 +1,18 @@
+{
+  "name": "flow-prompt-runner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chrome extension automation for Google Labs Flow",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "watch": "vite build --watch"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.2.0",
+    "@types/chrome": "^0.0.306",
+    "typescript": "^5.8.3",
+    "vite": "^5.4.10"
+  }
+}

@@ -1,16 +1,33 @@
+export {};
+
 const STORAGE_KEY = "flowPromptRunnerSettings";
 const LOG_STORAGE_KEY = "flowPromptRunnerLogs";
 
-const intervalInput = document.getElementById("intervalSeconds");
-const modeImageInput = document.getElementById("modeImage");
-const modeVideoInput = document.getElementById("modeVideo");
-const promptsInput = document.getElementById("prompts");
-const statusEl = document.getElementById("status");
-const startBtn = document.getElementById("startBtn");
-const stopBtn = document.getElementById("stopBtn");
-const logsEl = document.getElementById("logs");
+type PromptMode = "image" | "video";
 
-init().catch((error) => setStatus(`Init error: ${error.message}`, true));
+type RunnerSettings = {
+  intervalSeconds?: number;
+  mode?: PromptMode;
+  promptsText?: string;
+};
+
+type LogEntry = {
+  timestamp?: number;
+  message?: string;
+};
+
+const intervalInput = document.getElementById(
+  "intervalSeconds",
+) as HTMLInputElement;
+const modeImageInput = document.getElementById("modeImage") as HTMLInputElement;
+const modeVideoInput = document.getElementById("modeVideo") as HTMLInputElement;
+const promptsInput = document.getElementById("prompts") as HTMLTextAreaElement;
+const statusEl = document.getElementById("status") as HTMLElement;
+const startBtn = document.getElementById("startBtn") as HTMLButtonElement;
+const stopBtn = document.getElementById("stopBtn") as HTMLButtonElement;
+const logsEl = document.getElementById("logs") as HTMLElement;
+
+init().catch((error: Error) => setStatus(`Init error: ${error.message}`, true));
 
 async function init() {
   await loadSettings();
@@ -31,19 +48,20 @@ async function init() {
 
 async function loadSettings() {
   const data = await chrome.storage.local.get(STORAGE_KEY);
-  const settings = data[STORAGE_KEY] || {};
+  const settings = (data[STORAGE_KEY] || {}) as RunnerSettings;
 
-  intervalInput.value = settings.intervalSeconds || 15;
-  const mode = settings.mode === "video" ? "video" : "image";
+  intervalInput.value = String(settings.intervalSeconds || 15);
+  const mode: PromptMode = settings.mode === "video" ? "video" : "image";
   modeImageInput.checked = mode === "image";
   modeVideoInput.checked = mode === "video";
   promptsInput.value = settings.promptsText || "";
 }
 
 async function persistSettings() {
-  const existing =
-    (await chrome.storage.local.get(STORAGE_KEY))[STORAGE_KEY] || {};
-  const updated = {
+  const existing = ((await chrome.storage.local.get(STORAGE_KEY))[
+    STORAGE_KEY
+  ] || {}) as RunnerSettings;
+  const updated: RunnerSettings = {
     ...existing,
     intervalSeconds: Number(intervalInput.value || 15),
     mode: modeVideoInput.checked ? "video" : "image",
@@ -130,19 +148,22 @@ async function onStop() {
   setStatus("Stop requested.");
 }
 
-function setStatus(text, isError = false) {
+function setStatus(text: string, isError = false) {
   statusEl.textContent = text;
   statusEl.style.color = isError ? "#8a1d1d" : "#2f594a";
 }
 
-function onStorageChanged(changes, areaName) {
+function onStorageChanged(
+  changes: Record<string, chrome.storage.StorageChange>,
+  areaName: string,
+) {
   if (areaName !== "local") {
     return;
   }
 
   if (changes[LOG_STORAGE_KEY]) {
     const nextLogs = Array.isArray(changes[LOG_STORAGE_KEY].newValue)
-      ? changes[LOG_STORAGE_KEY].newValue
+      ? (changes[LOG_STORAGE_KEY].newValue as LogEntry[])
       : [];
     renderLogs(nextLogs);
   }
@@ -151,7 +172,7 @@ function onStorageChanged(changes, areaName) {
 async function loadLogs() {
   const data = await chrome.storage.local.get(LOG_STORAGE_KEY);
   const logs = Array.isArray(data[LOG_STORAGE_KEY])
-    ? data[LOG_STORAGE_KEY]
+    ? (data[LOG_STORAGE_KEY] as LogEntry[])
     : [];
   renderLogs(logs);
 }
@@ -161,7 +182,7 @@ async function clearLogs() {
   renderLogs([]);
 }
 
-function renderLogs(logs) {
+function renderLogs(logs: LogEntry[]) {
   if (!logsEl) {
     return;
   }
@@ -183,7 +204,7 @@ function renderLogs(logs) {
   logsEl.scrollTop = logsEl.scrollHeight;
 }
 
-function formatLogTime(timestamp) {
+function formatLogTime(timestamp?: number) {
   if (!timestamp) {
     return "--:--:--";
   }
@@ -196,14 +217,14 @@ function formatLogTime(timestamp) {
   return date.toLocaleTimeString();
 }
 
-function escapeHtml(text) {
+function escapeHtml(text: string) {
   return text
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
 }
 
-async function ensureContentScript(tabId) {
+async function ensureContentScript(tabId: number) {
   const ping = await chrome.tabs
     .sendMessage(tabId, { type: "PING_FLOW_PROMPT_RUNNER" })
     .catch(() => null);
@@ -212,18 +233,7 @@ async function ensureContentScript(tabId) {
     return true;
   }
 
-  try {
-    await chrome.scripting.executeScript({
-      target: { tabId },
-      files: ["content.js"],
-    });
-  } catch {
-    return false;
-  }
-
-  const afterInject = await chrome.tabs
-    .sendMessage(tabId, { type: "PING_FLOW_PROMPT_RUNNER" })
-    .catch(() => null);
-
-  return Boolean(afterInject?.ok);
+  // With CRXJS + Vite, content script file names are generated at build time.
+  // We rely on manifest-declared injection and only verify reachability here.
+  return false;
 }
