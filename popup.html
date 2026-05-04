@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flow Prompt Runner</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <main class="panel">
+    <h1>Flow Prompt Runner</h1>
+
+    <label for="prompts">Prompts (one line each)</label>
+    <textarea id="prompts"
+      placeholder="SCENE 1: A cinematic shot of a forest at sunrise&#10;SCENE 2: Slow camera pan above misty mountains"></textarea>
+
+    <p id="status" class="status">Ready.</p>
+
+    <div class="bottom-bar">
+      <label class="interval-item">
+        <span>Seconds</span>
+        <input id="intervalSeconds" type="number" min="1" step="1" value="15" />
+      </label>
+      <label class="check-item">
+        <input id="saveImage" type="checkbox" checked />
+        <span>Save image</span>
+      </label>
+      <label class="check-item">
+        <input id="saveVideo" type="checkbox" checked />
+        <span>Save video</span>
+      </label>
+    </div>
+
+    <div class="actions">
+      <button id="startBtn" type="button">Start</button>
+      <button id="stopBtn" type="button" class="secondary">Stop</button>
+    </div>
+  </main>
+
+  <script src="popup.js"></script>
+</body>
+</html>

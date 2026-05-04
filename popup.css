@@ -1,0 +1,160 @@
+:root {
+  --bg: radial-gradient(circle at top right, #f9e8d9 0%, #f4f0e8 48%, #e6efe9 100%);
+  --panel: #fff8f0ee;
+  --ink: #2c2a28;
+  --accent: #be5d2d;
+  --accent-strong: #93431f;
+  --border: #d7c7b8;
+  --hint: #6d665f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  width: 420px;
+  min-height: 560px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
+}
+
+.panel {
+  margin: 0;
+  padding: 16px;
+  min-height: 560px;
+  display: flex;
+  flex-direction: column;
+  border: none;
+  border-radius: 0;
+  background: var(--panel);
+  box-shadow: none;
+  animation: slide-in 240ms ease;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateY(6px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 20px;
+  letter-spacing: 0.2px;
+}
+
+label {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+textarea,
+input[type="file"] {
+  width: 100%;
+  flex: 1;
+  min-height: 120px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 13px;
+  background: #fff;
+  resize: none;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 180px;
+  line-height: 1.35;
+}
+
+.bottom-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: auto;
+  padding-top: 12px;
+  flex-wrap: nowrap;
+}
+
+.interval-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.interval-item input[type="number"] {
+  width: 58px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 13px;
+  background: #fff;
+}
+
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-weight: 500;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.hint {
+  margin: 6px 0 0;
+  color: var(--hint);
+  font-size: 12px;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+button {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  color: #fff;
+  background: var(--accent);
+}
+
+button:hover {
+  background: var(--accent-strong);
+}
+
+button.secondary {
+  background: #7f7468;
+}
+
+button.secondary:hover {
+  background: #5f564d;
+}
+
+.status {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #2f594a;
+  min-height: 1em;
+}
