@@ -168,7 +168,7 @@ export async function selectModelAndModeTab(
     }
 
     if (mode === "video") {
-      const videoOption = findButtonByText(["video"]);
+      const videoOption = findButtonByText(["video"], menuShown);
       if (videoOption) {
         await safeClick(videoOption);
         await appendAutomationLog("Selected Video option from model menu.");
@@ -196,9 +196,10 @@ export async function configureVideoModeModel(): Promise<void> {
   if (referencesTab) {
     await safeClick(referencesTab);
     await sleep(250);
-    await appendAutomationLog("Thanh phan tab selected.");
+    await appendAutomationLog(`"Thanh phan" tab selected.`);
   } else {
     await appendAutomationLog("Thanh phan tab not found.");
+    return;
   }
 
   await appendAutomationLog("Open video model dropdown.");

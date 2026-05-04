@@ -1,4 +1,4 @@
-import { isVisible } from "./utils";
+import { isVisible, sleep } from "./utils";
 
 export function findPromptInput(): HTMLElement | null {
   const selectors = [
@@ -60,10 +60,12 @@ export function findModelButton(): HTMLElement | null {
 }
 
 export function findVideoReferencesTab(): HTMLElement | null {
+  const a = document.querySelectorAll("button[role='tab']");
+
   const tabs = Array.from(
     document.querySelectorAll("button[role='tab']"),
   ) as HTMLElement[];
-  return (
+  const tab =
     tabs.find((tab) => {
       if (!isVisible(tab)) {
         return false;
@@ -73,12 +75,13 @@ export function findVideoReferencesTab(): HTMLElement | null {
       const controls = (tab.getAttribute("aria-controls") || "").toLowerCase();
       const id = (tab.id || "").toLowerCase();
       return (
-        text.includes("thanh phan") ||
+        text.includes("Thành phần") ||
         controls.includes("video_references") ||
         id.includes("video_references")
       );
-    }) || null
-  );
+    }) || null;
+  console.log("🚀 ~ findVideoReferencesTab ~ tab:", tab);
+  return tab;
 }
 
 export function findVideoModelDropdownButton(): HTMLElement | null {
