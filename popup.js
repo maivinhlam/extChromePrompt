@@ -1,25 +1,30 @@
 const STORAGE_KEY = "flowPromptRunnerSettings";
+const LOG_STORAGE_KEY = "flowPromptRunnerLogs";
 
 const intervalInput = document.getElementById("intervalSeconds");
-const saveImageInput = document.getElementById("saveImage");
-const saveVideoInput = document.getElementById("saveVideo");
+const modeImageInput = document.getElementById("modeImage");
+const modeVideoInput = document.getElementById("modeVideo");
 const promptsInput = document.getElementById("prompts");
 const statusEl = document.getElementById("status");
 const startBtn = document.getElementById("startBtn");
 const stopBtn = document.getElementById("stopBtn");
+const logsEl = document.getElementById("logs");
 
 init().catch((error) => setStatus(`Init error: ${error.message}`, true));
 
 async function init() {
   await loadSettings();
+  await loadLogs();
 
   intervalInput.addEventListener("input", persistSettings);
-  saveImageInput.addEventListener("change", persistSettings);
-  saveVideoInput.addEventListener("change", persistSettings);
+  modeImageInput.addEventListener("change", persistSettings);
+  modeVideoInput.addEventListener("change", persistSettings);
   promptsInput.addEventListener("input", persistSettings);
 
   startBtn.addEventListener("click", onStart);
   stopBtn.addEventListener("click", onStop);
+
+  chrome.storage.onChanged.addListener(onStorageChanged);
 
   setStatus("Ready.");
 }
@@ -29,8 +34,9 @@ async function loadSettings() {
   const settings = data[STORAGE_KEY] || {};
 
   intervalInput.value = settings.intervalSeconds || 15;
-  saveImageInput.checked = settings.saveImage ?? true;
-  saveVideoInput.checked = settings.saveVideo ?? true;
+  const mode = settings.mode === "video" ? "video" : "image";
+  modeImageInput.checked = mode === "image";
+  modeVideoInput.checked = mode === "video";
   promptsInput.value = settings.promptsText || "";
 }
 
@@ -40,8 +46,7 @@ async function persistSettings() {
   const updated = {
     ...existing,
     intervalSeconds: Number(intervalInput.value || 15),
-    saveImage: saveImageInput.checked,
-    saveVideo: saveVideoInput.checked,
+    mode: modeVideoInput.checked ? "video" : "image",
     promptsText: promptsInput.value,
   };
   await chrome.storage.local.set({ [STORAGE_KEY]: updated });
@@ -69,13 +74,23 @@ async function onStart() {
     return;
   }
 
+  const ready = await ensureContentScript(tab.id);
+  if (!ready) {
+    setStatus(
+      "Could not attach automation to this tab. Reload the page and try again.",
+      true,
+    );
+    return;
+  }
+
+  await clearLogs();
+
   const payload = {
     type: "START_AUTOMATION",
     config: {
       prompts,
+      mode: modeVideoInput.checked ? "video" : "image",
       intervalMs: Math.max(1, Number(intervalInput.value || 15)) * 1000,
-      saveImage: !!saveImageInput.checked,
-      saveVideo: !!saveVideoInput.checked,
     },
   };
 
@@ -101,6 +116,8 @@ async function onStop() {
     return;
   }
 
+  await ensureContentScript(tab.id);
+
   const response = await chrome.tabs
     .sendMessage(tab.id, { type: "STOP_AUTOMATION" })
     .catch(() => null);
@@ -116,4 +133,97 @@ async function onStop() {
 function setStatus(text, isError = false) {
   statusEl.textContent = text;
   statusEl.style.color = isError ? "#8a1d1d" : "#2f594a";
+}
+
+function onStorageChanged(changes, areaName) {
+  if (areaName !== "local") {
+    return;
+  }
+
+  if (changes[LOG_STORAGE_KEY]) {
+    const nextLogs = Array.isArray(changes[LOG_STORAGE_KEY].newValue)
+      ? changes[LOG_STORAGE_KEY].newValue
+      : [];
+    renderLogs(nextLogs);
+  }
+}
+
+async function loadLogs() {
+  const data = await chrome.storage.local.get(LOG_STORAGE_KEY);
+  const logs = Array.isArray(data[LOG_STORAGE_KEY])
+    ? data[LOG_STORAGE_KEY]
+    : [];
+  renderLogs(logs);
+}
+
+async function clearLogs() {
+  await chrome.storage.local.set({ [LOG_STORAGE_KEY]: [] });
+  renderLogs([]);
+}
+
+function renderLogs(logs) {
+  if (!logsEl) {
+    return;
+  }
+
+  if (!Array.isArray(logs) || !logs.length) {
+    logsEl.innerHTML = '<p class="log-empty">No logs yet.</p>';
+    return;
+  }
+
+  const lines = logs
+    .map((entry) => {
+      const message = escapeHtml(String(entry?.message || ""));
+      const timeText = formatLogTime(entry?.timestamp);
+      return `<p class="log-item"><span class="log-time">[${timeText}]</span>${message}</p>`;
+    })
+    .join("");
+
+  logsEl.innerHTML = lines;
+  logsEl.scrollTop = logsEl.scrollHeight;
+}
+
+function formatLogTime(timestamp) {
+  if (!timestamp) {
+    return "--:--:--";
+  }
+
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) {
+    return "--:--:--";
+  }
+
+  return date.toLocaleTimeString();
+}
+
+function escapeHtml(text) {
+  return text
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+async function ensureContentScript(tabId) {
+  const ping = await chrome.tabs
+    .sendMessage(tabId, { type: "PING_FLOW_PROMPT_RUNNER" })
+    .catch(() => null);
+
+  if (ping?.ok) {
+    return true;
+  }
+
+  try {
+    await chrome.scripting.executeScript({
+      target: { tabId },
+      files: ["content.js"],
+    });
+  } catch {
+    return false;
+  }
+
+  const afterInject = await chrome.tabs
+    .sendMessage(tabId, { type: "PING_FLOW_PROMPT_RUNNER" })
+    .catch(() => null);
+
+  return Boolean(afterInject?.ok);
 }

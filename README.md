@@ -1,15 +1,24 @@
 # Flow Prompt Runner (Chrome Extension)
 
-This extension helps automate prompts in Google Labs Flow.
+This extension automates prompt running in Google Labs Flow with two modes:
+
+- Create image
+- Create video
 
 ## Features
 
-- Popup UI with one-line prompts (one prompt per line).
-- Input to set seconds between each prompt send.
-- Checkboxes to auto-save image and video.
-- Auto download filename rename using the prompt scene name (for example `SCENE 1: ...`).
-- Start button to send prompts and click send automatically.
-- Retry behavior by clicking retry/regenerate buttons if failures appear.
+- Prompt list runner (one line = one prompt).
+- Select mode from popup: image or video.
+- Auto-click model selector and mode tab.
+- Image mode:
+  - Fills prompt, clicks create.
+  - Renames generated asset as `SCENE %d - Image %d`.
+- Video mode:
+  - Fills prompt.
+  - Opens reference-image picker.
+  - Selects image with matching name `SCENE %d - Image %d`.
+  - Clicks create.
+  - Renames generated asset as `SCENE %d - Video %d`.
 
 ## Install in Chrome
 
@@ -20,14 +29,22 @@ This extension helps automate prompts in Google Labs Flow.
 
 ## How to use
 
-1. Open Google Labs Flow in a tab (`https://labs.google/`).
-2. Click the extension icon.
-3. Add prompt lines in the textarea, each line one prompt.
-4. Set interval seconds.
-5. Toggle save image/video options.
+1. Open Google Labs Flow (`https://labs.google/`).
+2. Open extension popup.
+3. Choose mode.
+4. Paste prompt list (one prompt per line).
+5. Set interval seconds.
 6. Click **Start**.
+
+## Prompt naming rule
+
+- If prompt contains `SCENE <number>`, that number is used.
+- If not, line index is used.
+- Generated names:
+  - Image mode: `SCENE N - Image N`
+  - Video mode: `SCENE N - Video N`
 
 ## Notes
 
-- The Flow page DOM can change over time. If Google updates labels or layout, selector updates in `content.js` may be needed.
-- This extension currently targets `labs.google` pages.
+- The Flow DOM is dynamic. Selectors are text-based and may need updates if Google changes the UI.
+- Best results come from prompts starting with `SCENE N:` format.

@@ -10,6 +10,18 @@
   <main class="panel">
     <h1>Flow Prompt Runner</h1>
 
+    <fieldset class="mode-group">
+      <legend>Mode</legend>
+      <label class="mode-item">
+        <input id="modeImage" type="radio" name="runMode" value="image" checked />
+        <span>Create image</span>
+      </label>
+      <label class="mode-item">
+        <input id="modeVideo" type="radio" name="runMode" value="video" />
+        <span>Create video</span>
+      </label>
+    </fieldset>
+
     <label for="prompts">Prompts (one line each)</label>
     <textarea id="prompts"
       placeholder="SCENE 1: A cinematic shot of a forest at sunrise&#10;SCENE 2: Slow camera pan above misty mountains"></textarea>
@@ -21,20 +33,17 @@
         <span>Seconds</span>
         <input id="intervalSeconds" type="number" min="1" step="1" value="15" />
       </label>
-      <label class="check-item">
-        <input id="saveImage" type="checkbox" checked />
-        <span>Save image</span>
-      </label>
-      <label class="check-item">
-        <input id="saveVideo" type="checkbox" checked />
-        <span>Save video</span>
-      </label>
     </div>
 
     <div class="actions">
       <button id="startBtn" type="button">Start</button>
       <button id="stopBtn" type="button" class="secondary">Stop</button>
     </div>
+
+    <section class="logs-section">
+      <h2>Logs</h2>
+      <div id="logs" class="logs" aria-live="polite"></div>
+    </section>
   </main>
 
   <script src="popup.js"></script>
