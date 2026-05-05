@@ -30,6 +30,53 @@ function getTypingDelay(character: string): number {
   return 11;
 }
 
+async function typeTextIntoField(
+  field: HTMLInputElement | HTMLTextAreaElement,
+  text: string,
+): Promise<void> {
+  field.focus();
+  field.select();
+  field.value = "";
+  field.dispatchEvent(new Event("input", { bubbles: true }));
+
+  for (const character of text) {
+    field.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        bubbles: true,
+        cancelable: true,
+        key: character,
+      }),
+    );
+    field.dispatchEvent(
+      new InputEvent("beforeinput", {
+        bubbles: true,
+        cancelable: true,
+        inputType: "insertText",
+        data: character,
+      }),
+    );
+    field.value += character;
+    field.dispatchEvent(
+      new InputEvent("input", {
+        bubbles: true,
+        cancelable: true,
+        inputType: "insertText",
+        data: character,
+      }),
+    );
+    field.dispatchEvent(
+      new KeyboardEvent("keyup", {
+        bubbles: true,
+        cancelable: true,
+        key: character,
+      }),
+    );
+    await sleep(getTypingDelay(character));
+  }
+
+  field.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
 export async function fillPromptInput(prompt: string): Promise<boolean> {
   const promptInput = findPromptInput();
   if (!promptInput) {
@@ -49,47 +96,7 @@ export async function fillPromptInput(prompt: string): Promise<boolean> {
     promptInput instanceof HTMLTextAreaElement ||
     promptInput instanceof HTMLInputElement
   ) {
-    promptInput.focus();
-    promptInput.select();
-    promptInput.value = "";
-    promptInput.dispatchEvent(new Event("input", { bubbles: true }));
-
-    for (const character of prompt) {
-      promptInput.dispatchEvent(
-        new KeyboardEvent("keydown", {
-          bubbles: true,
-          cancelable: true,
-          key: character,
-        }),
-      );
-      promptInput.dispatchEvent(
-        new InputEvent("beforeinput", {
-          bubbles: true,
-          cancelable: true,
-          inputType: "insertText",
-          data: character,
-        }),
-      );
-      promptInput.value += character;
-      promptInput.dispatchEvent(
-        new InputEvent("input", {
-          bubbles: true,
-          cancelable: true,
-          inputType: "insertText",
-          data: character,
-        }),
-      );
-      promptInput.dispatchEvent(
-        new KeyboardEvent("keyup", {
-          bubbles: true,
-          cancelable: true,
-          key: character,
-        }),
-      );
-      await sleep(getTypingDelay(character));
-    }
-
-    promptInput.dispatchEvent(new Event("change", { bubbles: true }));
+    await typeTextIntoField(promptInput, prompt);
     console.log(`[AutoFlow] Da nhap: ${prompt.substring(0, 30)}...`);
     return true;
   }
@@ -268,6 +275,87 @@ export async function safeClick(element: HTMLElement | null): Promise<boolean> {
   return true;
 }
 
+async function openContextMenuAtContainerCenter(
+  mediaContainer: HTMLElement,
+): Promise<boolean> {
+  if (!mediaContainer || !isVisible(mediaContainer)) {
+    return false;
+  }
+
+  mediaContainer.scrollIntoView({ block: "center", inline: "nearest" });
+  await sleep(80);
+
+  const rect = mediaContainer.getBoundingClientRect();
+  const clientX = rect.left + rect.width / 2;
+  const clientY = rect.top + rect.height / 2;
+
+  const pointTarget = document.elementFromPoint(
+    clientX,
+    clientY,
+  ) as HTMLElement | null;
+  const eventTarget =
+    pointTarget && mediaContainer.contains(pointTarget)
+      ? pointTarget
+      : mediaContainer;
+
+  eventTarget.dispatchEvent(
+    new PointerEvent("pointerdown", {
+      bubbles: true,
+      cancelable: true,
+      pointerType: "mouse",
+      clientX,
+      clientY,
+      button: 2,
+      buttons: 2,
+      isPrimary: true,
+    }),
+  );
+  eventTarget.dispatchEvent(
+    new MouseEvent("mousedown", {
+      bubbles: true,
+      cancelable: true,
+      clientX,
+      clientY,
+      button: 2,
+      buttons: 2,
+    }),
+  );
+  eventTarget.dispatchEvent(
+    new MouseEvent("contextmenu", {
+      bubbles: true,
+      cancelable: true,
+      clientX,
+      clientY,
+      button: 2,
+      buttons: 2,
+    }),
+  );
+  eventTarget.dispatchEvent(
+    new MouseEvent("mouseup", {
+      bubbles: true,
+      cancelable: true,
+      clientX,
+      clientY,
+      button: 2,
+      buttons: 0,
+    }),
+  );
+  eventTarget.dispatchEvent(
+    new PointerEvent("pointerup", {
+      bubbles: true,
+      cancelable: true,
+      pointerType: "mouse",
+      clientX,
+      clientY,
+      button: 2,
+      buttons: 0,
+      isPrimary: true,
+    }),
+  );
+
+  return true;
+}
+
 export async function clickAndWaitForMenu(
   button: HTMLElement,
   maxRetries: number,
@@ -318,6 +406,8 @@ export async function selectModelAndModeTab(
       }
 
       await configureVideoModeModel();
+      await sleep(300);
+      await safeClick(videoOption);
     } else {
       const imageOption = findButtonByText(["Hình ảnh"], menuShown);
       if (imageOption) {
@@ -378,17 +468,22 @@ export async function selectReferenceImage(
     return;
   }
 
-  for (let i = 0; i < 3; i += 1) {
-    openButton.click();
-    await sleep(3000);
+  for (let i = 0; i < 3; i++) {
+    console.log("🚀 ~ selectReferenceImage ~ i:", i);
+    await sleep(500);
 
-    let dialogAfter = await waitForDialog(3000);
+    await openButton.click();
+    await sleep(500);
+
+    let dialogAfter = await waitForDialog(1100);
     if (dialogAfter) {
       const imageName = expectedName + ` - Image ${i + 1}`; // Try with incremental suffix if exact name doesn't work
+      console.log("🚀 ~ selectReferenceImage ~ imageName:", imageName);
       const item = findImgItemByAlt(imageName, dialogAfter);
       if (item) {
         await item.click();
         await appendAutomationLog(`Selected reference image: ${imageName}`);
+        continue;
       }
     } else {
       await appendAutomationLog(
@@ -397,7 +492,7 @@ export async function selectReferenceImage(
     }
   }
 
-  await sleep(3000);
+  await sleep(700);
 }
 
 export async function renameLatestGeneratedMedia(
@@ -477,9 +572,12 @@ function isTileGenerationComplete(root: HTMLElement): boolean {
   const progressValues = percentMatches
     .map((entry) => Number(entry.replace(/[^0-9]/g, "")))
     .filter((value) => Number.isFinite(value));
-
   if (progressValues.length) {
-    return progressValues.some((value) => value >= 100);
+    return progressValues.some((value) => value >= 99);
+  }
+
+  if (text == "") {
+    return true;
   }
 
   const statusTerms = ["dang tao", "dang xu ly", "generating", "processing"];
@@ -611,7 +709,7 @@ export async function waitForNewTopRowTileId(
       attributeFilter: ["style", "class", "data-state", "data-index"],
     });
 
-    pollTimer = window.setInterval(checkNow, 400);
+    pollTimer = window.setInterval(checkNow, 500);
     checkNow();
   });
 }
@@ -775,26 +873,22 @@ export async function renameMediaItem(
     return false;
   }
 
-  const rect = mediaContainer.getBoundingClientRect();
-  mediaContainer.dispatchEvent(
-    new MouseEvent("contextmenu", {
-      bubbles: true,
-      cancelable: true,
-      clientX: rect.left + Math.min(24, Math.max(6, rect.width / 2)),
-      clientY: rect.top + Math.min(24, Math.max(6, rect.height / 2)),
-      button: 2,
-    }),
-  );
+  const contextMenuOpened =
+    await openContextMenuAtContainerCenter(mediaContainer);
+  if (!contextMenuOpened) {
+    return false;
+  }
 
   await sleep(250);
 
   const renameButton = findButtonByText(["doi ten", "rename", "Đổi tên"]);
+  console.log("🚀 ~ renameMediaItem ~ renameButton:", renameButton);
   if (!renameButton) {
     return false;
   }
 
   renameButton.click();
-  await sleep(220);
+  await sleep(1050);
 
   const input =
     (document.querySelector(
@@ -809,20 +903,39 @@ export async function renameMediaItem(
     return false;
   }
 
-  input.focus();
-  input.value = trimmed;
-  input.dispatchEvent(new Event("input", { bubbles: true }));
-  input.dispatchEvent(new Event("change", { bubbles: true }));
+  await typeTextIntoField(input, trimmed);
 
-  // press Enter
+  await sleep(520);
+
+  input.form?.requestSubmit();
+  console.log("🚀 ~ renameMediaItem ~ input:", input);
+
   input.dispatchEvent(
-    new KeyboardEvent("keydown", { bubbles: true, key: "Enter" }),
+    new KeyboardEvent("keydown", {
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+      key: "Enter",
+      code: "Enter",
+    }),
   );
   input.dispatchEvent(
-    new KeyboardEvent("keypress", { bubbles: true, key: "Enter" }),
+    new KeyboardEvent("keypress", {
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+      key: "Enter",
+      code: "Enter",
+    }),
   );
   input.dispatchEvent(
-    new KeyboardEvent("keyup", { bubbles: true, key: "Enter" }),
+    new KeyboardEvent("keyup", {
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+      key: "Enter",
+      code: "Enter",
+    }),
   );
 
   return true;
@@ -831,18 +944,21 @@ export async function renameMediaItem(
 export async function downloadMediaItem(
   mediaContainer: HTMLElement,
 ): Promise<boolean> {
-  const rect = mediaContainer.getBoundingClientRect();
-  mediaContainer.dispatchEvent(
-    new MouseEvent("contextmenu", {
-      bubbles: true,
-      cancelable: true,
-      clientX: rect.left + Math.min(24, Math.max(6, rect.width / 2)),
-      clientY: rect.top + Math.min(24, Math.max(6, rect.height / 2)),
-      button: 2,
-    }),
-  );
+  const contextMenuOpened =
+    await openContextMenuAtContainerCenter(mediaContainer);
+  if (!contextMenuOpened) {
+    return false;
+  }
 
-  await sleep(300);
+  let item = mediaContainer.querySelectorAll(
+    "img, video",
+  )[0] as HTMLElement | null;
+
+  if (!item) {
+    return false;
+  }
+
+  await sleep(1000);
 
   const downloadButton = findButtonByText([
     "tải xuống",
@@ -854,17 +970,19 @@ export async function downloadMediaItem(
   }
 
   downloadButton.click();
-  await sleep(400);
+  await sleep(1000);
 
   const qualityButton = findButtonByText([
-    "kích thước gốc",
+    "kích thước gốc",
     "original size",
-    "Kích thước gốc",
+    "Kích thước gốc",
+    "1K",
   ]);
+  console.log("🚀 ~ downloadMediaItem ~ qualityButton:", qualityButton);
   if (!qualityButton) {
     return false;
   }
-
+  await sleep(1000);
   qualityButton.click();
   await sleep(300);
 

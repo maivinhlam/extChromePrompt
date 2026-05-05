@@ -99,8 +99,7 @@ export async function startAutomation(config: {
       appendAutomationLog,
     );
 
-    // TODO
-    //  await selectModelAndModeTab(state.mode);
+    await selectModelAndModeTab(state.mode);
 
     for (let i = startIndex; i < state.prompts.length; i += 1) {
       const prompt = state.prompts[i];
@@ -161,6 +160,7 @@ export async function startAutomation(config: {
         () => state.stopRequested,
         appendAutomationLog,
       );
+
       await clickCreateButton();
       await appendAutomationLog(
         "Prompt sent. Moving to next prompt immediately.",
@@ -170,11 +170,14 @@ export async function startAutomation(config: {
         prompt,
         formatSceneName(numbers.scene, ""),
       );
-
+      let waitingTime = 60000;
+      if (state.mode === "video") {
+        waitingTime = Math.max(240000, state.intervalMs * 4);
+      }
       const renameTask = (async (): Promise<void> => {
         const newTileId = await waitForNewTopRowTileId(
           knownTopRowTileIds,
-          Math.max(15000, state.intervalMs * 2),
+          Math.max(waitingTime, state.intervalMs * 2),
           () => state.stopRequested,
         );
 
@@ -191,7 +194,7 @@ export async function startAutomation(config: {
 
         const completedTile = await waitForTileDoneById(
           newTileId,
-          Math.max(30000, state.intervalMs * 6),
+          Math.max(waitingTime, state.intervalMs * 6),
           () => state.stopRequested,
         );
 
@@ -203,17 +206,21 @@ export async function startAutomation(config: {
         }
 
         const renamed = await renameMediaItem(completedTile, renameTo);
-        if (renamed && state.mode === "video") {
+        if (renamed) {
           await appendAutomationLog(`Renamed '${renameTo}' successfully.`);
 
-          await appendAutomationLog(`Downloading '${renameTo}'...`);
-          const downloaded = await downloadMediaItem(completedTile);
-          if (downloaded) {
-            await appendAutomationLog(`Downloaded '${renameTo}' successfully.`);
-          } else {
-            await appendAutomationLog(
-              `Download skipped for '${renameTo}': could not open download menu.`,
-            );
+          if (state.mode === "video") {
+            await appendAutomationLog(`Downloading '${renameTo}'...`);
+            const downloaded = await downloadMediaItem(completedTile);
+            if (downloaded) {
+              await appendAutomationLog(
+                `Downloaded '${renameTo}' successfully.`,
+              );
+            } else {
+              await appendAutomationLog(
+                `Download skipped for '${renameTo}': API request or menu flow failed.`,
+              );
+            }
           }
         } else {
           await appendAutomationLog(
