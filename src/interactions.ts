@@ -319,7 +319,7 @@ export async function selectModelAndModeTab(
 
       await configureVideoModeModel();
     } else {
-      const imageOption = findButtonByText(["hinh anh"]);
+      const imageOption = findButtonByText(["Hình ảnh"], menuShown);
       if (imageOption) {
         await safeClick(imageOption);
         await sleep(200);
