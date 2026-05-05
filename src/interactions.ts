@@ -20,14 +20,14 @@ import { formatSceneName } from "./formatting";
 
 function getTypingDelay(character: string): number {
   if (character === " ") {
-    return 110;
+    return 10;
   }
 
   if (/[.,;:!?]/.test(character)) {
-    return 140;
+    return 12;
   }
 
-  return 65;
+  return 11;
 }
 
 export async function fillPromptInput(prompt: string): Promise<boolean> {
