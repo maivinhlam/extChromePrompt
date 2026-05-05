@@ -17,6 +17,7 @@ import {
   getLatestMainMediaContainer,
 } from "./media-utils";
 import { formatSceneName } from "./formatting";
+import { state, TEST_MODE } from "./constants";
 
 function getTypingDelay(character: string): number {
   if (character === " ") {
@@ -576,10 +577,13 @@ function isTileGenerationComplete(root: HTMLElement): boolean {
     return progressValues.some((value) => value >= 99);
   }
 
+  console.log("🚀 ~ isTileGenerationComplete ~ text:", text);
   if (text == "") {
     return true;
   }
-
+  if (state.mode === "video" && text.includes("play_circle")) {
+    return true;
+  }
   const statusTerms = ["dang tao", "dang xu ly", "generating", "processing"];
 
   // Strict mode: if no explicit percentage is present, do not consider done.
@@ -645,7 +649,7 @@ export async function waitForNewTopRowTileId(
   const findNewTileId = (): string | null => {
     const latestIds = getTopRowTileIds();
     for (const id of latestIds) {
-      if (!existingIds.has(id)) {
+      if (TEST_MODE ? existingIds.has(id) : !existingIds.has(id)) {
         return id;
       }
     }
@@ -784,7 +788,7 @@ export async function waitForTileDoneById(
       attributeFilter: ["style", "class", "data-state", "data-index"],
     });
 
-    pollTimer = window.setInterval(checkNow, 500);
+    pollTimer = window.setInterval(checkNow, 1000);
     checkNow();
   });
 }
@@ -859,7 +863,7 @@ export async function waitForFirstRowItemDone(
       attributeFilter: ["style", "class", "data-state", "data-index"],
     });
 
-    pollTimer = window.setInterval(checkNow, 500);
+    pollTimer = window.setInterval(checkNow, 1000);
     checkNow();
   });
 }
