@@ -7,6 +7,7 @@ import {
   findVideoReferencesTab,
   findVideoModelDropdownButton,
   findReferenceImageOpenButton,
+  findReferenceImageSearchInput,
   findButtonByText,
   findImgItemByAlt,
   waitForDialog,
@@ -97,6 +98,26 @@ async function typeTextIntoField(
   }
 
   field.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+async function waitForTransientUiToClose(timeoutMs: number): Promise<boolean> {
+  const started = Date.now();
+
+  while (Date.now() - started < timeoutMs) {
+    const hasVisibleDialog = Array.from(
+      document.querySelectorAll("div[role='dialog']"),
+    ).some((dialog) => isVisible(dialog as HTMLElement));
+    const menu = document.querySelector("[role='menu']") as HTMLElement | null;
+    const hasVisibleMenu = !!menu && isVisible(menu);
+
+    if (!hasVisibleDialog && !hasVisibleMenu) {
+      return true;
+    }
+
+    await sleep(120);
+  }
+
+  return false;
 }
 
 export async function fillPromptInput(prompt: string): Promise<boolean> {
@@ -486,37 +507,50 @@ export async function configureVideoModeModel(): Promise<void> {
 export async function selectReferenceImage(
   expectedName: string,
 ): Promise<void> {
-  const openButton = findReferenceImageOpenButton();
-  if (!openButton) {
-    await appendAutomationLog("Reference image open button not found.");
-    return;
-  }
-
-  for (let i = 0; i < 3; i++) {
-    console.log("🚀 ~ selectReferenceImage ~ i:", i);
-    await sleep(500);
-
-    await openButton.click();
-    await sleep(500);
-
-    let dialogAfter = await waitForDialog(1100);
-    if (dialogAfter) {
-      const imageName = expectedName + ` - Image ${i + 1}`; // Try with incremental suffix if exact name doesn't work
-      console.log("🚀 ~ selectReferenceImage ~ imageName:", imageName);
-      const item = findImgItemByAlt(imageName, dialogAfter);
-      if (item) {
-        await item.click();
-        await appendAutomationLog(`Selected reference image: ${imageName}`);
-        continue;
-      }
-    } else {
-      await appendAutomationLog(
-        `Reference image dialog did not appear after clicking open button.`,
-      );
+  await withPageInteractionLock(async () => {
+    const openButton = findReferenceImageOpenButton();
+    if (!openButton) {
+      await appendAutomationLog("Reference image open button not found.");
+      return;
     }
-  }
 
-  await sleep(700);
+    for (let i = 0; i < 3; i++) {
+      await sleep(500);
+
+      await openButton.click();
+      await sleep(500);
+
+      const dialogAfter = await waitForDialog(1100);
+      if (dialogAfter) {
+        const imageName = expectedName + ` - Image ${i + 1}`;
+        console.log("🚀 ~ selectReferenceImage ~ imageName:", imageName);
+        const searchInput = findReferenceImageSearchInput(dialogAfter);
+
+        if (searchInput) {
+          await typeTextIntoField(searchInput, imageName);
+          await sleep(350);
+        }
+
+        const item = findImgItemByAlt(imageName, dialogAfter);
+        if (item) {
+          await sleep(500);
+
+          await item.click();
+          await appendAutomationLog(`Selected reference image: ${imageName}`);
+          await waitForTransientUiToClose(3000);
+        }
+      } else {
+        await appendAutomationLog(
+          `Reference image dialog did not appear after clicking open button.`,
+        );
+      }
+
+      await openButton.click();
+      await waitForTransientUiToClose(1500);
+    }
+
+    await sleep(700);
+  });
 }
 
 export async function renameLatestGeneratedMedia(
@@ -600,10 +634,10 @@ function isTileGenerationComplete(root: HTMLElement): boolean {
     return progressValues.some((value) => value >= 99);
   }
 
-  console.log("🚀 ~ isTileGenerationComplete ~ text:", text);
   if (text == "") {
     return true;
   }
+
   if (state.mode === "video" && text.includes("play_circle")) {
     return true;
   }
@@ -745,34 +779,64 @@ export async function waitForTileDoneById(
   tileId: string,
   waitMs: number,
   shouldStop: () => boolean,
-): Promise<HTMLElement | null> {
-  const getCompletedTile = (): HTMLElement | null => {
+): Promise<
+  | { status: "completed"; tile: HTMLElement }
+  | { status: "failed" }
+  | { status: "timeout" }
+  | { status: "stopped" }
+> {
+  const started = Date.now();
+
+  const getTileResult = ():
+    | { status: "completed"; tile: HTMLElement }
+    | { status: "failed" }
+    | null => {
     const tile = getTileContainerById(tileId);
     if (!tile) {
       return null;
     }
 
-    return isTileGenerationComplete(tile) ? tile : null;
+    if (isTileGenerationComplete(tile)) {
+      return { status: "completed", tile };
+    }
+
+    const text = (tile.textContent || "").toLowerCase();
+    console.log("🚀 ~ getTileResult ~ text:", text);
+    if (text.includes("flow đang có lượng truy cập cao")) {
+      return { status: "failed" };
+    }
+
+    return null;
   };
 
-  const immediate = getCompletedTile();
+  const immediate = getTileResult();
   if (immediate) {
     return immediate;
   }
 
-  return new Promise<HTMLElement | null>((resolve) => {
-    const started = Date.now();
+  return new Promise<
+    | { status: "completed"; tile: HTMLElement }
+    | { status: "failed" }
+    | { status: "timeout" }
+    | { status: "stopped" }
+  >((resolve) => {
     const observerRoot = document.body;
 
     if (!observerRoot) {
-      resolve(null);
+      resolve({ status: "timeout" });
       return;
     }
 
     let done = false;
     let pollTimer = 0;
 
-    const finalize = (result: HTMLElement | null): void => {
+    const finalize = (
+      result:
+        | { status: "completed"; tile: HTMLElement }
+        | { status: "failed" }
+        | { status: "timeout" }
+        | { status: "stopped" },
+    ): void => {
       if (done) {
         return;
       }
@@ -783,19 +847,23 @@ export async function waitForTileDoneById(
     };
 
     const checkNow = (): void => {
+      if (done) {
+        return;
+      }
+
       if (shouldStop()) {
-        finalize(null);
+        finalize({ status: "stopped" });
         return;
       }
 
       if (Date.now() - started >= waitMs) {
-        finalize(null);
+        finalize({ status: "timeout" });
         return;
       }
 
-      const tile = getCompletedTile();
-      if (tile) {
-        finalize(tile);
+      const tileResult = getTileResult();
+      if (tileResult) {
+        finalize(tileResult);
       }
     };
 
@@ -820,6 +888,8 @@ export async function waitForFirstRowItemDone(
   waitMs: number,
   shouldStop: () => boolean,
 ): Promise<HTMLElement | null> {
+  const started = Date.now();
+
   const getCompletedTile = (): HTMLElement | null => {
     const tile = getFirstRowPrimaryTileContainer();
     if (!tile) {
@@ -835,7 +905,6 @@ export async function waitForFirstRowItemDone(
   }
 
   return new Promise<HTMLElement | null>((resolve) => {
-    const started = Date.now();
     const observerRoot = document.body;
 
     if (!observerRoot) {
@@ -845,6 +914,7 @@ export async function waitForFirstRowItemDone(
 
     let done = false;
     let pollTimer = 0;
+    let checkInFlight = false;
 
     const finalize = (result: HTMLElement | null): void => {
       if (done) {
@@ -856,26 +926,51 @@ export async function waitForFirstRowItemDone(
       resolve(result);
     };
 
-    const checkNow = (): void => {
-      if (shouldStop()) {
-        finalize(null);
+    const checkNow = async (): Promise<void> => {
+      if (done || checkInFlight) {
         return;
       }
 
-      const elapsed = Date.now() - started;
-      if (elapsed >= waitMs) {
-        finalize(null);
-        return;
-      }
+      checkInFlight = true;
 
-      const tile = getCompletedTile();
-      if (tile) {
-        finalize(tile);
+      try {
+        if (shouldStop()) {
+          finalize(null);
+          return;
+        }
+
+        const elapsed = Date.now() - started;
+        if (elapsed >= waitMs) {
+          finalize(null);
+          return;
+        }
+
+        const tile = getCompletedTile();
+        if (tile) {
+          finalize(tile);
+          return;
+        }
+
+        const firstRowTile = getFirstRowPrimaryTileContainer();
+        if (!firstRowTile) {
+          return;
+        }
+
+        const text = (firstRowTile.textContent || "").toLowerCase();
+        if (text.includes("Flow đang có lượng truy cập cao")) {
+          console.log(
+            "🚀 ~ waitForFirstRowItemDone ~ failed tile:",
+            firstRowTile,
+          );
+          finalize(null);
+        }
+      } finally {
+        checkInFlight = false;
       }
     };
 
     const observer = new MutationObserver(() => {
-      checkNow();
+      void checkNow();
     });
 
     observer.observe(observerRoot, {
@@ -886,8 +981,10 @@ export async function waitForFirstRowItemDone(
       attributeFilter: ["style", "class", "data-state", "data-index"],
     });
 
-    pollTimer = window.setInterval(checkNow, 1000);
-    checkNow();
+    pollTimer = window.setInterval(() => {
+      void checkNow();
+    }, 1000);
+    void checkNow();
   });
 }
 
@@ -901,16 +998,26 @@ export async function renameMediaItem(
       return false;
     }
 
-    const contextMenuOpened =
+    let contextMenuOpened =
       await openContextMenuAtContainerCenter(mediaContainer);
     if (!contextMenuOpened) {
-      return false;
+      // try the open again in case the first attempt failed due to transient UI state
+      // we need to click the out side of the tile to make sure the context menu will be associated with the correct tile, so we cannot just retry clicking the rename button if we fail to find it - we have to reopen the context menu
+      console.log(
+        "🚀 ~ renameMediaItem ~ contextMenuOpened:",
+        contextMenuOpened,
+      );
+
+      await sleep(500);
+      await clickOutsideTile(mediaContainer);
+      await sleep(500);
+      contextMenuOpened =
+        await openContextMenuAtContainerCenter(mediaContainer);
     }
 
     await sleep(250);
 
     const renameButton = findButtonByText(["doi ten", "rename", "Đổi tên"]);
-    console.log("🚀 ~ renameMediaItem ~ renameButton:", renameButton);
     if (!renameButton) {
       return false;
     }
@@ -936,7 +1043,6 @@ export async function renameMediaItem(
     await sleep(520);
 
     input.form?.requestSubmit();
-    console.log("🚀 ~ renameMediaItem ~ input:", input);
 
     input.dispatchEvent(
       new KeyboardEvent("keydown", {
@@ -973,49 +1079,53 @@ export async function renameMediaItem(
 export async function downloadMediaItem(
   mediaContainer: HTMLElement,
 ): Promise<boolean> {
-  const contextMenuOpened =
-    await openContextMenuAtContainerCenter(mediaContainer);
-  if (!contextMenuOpened) {
-    return false;
-  }
+  return withPageInteractionLock(async () => {
+    const contextMenuOpened =
+      await openContextMenuAtContainerCenter(mediaContainer);
+    if (!contextMenuOpened) {
+      return false;
+    }
 
-  let item = mediaContainer.querySelectorAll(
-    "img, video",
-  )[0] as HTMLElement | null;
+    const item = mediaContainer.querySelectorAll(
+      "img, video",
+    )[0] as HTMLElement | null;
 
-  if (!item) {
-    return false;
-  }
+    if (!item) {
+      return false;
+    }
 
-  await sleep(1000);
+    await sleep(1000);
 
-  const downloadButton = findButtonByText([
-    "tải xuống",
-    "download",
-    "Tải xuống",
-  ]);
-  if (!downloadButton) {
-    return false;
-  }
+    const downloadButton = findButtonByText([
+      "tải xuống",
+      "download",
+      "Tải xuống",
+    ]);
+    if (!downloadButton) {
+      return false;
+    }
 
-  downloadButton.click();
-  await sleep(1000);
+    downloadButton.click();
+    await sleep(1000);
 
-  const qualityButton = findButtonByText([
-    "kích thước gốc",
-    "original size",
-    "Kích thước gốc",
-    "1K",
-  ]);
-  console.log("🚀 ~ downloadMediaItem ~ qualityButton:", qualityButton);
-  if (!qualityButton) {
-    return false;
-  }
-  await sleep(1000);
-  qualityButton.click();
-  await sleep(300);
+    const qualityButton = findButtonByText([
+      "kích thước gốc",
+      "original size",
+      "Kích thước gốc",
+      "1K",
+    ]);
 
-  return true;
+    if (!qualityButton) {
+      return false;
+    }
+
+    await sleep(1000);
+    qualityButton.click();
+    await waitForTransientUiToClose(3000);
+    await sleep(300);
+
+    return true;
+  });
 }
 
 export async function waitForMediaIncrease(
@@ -1037,4 +1147,17 @@ export async function waitForMediaIncrease(
   }
 
   await appendAutomationLog("No new media detected before timeout.");
+}
+
+function clickOutsideTile(mediaContainer: HTMLElement) {
+  const rect = mediaContainer.getBoundingClientRect();
+  const x = rect.left - 10;
+  const y = rect.top - 10;
+  const event = new MouseEvent("click", {
+    bubbles: true,
+    cancelable: true,
+    clientX: x,
+    clientY: y,
+  });
+  document.elementFromPoint(x, y)?.dispatchEvent(event);
 }

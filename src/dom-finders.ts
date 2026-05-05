@@ -201,6 +201,18 @@ export function findImgItemByAlt(
   return null;
 }
 
+export function findReferenceImageSearchInput(
+  root: ParentNode = document,
+): HTMLInputElement | HTMLTextAreaElement | null {
+  const candidates = Array.from(
+    root.querySelectorAll(
+      "#quick-search-input, input[placeholder='Tìm kiếm các thành phần'], input[type='text'], textarea",
+    ),
+  ) as Array<HTMLInputElement | HTMLTextAreaElement>;
+
+  return candidates.find(isVisible) || null;
+}
+
 export function findButtonByText(
   terms: string[],
   root: ParentNode = document,

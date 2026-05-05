@@ -49,6 +49,7 @@ export async function startAutomation(config: {
 
   let promptStatuses = createInitialPromptStatuses(state.prompts.length);
   let startIndex = 0;
+  let activePromptIndex = 0;
   const pendingRenameTasks: Promise<void>[] = [];
 
   const savedState = await loadAutomationState();
@@ -77,6 +78,25 @@ export async function startAutomation(config: {
   }
 
   try {
+    const queuePromptForRetry = async (
+      promptToRetry: string,
+    ): Promise<void> => {
+      state.prompts.push(promptToRetry);
+      promptStatuses.push("pending");
+
+      await appendAutomationLog(
+        `Generation failed. Re-queued prompt at the end (${state.prompts.length}/${state.prompts.length}).`,
+      );
+
+      await saveAutomationState({
+        running: true,
+        mode: state.mode,
+        promptCount: state.prompts.length,
+        currentIndex: Math.min(activePromptIndex, state.prompts.length - 1),
+        promptStatuses,
+      });
+    };
+
     await appendAutomationLog(
       `Automation started. Mode: ${state.mode}. Total prompts: ${state.prompts.length}.`,
     );
@@ -134,18 +154,20 @@ export async function startAutomation(config: {
           `Detected new tile for '${renameTo}' (${newTileId}). Waiting for 100%.`,
         );
 
-        const completedTile = await waitForTileDoneById(
+        const tileResult = await waitForTileDoneById(
           newTileId,
           Math.max(waitingTime, state.intervalMs * 6),
           () => state.stopRequested,
         );
 
-        if (!completedTile) {
+        if (tileResult.status !== "completed") {
           await appendAutomationLog(
             `Rename skipped for '${renameTo}': tile did not reach 100% in time.`,
           );
           return;
         }
+
+        const completedTile = tileResult.tile;
 
         // waiting an additional short time to ensure the tile is fully ready for interactions
         await sleep(10000);
@@ -190,7 +212,8 @@ export async function startAutomation(config: {
       return;
     }
 
-    for (let i = startIndex; i < state.prompts.length; i += 1) {
+    for (let i = startIndex; i < state.prompts.length; ) {
+      activePromptIndex = i;
       const prompt = state.prompts[i];
       const numbers = parseSceneNumbers(prompt, i + 1);
 
@@ -209,6 +232,10 @@ export async function startAutomation(config: {
         );
         break;
       }
+      console.log(
+        "🚀 ~ startAutomation ~ ",
+        `Prompt ${i + 1}/${state.prompts.length}: SCENE ${numbers.scene}.`,
+      );
 
       await appendAutomationLog(
         `Prompt ${i + 1}/${state.prompts.length}: SCENE ${numbers.scene}.`,
@@ -281,19 +308,27 @@ export async function startAutomation(config: {
           `Detected new tile for '${renameTo}' (${newTileId}). Waiting for 100%.`,
         );
 
-        const completedTile = await waitForTileDoneById(
+        const tileResult = await waitForTileDoneById(
           newTileId,
           Math.max(waitingTime, state.intervalMs * 6),
           () => state.stopRequested,
         );
 
-        if (!completedTile) {
+        if (tileResult.status === "failed") {
+          await queuePromptForRetry(prompt);
+          return;
+        }
+
+        if (tileResult.status !== "completed") {
           await appendAutomationLog(
             `Rename skipped for '${renameTo}': tile did not reach 100% in time.`,
           );
           return;
         }
 
+        const completedTile = tileResult.tile;
+
+        await sleep(10000);
         const renamed = await renameMediaItem(completedTile, renameTo);
         if (renamed) {
           await appendAutomationLog(`Renamed '${renameTo}' successfully.`);
@@ -323,6 +358,18 @@ export async function startAutomation(config: {
       });
 
       pendingRenameTasks.push(renameTask);
+      i += 1;
+
+      if (i >= state.prompts.length && pendingRenameTasks.length) {
+        const tasksToWait = pendingRenameTasks.splice(
+          0,
+          pendingRenameTasks.length,
+        );
+        await appendAutomationLog(
+          `Waiting for ${tasksToWait.length} rename task(s) to finish.`,
+        );
+        await Promise.allSettled(tasksToWait);
+      }
     }
 
     if (pendingRenameTasks.length) {
