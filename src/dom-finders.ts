@@ -60,12 +60,10 @@ export function findModelButton(): HTMLElement | null {
 }
 
 export function findVideoReferencesTab(): HTMLElement | null {
-  const a = document.querySelectorAll("button[role='tab']");
-
   const tabs = Array.from(
     document.querySelectorAll("button[role='tab']"),
   ) as HTMLElement[];
-  const tab =
+  return (
     tabs.find((tab) => {
       if (!isVisible(tab)) {
         return false;
@@ -79,9 +77,8 @@ export function findVideoReferencesTab(): HTMLElement | null {
         controls.includes("video_references") ||
         id.includes("video_references")
       );
-    }) || null;
-  console.log("🚀 ~ findVideoReferencesTab ~ tab:", tab);
-  return tab;
+    }) || null
+  );
 }
 
 export function findVideoModelDropdownButton(): HTMLElement | null {
@@ -140,9 +137,11 @@ export async function waitForDialog(
 ): Promise<HTMLElement | null> {
   const started = Date.now();
   while (Date.now() - started < timeoutMs) {
-    const dialog = document.querySelector(
-      "[role='dialog']",
-    ) as HTMLElement | null;
+    const dialogs = Array.from(
+      document.querySelectorAll("div[role='dialog']"),
+    ) as HTMLElement[];
+
+    const dialog = dialogs.find(isVisible) || null;
     if (dialog && isVisible(dialog)) {
       return dialog;
     }
@@ -165,18 +164,12 @@ export async function waitForMenu(
   return null;
 }
 
-export function findDialogItemByText(text: string): HTMLElement | null {
-  const expected = String(text || "")
-    .trim()
-    .toLowerCase();
-  if (!expected) {
-    return null;
-  }
-
+export function findImgItemByAlt(
+  text: string,
+  root: ParentNode = document,
+): HTMLElement | null {
   const candidates = Array.from(
-    document.querySelectorAll(
-      "button, [role='button'], [data-index], li, div, img, [alt]",
-    ),
+    root.querySelectorAll(`img[alt='${text}']`),
   ) as HTMLElement[];
 
   for (const el of candidates) {
@@ -188,17 +181,17 @@ export function findDialogItemByText(text: string): HTMLElement | null {
     const alt = (el.getAttribute("alt") || "").trim().toLowerCase();
     const label = (el.getAttribute("aria-label") || "").trim().toLowerCase();
     const title = (el.getAttribute("title") || "").trim().toLowerCase();
-    const combined = `${content} ${alt} ${label} ${title}`.trim();
-    if (!combined.includes(expected)) {
+    const combined = `${content} ${alt} ${label} ${title}`;
+    if (!combined.includes(text.toLowerCase())) {
       continue;
     }
 
-    if (el.matches("button, [role='button'], [data-index], li")) {
+    if (el.matches("button, [role='button'], [data-index], li, div")) {
       return el;
     }
 
     const clickableParent = el.closest(
-      "button, [role='button'], [data-index], li",
+      "button, [role='button'], [data-index], li, div",
     ) as HTMLElement | null;
     if (clickableParent && isVisible(clickableParent)) {
       return clickableParent;

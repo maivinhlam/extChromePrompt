@@ -90,7 +90,9 @@ export async function startAutomation(config: {
       () => state.stopRequested,
       appendAutomationLog,
     );
-    await selectModelAndModeTab(state.mode);
+
+    // TODO
+    //  await selectModelAndModeTab(state.mode);
 
     for (let i = startIndex; i < state.prompts.length; i += 1) {
       const prompt = state.prompts[i];
@@ -129,12 +131,13 @@ export async function startAutomation(config: {
         const expectedImageName = formatSceneName(numbers.scene, "");
 
         await pauseBeforeStep(
-          `Select reference image for the ${expectedImageName}`,
+          `Select reference image for the ${expectedImageName}.`,
           () => state.stopRequested,
           appendAutomationLog,
         );
         await selectReferenceImage(expectedImageName);
       }
+      return;
 
       promptStatuses[i] = "done";
       await saveAutomationState({

@@ -8,7 +8,7 @@ import {
   findVideoModelDropdownButton,
   findReferenceImageOpenButton,
   findButtonByText,
-  findDialogItemByText,
+  findImgItemByAlt,
   waitForDialog,
   waitForMenu,
 } from "./dom-finders";
@@ -238,21 +238,25 @@ export async function selectReferenceImage(
   }
 
   for (let i = 0; i < 3; i += 1) {
-    await safeClick(openButton);
+    openButton.click();
+    await sleep(3000);
 
-    const imageName = expectedName + ` - Image ${i + 1}`; // Try with incremental suffix if exact name doesn't work
-    const item = findDialogItemByText(imageName);
-    if (item) {
-      await safeClick(item);
-      await appendAutomationLog(`Selected reference image: ${imageName}`);
-      return;
-    }
-
-    const dialogAfter = await waitForDialog(4000);
+    let dialogAfter = await waitForDialog(3000);
     if (dialogAfter) {
-      await safeClick(openButton);
+      const imageName = expectedName + ` - Image ${i + 1}`; // Try with incremental suffix if exact name doesn't work
+      const item = findImgItemByAlt(imageName, dialogAfter);
+      if (item) {
+        await item.click();
+        await appendAutomationLog(`Selected reference image: ${imageName}`);
+      }
+    } else {
+      await appendAutomationLog(
+        `Reference image dialog did not appear after clicking open button.`,
+      );
     }
   }
+
+  await sleep(3000);
 }
 
 export async function renameLatestGeneratedMedia(
