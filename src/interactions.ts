@@ -316,6 +316,377 @@ export async function renameLatestGeneratedMedia(
   }
 }
 
+function getFirstRowPrimaryTileContainer(): HTMLElement | null {
+  const rowPrimary = document.querySelector(
+    "div[data-index='0'][data-item-index='0']",
+  ) as HTMLElement | null;
+  if (!rowPrimary) {
+    return null;
+  }
+
+  const withTileId = rowPrimary.querySelector(
+    "[data-tile-id]",
+  ) as HTMLElement | null;
+  return withTileId || rowPrimary;
+}
+
+function isTileGenerationComplete(root: HTMLElement): boolean {
+  const text = (root.textContent || "").toLowerCase();
+  const percentMatches = text.match(/\b(\d{1,3})\s*%\b/g) || [];
+  const progressValues = percentMatches
+    .map((entry) => Number(entry.replace(/[^0-9]/g, "")))
+    .filter((value) => Number.isFinite(value));
+
+  if (progressValues.length) {
+    return progressValues.some((value) => value >= 100);
+  }
+
+  const statusTerms = ["dang tao", "dang xu ly", "generating", "processing"];
+
+  // Strict mode: if no explicit percentage is present, do not consider done.
+  if (statusTerms.some((term) => text.includes(term))) {
+    return false;
+  }
+
+  return false;
+}
+
+function escapeSelectorValue(value: string): string {
+  if (typeof CSS !== "undefined" && typeof CSS.escape === "function") {
+    return CSS.escape(value);
+  }
+
+  return value.replace(/['"\\]/g, "\\$&");
+}
+
+function getTileContainerById(tileId: string): HTMLElement | null {
+  const escapedId = escapeSelectorValue(tileId);
+  const nodes = Array.from(
+    document.querySelectorAll(`[data-tile-id='${escapedId}']`),
+  ) as HTMLElement[];
+
+  const visibleNode = nodes.find(isVisible) || nodes[0] || null;
+  if (!visibleNode) {
+    return null;
+  }
+
+  const container = visibleNode.closest(
+    "div[data-index][data-item-index], [data-tile-id]",
+  ) as HTMLElement | null;
+  return container || visibleNode;
+}
+
+export function getTopRowTileIds(): string[] {
+  const tileIds: string[] = [];
+  const seen = new Set<string>();
+
+  const topRowItems = Array.from(
+    document.querySelectorAll("div[data-index='0'][data-item-index]"),
+  ) as HTMLElement[];
+
+  for (const rowItem of topRowItems) {
+    const tile = rowItem.querySelector("[data-tile-id]") as HTMLElement | null;
+    const id = (tile?.getAttribute("data-tile-id") || "").trim();
+    if (!id || seen.has(id)) {
+      continue;
+    }
+
+    seen.add(id);
+    tileIds.push(id);
+  }
+
+  return tileIds;
+}
+
+export async function waitForNewTopRowTileId(
+  existingIds: Set<string>,
+  waitMs: number,
+  shouldStop: () => boolean,
+): Promise<string | null> {
+  const findNewTileId = (): string | null => {
+    const latestIds = getTopRowTileIds();
+    for (const id of latestIds) {
+      if (!existingIds.has(id)) {
+        return id;
+      }
+    }
+
+    return null;
+  };
+
+  const immediate = findNewTileId();
+  if (immediate) {
+    return immediate;
+  }
+
+  return new Promise<string | null>((resolve) => {
+    const started = Date.now();
+    const observerRoot = document.body;
+
+    if (!observerRoot) {
+      resolve(null);
+      return;
+    }
+
+    let done = false;
+    let pollTimer = 0;
+
+    const finalize = (result: string | null): void => {
+      if (done) {
+        return;
+      }
+      done = true;
+      observer.disconnect();
+      window.clearInterval(pollTimer);
+      resolve(result);
+    };
+
+    const checkNow = (): void => {
+      if (shouldStop()) {
+        finalize(null);
+        return;
+      }
+
+      if (Date.now() - started >= waitMs) {
+        finalize(null);
+        return;
+      }
+
+      const newId = findNewTileId();
+      if (newId) {
+        finalize(newId);
+      }
+    };
+
+    const observer = new MutationObserver(() => {
+      checkNow();
+    });
+
+    observer.observe(observerRoot, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["style", "class", "data-state", "data-index"],
+    });
+
+    pollTimer = window.setInterval(checkNow, 400);
+    checkNow();
+  });
+}
+
+export async function waitForTileDoneById(
+  tileId: string,
+  waitMs: number,
+  shouldStop: () => boolean,
+): Promise<HTMLElement | null> {
+  const getCompletedTile = (): HTMLElement | null => {
+    const tile = getTileContainerById(tileId);
+    if (!tile) {
+      return null;
+    }
+
+    return isTileGenerationComplete(tile) ? tile : null;
+  };
+
+  const immediate = getCompletedTile();
+  if (immediate) {
+    return immediate;
+  }
+
+  return new Promise<HTMLElement | null>((resolve) => {
+    const started = Date.now();
+    const observerRoot = document.body;
+
+    if (!observerRoot) {
+      resolve(null);
+      return;
+    }
+
+    let done = false;
+    let pollTimer = 0;
+
+    const finalize = (result: HTMLElement | null): void => {
+      if (done) {
+        return;
+      }
+      done = true;
+      observer.disconnect();
+      window.clearInterval(pollTimer);
+      resolve(result);
+    };
+
+    const checkNow = (): void => {
+      if (shouldStop()) {
+        finalize(null);
+        return;
+      }
+
+      if (Date.now() - started >= waitMs) {
+        finalize(null);
+        return;
+      }
+
+      const tile = getCompletedTile();
+      if (tile) {
+        finalize(tile);
+      }
+    };
+
+    const observer = new MutationObserver(() => {
+      checkNow();
+    });
+
+    observer.observe(observerRoot, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["style", "class", "data-state", "data-index"],
+    });
+
+    pollTimer = window.setInterval(checkNow, 500);
+    checkNow();
+  });
+}
+
+export async function waitForFirstRowItemDone(
+  waitMs: number,
+  shouldStop: () => boolean,
+): Promise<HTMLElement | null> {
+  const getCompletedTile = (): HTMLElement | null => {
+    const tile = getFirstRowPrimaryTileContainer();
+    if (!tile) {
+      return null;
+    }
+
+    return isTileGenerationComplete(tile) ? tile : null;
+  };
+
+  const immediate = getCompletedTile();
+  if (immediate) {
+    return immediate;
+  }
+
+  return new Promise<HTMLElement | null>((resolve) => {
+    const started = Date.now();
+    const observerRoot = document.body;
+
+    if (!observerRoot) {
+      resolve(null);
+      return;
+    }
+
+    let done = false;
+    let pollTimer = 0;
+
+    const finalize = (result: HTMLElement | null): void => {
+      if (done) {
+        return;
+      }
+      done = true;
+      observer.disconnect();
+      window.clearInterval(pollTimer);
+      resolve(result);
+    };
+
+    const checkNow = (): void => {
+      if (shouldStop()) {
+        finalize(null);
+        return;
+      }
+
+      const elapsed = Date.now() - started;
+      if (elapsed >= waitMs) {
+        finalize(null);
+        return;
+      }
+
+      const tile = getCompletedTile();
+      if (tile) {
+        finalize(tile);
+      }
+    };
+
+    const observer = new MutationObserver(() => {
+      checkNow();
+    });
+
+    observer.observe(observerRoot, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ["style", "class", "data-state", "data-index"],
+    });
+
+    pollTimer = window.setInterval(checkNow, 500);
+    checkNow();
+  });
+}
+
+export async function renameMediaItem(
+  mediaContainer: HTMLElement,
+  newName: string,
+): Promise<boolean> {
+  const trimmed = String(newName || "").trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  const rect = mediaContainer.getBoundingClientRect();
+  mediaContainer.dispatchEvent(
+    new MouseEvent("contextmenu", {
+      bubbles: true,
+      cancelable: true,
+      clientX: rect.left + Math.min(24, Math.max(6, rect.width / 2)),
+      clientY: rect.top + Math.min(24, Math.max(6, rect.height / 2)),
+      button: 2,
+    }),
+  );
+
+  await sleep(250);
+
+  const renameButton = findButtonByText(["doi ten", "rename", "Đổi tên"]);
+  if (!renameButton) {
+    return false;
+  }
+
+  renameButton.click();
+  await sleep(220);
+
+  const input =
+    (document.querySelector(
+      "[role='dialog'] input[type='text']",
+    ) as HTMLInputElement | null) ||
+    (document.querySelector(
+      "[role='dialog'] textarea",
+    ) as HTMLTextAreaElement | null) ||
+    (document.querySelector("input[type='text']") as HTMLInputElement | null);
+
+  if (!input) {
+    return false;
+  }
+
+  input.focus();
+  input.value = trimmed;
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+
+  // press Enter
+  input.dispatchEvent(
+    new KeyboardEvent("keydown", { bubbles: true, key: "Enter" }),
+  );
+  input.dispatchEvent(
+    new KeyboardEvent("keypress", { bubbles: true, key: "Enter" }),
+  );
+  input.dispatchEvent(
+    new KeyboardEvent("keyup", { bubbles: true, key: "Enter" }),
+  );
+
+  return true;
+}
+
 export async function waitForMediaIncrease(
   beforeCount: number,
   waitMs: number,

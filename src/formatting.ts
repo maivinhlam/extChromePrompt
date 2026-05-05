@@ -22,6 +22,21 @@ export function formatSceneName(
   return `SCENE ${sceneNumber}` + (typeLabel === "" ? "" : ` - ${typeLabel} `);
 }
 
+export function extractPromptPrefixName(
+  prompt: string,
+  fallback: string,
+): string {
+  const text = String(prompt || "").trim();
+  const beforeColon = text.split(":", 1)[0]?.trim() || "";
+  const normalized = beforeColon.replace(/\s+/g, " ").trim();
+
+  if (!normalized) {
+    return fallback;
+  }
+
+  return normalized.slice(0, 120);
+}
+
 export function setInputValue(node: HTMLElement, value: string): void {
   node.focus();
   const nextValue = String(value ?? "");
