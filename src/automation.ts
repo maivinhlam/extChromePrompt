@@ -22,7 +22,7 @@ import {
   formatSceneName,
   extractPromptPrefixName,
 } from "./formatting";
-import { pauseBeforeStep } from "./utils";
+import { pauseBeforeStep, sleep } from "./utils";
 
 function createInitialPromptStatuses(length: number): PromptStatus[] {
   return Array.from({ length }, () => "pending");
@@ -146,6 +146,9 @@ export async function startAutomation(config: {
           );
           return;
         }
+
+        // waiting an additional short time to ensure the tile is fully ready for interactions
+        await sleep(10000);
 
         const renamed = await renameMediaItem(completedTile, renameTo);
         if (renamed) {

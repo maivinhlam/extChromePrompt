@@ -19,6 +19,27 @@ import {
 import { formatSceneName } from "./formatting";
 import { state, TEST_MODE } from "./constants";
 
+let pageInteractionLock: Promise<void> = Promise.resolve();
+
+async function withPageInteractionLock<T>(
+  action: () => Promise<T>,
+): Promise<T> {
+  const previousLock = pageInteractionLock;
+  let releaseLock: (() => void) | null = null;
+
+  pageInteractionLock = new Promise<void>((resolve) => {
+    releaseLock = resolve;
+  });
+
+  await previousLock;
+
+  try {
+    return await action();
+  } finally {
+    releaseLock?.();
+  }
+}
+
 function getTypingDelay(character: string): number {
   if (character === " ") {
     return 10;
@@ -79,115 +100,117 @@ async function typeTextIntoField(
 }
 
 export async function fillPromptInput(prompt: string): Promise<boolean> {
-  const promptInput = findPromptInput();
-  if (!promptInput) {
-    throw new Error("Could not find Flow prompt input.");
-  }
-
-  const editor = (promptInput.closest('[data-slate-editor="true"]') ||
-    promptInput) as HTMLElement | null;
-  if (!editor) {
-    console.error("Khong tim thay khung nhap prompt!");
-    return false;
-  }
-
-  editor.focus();
-
-  if (
-    promptInput instanceof HTMLTextAreaElement ||
-    promptInput instanceof HTMLInputElement
-  ) {
-    await typeTextIntoField(promptInput, prompt);
-    console.log(`[AutoFlow] Da nhap: ${prompt.substring(0, 30)}...`);
-    return true;
-  }
-
-  const selection = window.getSelection();
-  if (!selection) {
-    return false;
-  }
-
-  const range = document.createRange();
-  range.selectNodeContents(editor);
-  selection.removeAllRanges();
-  selection.addRange(range);
-
-  editor.dispatchEvent(
-    new InputEvent("beforeinput", {
-      bubbles: true,
-      cancelable: true,
-      inputType: "deleteByCut",
-      data: null,
-    }),
-  );
-  document.execCommand("insertText", false, "");
-  editor.dispatchEvent(new Event("input", { bubbles: true }));
-
-  const ensureCaretAtEnd = (): void => {
-    const targetNode =
-      editor.querySelector("span[data-slate-string='true']") || editor;
-    const endRange = document.createRange();
-
-    let caretNode: Node = targetNode;
-    if (targetNode.firstChild) {
-      caretNode = targetNode.firstChild;
+  return withPageInteractionLock(async () => {
+    const promptInput = findPromptInput();
+    if (!promptInput) {
+      throw new Error("Could not find Flow prompt input.");
     }
 
-    if (caretNode.nodeType === Node.TEXT_NODE) {
-      const length = caretNode.textContent?.length || 0;
-      endRange.setStart(caretNode, length);
-    } else {
-      const childCount = caretNode.childNodes.length;
-      endRange.setStart(caretNode, childCount);
+    const editor = (promptInput.closest('[data-slate-editor="true"]') ||
+      promptInput) as HTMLElement | null;
+    if (!editor) {
+      console.error("Khong tim thay khung nhap prompt!");
+      return false;
     }
 
-    endRange.collapse(true);
+    editor.focus();
+
+    if (
+      promptInput instanceof HTMLTextAreaElement ||
+      promptInput instanceof HTMLInputElement
+    ) {
+      await typeTextIntoField(promptInput, prompt);
+      console.log(`[AutoFlow] Da nhap: ${prompt.substring(0, 30)}...`);
+      return true;
+    }
+
+    const selection = window.getSelection();
+    if (!selection) {
+      return false;
+    }
+
+    const range = document.createRange();
+    range.selectNodeContents(editor);
     selection.removeAllRanges();
-    selection.addRange(endRange);
-  };
+    selection.addRange(range);
 
-  ensureCaretAtEnd();
-
-  for (const character of prompt) {
-    editor.dispatchEvent(
-      new KeyboardEvent("keydown", {
-        bubbles: true,
-        cancelable: true,
-        key: character,
-      }),
-    );
     editor.dispatchEvent(
       new InputEvent("beforeinput", {
         bubbles: true,
         cancelable: true,
-        inputType: "insertText",
-        data: character,
+        inputType: "deleteByCut",
+        data: null,
       }),
     );
-    document.execCommand("insertText", false, character);
-    editor.dispatchEvent(
-      new InputEvent("input", {
-        bubbles: true,
-        cancelable: true,
-        inputType: "insertText",
-        data: character,
-      }),
-    );
-    editor.dispatchEvent(
-      new KeyboardEvent("keyup", {
-        bubbles: true,
-        cancelable: true,
-        key: character,
-      }),
-    );
+    document.execCommand("insertText", false, "");
+    editor.dispatchEvent(new Event("input", { bubbles: true }));
+
+    const ensureCaretAtEnd = (): void => {
+      const targetNode =
+        editor.querySelector("span[data-slate-string='true']") || editor;
+      const endRange = document.createRange();
+
+      let caretNode: Node = targetNode;
+      if (targetNode.firstChild) {
+        caretNode = targetNode.firstChild;
+      }
+
+      if (caretNode.nodeType === Node.TEXT_NODE) {
+        const length = caretNode.textContent?.length || 0;
+        endRange.setStart(caretNode, length);
+      } else {
+        const childCount = caretNode.childNodes.length;
+        endRange.setStart(caretNode, childCount);
+      }
+
+      endRange.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(endRange);
+    };
+
     ensureCaretAtEnd();
-    await sleep(getTypingDelay(character));
-  }
 
-  editor.dispatchEvent(new Event("change", { bubbles: true }));
+    for (const character of prompt) {
+      editor.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          bubbles: true,
+          cancelable: true,
+          key: character,
+        }),
+      );
+      editor.dispatchEvent(
+        new InputEvent("beforeinput", {
+          bubbles: true,
+          cancelable: true,
+          inputType: "insertText",
+          data: character,
+        }),
+      );
+      document.execCommand("insertText", false, character);
+      editor.dispatchEvent(
+        new InputEvent("input", {
+          bubbles: true,
+          cancelable: true,
+          inputType: "insertText",
+          data: character,
+        }),
+      );
+      editor.dispatchEvent(
+        new KeyboardEvent("keyup", {
+          bubbles: true,
+          cancelable: true,
+          key: character,
+        }),
+      );
+      ensureCaretAtEnd();
+      await sleep(getTypingDelay(character));
+    }
 
-  console.log(`[AutoFlow] Da nhap: ${prompt.substring(0, 30)}...`);
-  return true;
+    editor.dispatchEvent(new Event("change", { bubbles: true }));
+
+    console.log(`[AutoFlow] Da nhap: ${prompt.substring(0, 30)}...`);
+    return true;
+  });
 }
 
 export async function clickCreateButton(): Promise<void> {
@@ -872,77 +895,79 @@ export async function renameMediaItem(
   mediaContainer: HTMLElement,
   newName: string,
 ): Promise<boolean> {
-  const trimmed = String(newName || "").trim();
-  if (!trimmed) {
-    return false;
-  }
+  return withPageInteractionLock(async () => {
+    const trimmed = String(newName || "").trim();
+    if (!trimmed) {
+      return false;
+    }
 
-  const contextMenuOpened =
-    await openContextMenuAtContainerCenter(mediaContainer);
-  if (!contextMenuOpened) {
-    return false;
-  }
+    const contextMenuOpened =
+      await openContextMenuAtContainerCenter(mediaContainer);
+    if (!contextMenuOpened) {
+      return false;
+    }
 
-  await sleep(250);
+    await sleep(250);
 
-  const renameButton = findButtonByText(["doi ten", "rename", "Đổi tên"]);
-  console.log("🚀 ~ renameMediaItem ~ renameButton:", renameButton);
-  if (!renameButton) {
-    return false;
-  }
+    const renameButton = findButtonByText(["doi ten", "rename", "Đổi tên"]);
+    console.log("🚀 ~ renameMediaItem ~ renameButton:", renameButton);
+    if (!renameButton) {
+      return false;
+    }
 
-  renameButton.click();
-  await sleep(1050);
+    renameButton.click();
+    await sleep(1050);
 
-  const input =
-    (document.querySelector(
-      "[role='dialog'] input[type='text']",
-    ) as HTMLInputElement | null) ||
-    (document.querySelector(
-      "[role='dialog'] textarea",
-    ) as HTMLTextAreaElement | null) ||
-    (document.querySelector("input[type='text']") as HTMLInputElement | null);
+    const input =
+      (document.querySelector(
+        "[role='dialog'] input[type='text']",
+      ) as HTMLInputElement | null) ||
+      (document.querySelector(
+        "[role='dialog'] textarea",
+      ) as HTMLTextAreaElement | null) ||
+      (document.querySelector("input[type='text']") as HTMLInputElement | null);
 
-  if (!input) {
-    return false;
-  }
+    if (!input) {
+      return false;
+    }
 
-  await typeTextIntoField(input, trimmed);
+    await typeTextIntoField(input, trimmed);
 
-  await sleep(520);
+    await sleep(520);
 
-  input.form?.requestSubmit();
-  console.log("🚀 ~ renameMediaItem ~ input:", input);
+    input.form?.requestSubmit();
+    console.log("🚀 ~ renameMediaItem ~ input:", input);
 
-  input.dispatchEvent(
-    new KeyboardEvent("keydown", {
-      bubbles: true,
-      cancelable: true,
-      composed: true,
-      key: "Enter",
-      code: "Enter",
-    }),
-  );
-  input.dispatchEvent(
-    new KeyboardEvent("keypress", {
-      bubbles: true,
-      cancelable: true,
-      composed: true,
-      key: "Enter",
-      code: "Enter",
-    }),
-  );
-  input.dispatchEvent(
-    new KeyboardEvent("keyup", {
-      bubbles: true,
-      cancelable: true,
-      composed: true,
-      key: "Enter",
-      code: "Enter",
-    }),
-  );
+    input.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+        key: "Enter",
+        code: "Enter",
+      }),
+    );
+    input.dispatchEvent(
+      new KeyboardEvent("keypress", {
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+        key: "Enter",
+        code: "Enter",
+      }),
+    );
+    input.dispatchEvent(
+      new KeyboardEvent("keyup", {
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+        key: "Enter",
+        code: "Enter",
+      }),
+    );
 
-  return true;
+    return true;
+  });
 }
 
 export async function downloadMediaItem(
