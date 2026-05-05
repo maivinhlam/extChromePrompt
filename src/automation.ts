@@ -15,6 +15,7 @@ import {
   waitForNewTopRowTileId,
   waitForTileDoneById,
   renameMediaItem,
+  downloadMediaItem,
 } from "./interactions";
 import {
   parseSceneNumbers,
@@ -161,7 +162,9 @@ export async function startAutomation(config: {
         appendAutomationLog,
       );
       await clickCreateButton();
-      await appendAutomationLog("Prompt sent. Moving to next prompt immediately.");
+      await appendAutomationLog(
+        "Prompt sent. Moving to next prompt immediately.",
+      );
 
       const renameTo = extractPromptPrefixName(
         prompt,
@@ -200,8 +203,18 @@ export async function startAutomation(config: {
         }
 
         const renamed = await renameMediaItem(completedTile, renameTo);
-        if (renamed) {
+        if (renamed && state.mode === "video") {
           await appendAutomationLog(`Renamed '${renameTo}' successfully.`);
+
+          await appendAutomationLog(`Downloading '${renameTo}'...`);
+          const downloaded = await downloadMediaItem(completedTile);
+          if (downloaded) {
+            await appendAutomationLog(`Downloaded '${renameTo}' successfully.`);
+          } else {
+            await appendAutomationLog(
+              `Download skipped for '${renameTo}': could not open download menu.`,
+            );
+          }
         } else {
           await appendAutomationLog(
             `Rename skipped for '${renameTo}': could not open Rename dialog.`,

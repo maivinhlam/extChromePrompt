@@ -687,6 +687,49 @@ export async function renameMediaItem(
   return true;
 }
 
+export async function downloadMediaItem(
+  mediaContainer: HTMLElement,
+): Promise<boolean> {
+  const rect = mediaContainer.getBoundingClientRect();
+  mediaContainer.dispatchEvent(
+    new MouseEvent("contextmenu", {
+      bubbles: true,
+      cancelable: true,
+      clientX: rect.left + Math.min(24, Math.max(6, rect.width / 2)),
+      clientY: rect.top + Math.min(24, Math.max(6, rect.height / 2)),
+      button: 2,
+    }),
+  );
+
+  await sleep(300);
+
+  const downloadButton = findButtonByText([
+    "tải xuống",
+    "download",
+    "Tải xuống",
+  ]);
+  if (!downloadButton) {
+    return false;
+  }
+
+  downloadButton.click();
+  await sleep(400);
+
+  const qualityButton = findButtonByText([
+    "kích thước gốc",
+    "original size",
+    "Kích thước gốc",
+  ]);
+  if (!qualityButton) {
+    return false;
+  }
+
+  qualityButton.click();
+  await sleep(300);
+
+  return true;
+}
+
 export async function waitForMediaIncrease(
   beforeCount: number,
   waitMs: number,
