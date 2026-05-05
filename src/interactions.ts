@@ -18,24 +18,165 @@ import {
 } from "./media-utils";
 import { formatSceneName } from "./formatting";
 
+function getTypingDelay(character: string): number {
+  if (character === " ") {
+    return 110;
+  }
+
+  if (/[.,;:!?]/.test(character)) {
+    return 140;
+  }
+
+  return 65;
+}
+
 export async function fillPromptInput(prompt: string): Promise<boolean> {
   const promptInput = findPromptInput();
   if (!promptInput) {
     throw new Error("Could not find Flow prompt input.");
   }
 
-  const editor = document.querySelector(
-    'div[data-slate-editor="true"]',
-  ) as HTMLElement | null;
+  const editor = (promptInput.closest('[data-slate-editor="true"]') ||
+    promptInput) as HTMLElement | null;
   if (!editor) {
     console.error("Khong tim thay khung nhap prompt!");
     return false;
   }
 
   editor.focus();
-  document.execCommand("selectAll", false);
-  document.execCommand("delete", false);
-  document.execCommand("insertText", false, prompt);
+
+  if (
+    promptInput instanceof HTMLTextAreaElement ||
+    promptInput instanceof HTMLInputElement
+  ) {
+    promptInput.focus();
+    promptInput.select();
+    promptInput.value = "";
+    promptInput.dispatchEvent(new Event("input", { bubbles: true }));
+
+    for (const character of prompt) {
+      promptInput.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          bubbles: true,
+          cancelable: true,
+          key: character,
+        }),
+      );
+      promptInput.dispatchEvent(
+        new InputEvent("beforeinput", {
+          bubbles: true,
+          cancelable: true,
+          inputType: "insertText",
+          data: character,
+        }),
+      );
+      promptInput.value += character;
+      promptInput.dispatchEvent(
+        new InputEvent("input", {
+          bubbles: true,
+          cancelable: true,
+          inputType: "insertText",
+          data: character,
+        }),
+      );
+      promptInput.dispatchEvent(
+        new KeyboardEvent("keyup", {
+          bubbles: true,
+          cancelable: true,
+          key: character,
+        }),
+      );
+      await sleep(getTypingDelay(character));
+    }
+
+    promptInput.dispatchEvent(new Event("change", { bubbles: true }));
+    console.log(`[AutoFlow] Da nhap: ${prompt.substring(0, 30)}...`);
+    return true;
+  }
+
+  const selection = window.getSelection();
+  if (!selection) {
+    return false;
+  }
+
+  const range = document.createRange();
+  range.selectNodeContents(editor);
+  selection.removeAllRanges();
+  selection.addRange(range);
+
+  editor.dispatchEvent(
+    new InputEvent("beforeinput", {
+      bubbles: true,
+      cancelable: true,
+      inputType: "deleteByCut",
+      data: null,
+    }),
+  );
+  document.execCommand("insertText", false, "");
+  editor.dispatchEvent(new Event("input", { bubbles: true }));
+
+  const ensureCaretAtEnd = (): void => {
+    const targetNode =
+      editor.querySelector("span[data-slate-string='true']") || editor;
+    const endRange = document.createRange();
+
+    let caretNode: Node = targetNode;
+    if (targetNode.firstChild) {
+      caretNode = targetNode.firstChild;
+    }
+
+    if (caretNode.nodeType === Node.TEXT_NODE) {
+      const length = caretNode.textContent?.length || 0;
+      endRange.setStart(caretNode, length);
+    } else {
+      const childCount = caretNode.childNodes.length;
+      endRange.setStart(caretNode, childCount);
+    }
+
+    endRange.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(endRange);
+  };
+
+  ensureCaretAtEnd();
+
+  for (const character of prompt) {
+    editor.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        bubbles: true,
+        cancelable: true,
+        key: character,
+      }),
+    );
+    editor.dispatchEvent(
+      new InputEvent("beforeinput", {
+        bubbles: true,
+        cancelable: true,
+        inputType: "insertText",
+        data: character,
+      }),
+    );
+    document.execCommand("insertText", false, character);
+    editor.dispatchEvent(
+      new InputEvent("input", {
+        bubbles: true,
+        cancelable: true,
+        inputType: "insertText",
+        data: character,
+      }),
+    );
+    editor.dispatchEvent(
+      new KeyboardEvent("keyup", {
+        bubbles: true,
+        cancelable: true,
+        key: character,
+      }),
+    );
+    ensureCaretAtEnd();
+    await sleep(getTypingDelay(character));
+  }
+
+  editor.dispatchEvent(new Event("change", { bubbles: true }));
 
   console.log(`[AutoFlow] Da nhap: ${prompt.substring(0, 30)}...`);
   return true;
