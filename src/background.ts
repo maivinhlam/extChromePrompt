@@ -7,7 +7,16 @@ type PendingDownload = {
 
 const pendingDownloads: PendingDownload[] = [];
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type === "FOCUS_SENDER_TAB") {
+    void focusSenderTab(sender)
+      .then(() => sendResponse({ ok: true }))
+      .catch((error: Error) =>
+        sendResponse({ ok: false, error: error.message }),
+      );
+    return true;
+  }
+
   if (message?.type === "REGISTER_DOWNLOAD_NAME") {
     pendingDownloads.push({
       sceneName: message.sceneName || "scene",
@@ -25,6 +34,20 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
   sendResponse({ ok: false, error: "Unknown message." });
 });
+
+async function focusSenderTab(
+  sender: chrome.runtime.MessageSender,
+): Promise<void> {
+  const tabId = sender.tab?.id;
+  const windowId = sender.tab?.windowId;
+
+  if (typeof tabId !== "number" || typeof windowId !== "number") {
+    throw new Error("Could not resolve sender tab.");
+  }
+
+  await chrome.windows.update(windowId, { focused: true });
+  await chrome.tabs.update(tabId, { active: true });
+}
 
 chrome.downloads.onDeterminingFilename.addListener((item, suggest) => {
   if (!pendingDownloads.length) {

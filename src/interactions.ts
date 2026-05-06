@@ -120,6 +120,31 @@ async function waitForTransientUiToClose(timeoutMs: number): Promise<boolean> {
   return false;
 }
 
+async function ensurePageCanOpenNativeUi(timeoutMs = 2000): Promise<boolean> {
+  if (!document.hidden && document.hasFocus()) {
+    return true;
+  }
+
+  const response = await chrome.runtime
+    .sendMessage({ type: "FOCUS_SENDER_TAB" })
+    .catch(() => null);
+
+  if (!response?.ok) {
+    return !document.hidden;
+  }
+
+  const started = Date.now();
+  while (Date.now() - started < timeoutMs) {
+    if (!document.hidden && document.hasFocus()) {
+      return true;
+    }
+
+    await sleep(50);
+  }
+
+  return !document.hidden;
+}
+
 export async function fillPromptInput(prompt: string): Promise<boolean> {
   return withPageInteractionLock(async () => {
     const promptInput = findPromptInput();
@@ -327,6 +352,11 @@ async function openContextMenuAtContainerCenter(
     return false;
   }
 
+  const pageReady = await ensurePageCanOpenNativeUi();
+  if (!pageReady) {
+    return false;
+  }
+
   mediaContainer.scrollIntoView({ block: "center", inline: "nearest" });
   await sleep(80);
 
@@ -505,7 +535,7 @@ export async function configureVideoModeModel(): Promise<void> {
 }
 
 export async function selectReferenceImage(
-  expectedName: string,
+  expectedNames: string[],
 ): Promise<void> {
   await withPageInteractionLock(async () => {
     const openButton = findReferenceImageOpenButton();
@@ -514,16 +544,14 @@ export async function selectReferenceImage(
       return;
     }
 
-    for (let i = 0; i < 3; i++) {
-      await sleep(500);
-
+    for (let i = 0; i < expectedNames.length; i++) {
+      await sleep(300);
       await openButton.click();
       await sleep(500);
 
-      const dialogAfter = await waitForDialog(1100);
+      const dialogAfter = await waitForDialog(500);
       if (dialogAfter) {
-        const imageName = expectedName + ` - Image ${i + 1}`;
-        console.log("🚀 ~ selectReferenceImage ~ imageName:", imageName);
+        const imageName = expectedNames[i];
         const searchInput = findReferenceImageSearchInput(dialogAfter);
 
         if (searchInput) {
@@ -533,11 +561,10 @@ export async function selectReferenceImage(
 
         const item = findImgItemByAlt(imageName, dialogAfter);
         if (item) {
-          await sleep(500);
-
+          await sleep(300);
           await item.click();
           await appendAutomationLog(`Selected reference image: ${imageName}`);
-          await waitForTransientUiToClose(3000);
+          await waitForTransientUiToClose(300);
         }
       } else {
         await appendAutomationLog(
@@ -546,7 +573,6 @@ export async function selectReferenceImage(
       }
 
       await openButton.click();
-      await waitForTransientUiToClose(1500);
     }
 
     await sleep(700);
@@ -638,17 +664,27 @@ function isTileGenerationComplete(root: HTMLElement): boolean {
     return true;
   }
 
-  if (state.mode === "video" && text.includes("play_circle")) {
+  if (
+    state.mode === "video" &&
+    text.includes("play_circle") &&
+    !hasProgressPercentage(text)
+  ) {
+    console.log("🚀 ~ isTileGenerationComplete ~ text:", text);
     return true;
   }
   const statusTerms = ["dang tao", "dang xu ly", "generating", "processing"];
 
   // Strict mode: if no explicit percentage is present, do not consider done.
   if (statusTerms.some((term) => text.includes(term))) {
+    console.log("🚀 ~ isTileGenerationComplete ~ text:", text);
     return false;
   }
 
   return false;
+}
+
+function hasProgressPercentage(text: string): boolean {
+  return /\d{1,3}\s*%/.test(text);
 }
 
 function escapeSelectorValue(value: string): string {
@@ -785,6 +821,8 @@ export async function waitForTileDoneById(
   | { status: "timeout" }
   | { status: "stopped" }
 > {
+  await sleep(2000);
+
   const started = Date.now();
 
   const getTileResult = ():
@@ -801,8 +839,15 @@ export async function waitForTileDoneById(
     }
 
     const text = (tile.textContent || "").toLowerCase();
-    console.log("🚀 ~ getTileResult ~ text:", text);
-    if (text.includes("flow đang có lượng truy cập cao")) {
+    if (
+      text.includes("flow đang có lượng truy cập cao") ||
+      text.includes("we noticed some unusual activity")
+    ) {
+      return { status: "failed" };
+    }
+
+    if (text.includes("không thành công") && !hasProgressPercentage(text)) {
+      console.log("🚀 ~ isTileGenerationComplete ~ text:", text);
       return { status: "failed" };
     }
 
@@ -957,11 +1002,16 @@ export async function waitForFirstRowItemDone(
         }
 
         const text = (firstRowTile.textContent || "").toLowerCase();
-        if (text.includes("Flow đang có lượng truy cập cao")) {
-          console.log(
-            "🚀 ~ waitForFirstRowItemDone ~ failed tile:",
-            firstRowTile,
-          );
+        console.log("🚀 ~ checkNow ~ text:", text);
+        if (
+          text.includes("flow đang có lượng truy cập cao") ||
+          text.includes("we noticed some unusual activity")
+        ) {
+          finalize(null);
+        }
+
+        if (text.includes("không thành công") && !hasProgressPercentage(text)) {
+          console.log("🚀 ~ checkNow ~ text: không thành công", text);
           finalize(null);
         }
       } finally {
@@ -995,18 +1045,17 @@ export async function renameMediaItem(
   return withPageInteractionLock(async () => {
     const trimmed = String(newName || "").trim();
     if (!trimmed) {
+      console.log("🚀 ~ renameMediaItem ~ trimmed:", trimmed);
+
       return false;
     }
-
+    await sleep(1000);
     let contextMenuOpened =
       await openContextMenuAtContainerCenter(mediaContainer);
     if (!contextMenuOpened) {
       // try the open again in case the first attempt failed due to transient UI state
       // we need to click the out side of the tile to make sure the context menu will be associated with the correct tile, so we cannot just retry clicking the rename button if we fail to find it - we have to reopen the context menu
-      console.log(
-        "🚀 ~ renameMediaItem ~ contextMenuOpened:",
-        contextMenuOpened,
-      );
+      console.log("🚀 ~ renameMediaItem ~ cant open context menu:", newName);
 
       await sleep(500);
       await clickOutsideTile(mediaContainer);
@@ -1017,9 +1066,22 @@ export async function renameMediaItem(
 
     await sleep(250);
 
-    const renameButton = findButtonByText(["doi ten", "rename", "Đổi tên"]);
+    let renameButton = findButtonByText(["doi ten", "rename", "Đổi tên"]);
     if (!renameButton) {
-      return false;
+      await sleep(550);
+
+      contextMenuOpened =
+        await openContextMenuAtContainerCenter(mediaContainer);
+      renameButton = findButtonByText(["doi ten", "rename", "Đổi tên"]);
+      if (!renameButton) {
+        console.log(
+          "🚀 ~ renameMediaItem ~ renameButton: ",
+          newName,
+          ": ",
+          renameButton,
+        );
+        return false;
+      }
     }
 
     renameButton.click();
@@ -1035,6 +1097,7 @@ export async function renameMediaItem(
       (document.querySelector("input[type='text']") as HTMLInputElement | null);
 
     if (!input) {
+      console.log("🚀 ~ renameMediaItem ~ input:", input);
       return false;
     }
 
@@ -1083,6 +1146,11 @@ export async function downloadMediaItem(
     const contextMenuOpened =
       await openContextMenuAtContainerCenter(mediaContainer);
     if (!contextMenuOpened) {
+      console.log(
+        "🚀 ~ downloadMediaItem ~ can't open context menu:",
+        contextMenuOpened,
+      );
+
       return false;
     }
 

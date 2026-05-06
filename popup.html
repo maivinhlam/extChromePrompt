@@ -22,16 +22,24 @@
       </label>
     </fieldset>
 
-    <label for="prompts">Prompts (one line each)</label>
+    <label for="prompts" class="field-header">
+      <span>Prompts (one line each)</span>
+      <span>Total: <span id="totalPrompts">0</span></span>
+    </label>
+
     <textarea id="prompts"
       placeholder="SCENE 1: A cinematic shot of a forest at sunrise&#10;SCENE 2: Slow camera pan above misty mountains"></textarea>
 
-    <p id="status" class="status">Ready.</p>
+    <div class="status-row">
+      <p id="status" class="status">Ready.</p>
+      <button id="clearPromptsBtn" type="button" class="secondary clear-prompts-btn">Clear</button>
+    </div>
 
     <div class="bottom-bar">
       <label class="interval-item">
-        <span>Seconds</span>
+        <span>Time between two prompt</span>
         <input id="intervalSeconds" type="number" min="1" step="1" value="15" />
+        <span>seconds</span>
       </label>
     </div>
 
@@ -40,7 +48,7 @@
       <button id="stopBtn" type="button" class="secondary">Stop</button>
     </div>
 
-    <section class="logs-section">
+    <section class="logs-section" style="display: none;">
       <h2>Logs</h2>
       <div id="logs" class="logs" aria-live="polite"></div>
     </section>

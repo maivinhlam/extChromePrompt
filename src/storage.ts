@@ -42,6 +42,7 @@ export async function appendAutomationLog(message: string): Promise<void> {
     timestamp: Date.now(),
     message: String(message || ""),
   };
+  console.log("🚀 ~ appendAutomationLog ~ entry:", entry);
 
   try {
     const data = await chrome.storage.local.get(LOG_STORAGE_KEY);

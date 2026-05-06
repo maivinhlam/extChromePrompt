@@ -34,7 +34,7 @@ export function extractPromptPrefixName(
     return fallback;
   }
 
-  return normalized.slice(0, 120);
+  return normalized.slice(0, 20);
 }
 
 export function setInputValue(node: HTMLElement, value: string): void {

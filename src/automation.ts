@@ -23,6 +23,7 @@ import {
   extractPromptPrefixName,
 } from "./formatting";
 import { pauseBeforeStep, sleep } from "./utils";
+import { test } from "./test";
 
 function createInitialPromptStatuses(length: number): PromptStatus[] {
   return Array.from({ length }, () => "pending");
@@ -124,91 +125,11 @@ export async function startAutomation(config: {
     }
 
     if (TEST_MODE) {
-      const knownTopRowTileIds = new Set(getTopRowTileIds());
-      let renameTo = extractPromptPrefixName(
-        "Scene 1 - Image 1",
-        formatSceneName(1, ""),
-      );
-      if (state.mode === "video") {
-        renameTo = extractPromptPrefixName("Scene 1", formatSceneName(1, ""));
-      }
-      let waitingTime = 600;
-      if (state.mode === "video") {
-        waitingTime = Math.max(120000, state.intervalMs * 4);
-      }
-      const renameTask = (async (): Promise<void> => {
-        const newTileId = await waitForNewTopRowTileId(
-          knownTopRowTileIds,
-          Math.max(waitingTime, state.intervalMs * 2),
-          () => state.stopRequested,
-        );
-
-        if (!newTileId) {
-          await appendAutomationLog(
-            `Rename skipped for '${renameTo}': no new tile detected in time.`,
-          );
-          return;
-        }
-
+      test(pendingRenameTasks).catch(async (error: unknown) => {
         await appendAutomationLog(
-          `Detected new tile for '${renameTo}' (${newTileId}). Waiting for 100%.`,
-        );
-
-        const tileResult = await waitForTileDoneById(
-          newTileId,
-          Math.max(waitingTime, state.intervalMs * 6),
-          () => state.stopRequested,
-        );
-
-        if (tileResult.status !== "completed") {
-          await appendAutomationLog(
-            `Rename skipped for '${renameTo}': tile did not reach 100% in time.`,
-          );
-          return;
-        }
-
-        const completedTile = tileResult.tile;
-
-        // waiting an additional short time to ensure the tile is fully ready for interactions
-        await sleep(10000);
-
-        const renamed = await renameMediaItem(completedTile, renameTo);
-        if (renamed) {
-          await appendAutomationLog(`Renamed '${renameTo}' successfully.`);
-
-          if (state.mode === "video") {
-            await appendAutomationLog(`Downloading '${renameTo}'...`);
-            const downloaded = await downloadMediaItem(completedTile);
-            if (downloaded) {
-              await appendAutomationLog(
-                `Downloaded '${renameTo}' successfully.`,
-              );
-            } else {
-              await appendAutomationLog(
-                `Download skipped for '${renameTo}': API request or menu flow failed.`,
-              );
-            }
-          }
-        } else {
-          await appendAutomationLog(
-            `Rename skipped for '${renameTo}': could not open Rename dialog.`,
-          );
-        }
-      })().catch(async (error: unknown) => {
-        await appendAutomationLog(
-          `Rename task failed for '${renameTo}': ${(error as Error).message}`,
+          `Test function error: ${(error as Error).message}`,
         );
       });
-
-      pendingRenameTasks.push(renameTask);
-
-      if (pendingRenameTasks.length) {
-        await appendAutomationLog(
-          `Waiting for ${pendingRenameTasks.length} rename task(s) to finish.`,
-        );
-        await Promise.allSettled(pendingRenameTasks);
-      }
-
       return;
     }
 
@@ -250,17 +171,12 @@ export async function startAutomation(config: {
       );
       await fillPromptInput(prompt);
 
-      if (state.mode === "video") {
-        const expectedImageName = formatSceneName(numbers.scene, "");
-
-        await pauseBeforeStep(
-          `Select reference image for the ${expectedImageName}.`,
-          () => state.stopRequested,
-          appendAutomationLog,
-        );
-        await selectReferenceImage(expectedImageName);
+      // if (state.mode === "video")
+      const imageNames = extractImageNamesFromPrompt(prompt);
+      if (imageNames.length > 0) {
+        await selectReferenceImage(imageNames);
       }
-
+      await sleep(1000);
       promptStatuses[i] = "done";
       await saveAutomationState({
         running: true,
@@ -288,8 +204,9 @@ export async function startAutomation(config: {
       );
       let waitingTime = 60000;
       if (state.mode === "video") {
-        waitingTime = Math.max(240000, state.intervalMs * 4);
+        waitingTime = Math.max(180000, state.intervalMs * 4);
       }
+
       const renameTask = (async (): Promise<void> => {
         const newTileId = await waitForNewTopRowTileId(
           knownTopRowTileIds,
@@ -314,6 +231,7 @@ export async function startAutomation(config: {
           () => state.stopRequested,
         );
 
+        console.log("🚀 ~ startAutomation ~ tileResult:", tileResult);
         if (tileResult.status === "failed") {
           await queuePromptForRetry(prompt);
           return;
@@ -387,4 +305,19 @@ export async function startAutomation(config: {
   } finally {
     state.running = false;
   }
+}
+
+function extractImageNamesFromPrompt(prompt: string): string[] {
+  const imageNamesMatch = prompt.match(/IMAGES:\s*(.+?)(?:\s*\||\s*$)/i);
+
+  // Lấy chuỗi tên ảnh (hoặc null nếu không khớp)
+  const imageNames = imageNamesMatch ? imageNamesMatch[1].trim() : null;
+  const imageArray = imageNames
+    ? imageNames
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+
+  return imageArray;
 }

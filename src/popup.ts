@@ -22,7 +22,11 @@ const intervalInput = document.getElementById(
 const modeImageInput = document.getElementById("modeImage") as HTMLInputElement;
 const modeVideoInput = document.getElementById("modeVideo") as HTMLInputElement;
 const promptsInput = document.getElementById("prompts") as HTMLTextAreaElement;
+const totalPromptsEl = document.getElementById("totalPrompts") as HTMLElement;
 const statusEl = document.getElementById("status") as HTMLElement;
+const clearPromptsBtn = document.getElementById(
+  "clearPromptsBtn",
+) as HTMLButtonElement;
 const startBtn = document.getElementById("startBtn") as HTMLButtonElement;
 const stopBtn = document.getElementById("stopBtn") as HTMLButtonElement;
 const logsEl = document.getElementById("logs") as HTMLElement;
@@ -37,9 +41,11 @@ async function init() {
   modeImageInput.addEventListener("change", persistSettings);
   modeVideoInput.addEventListener("change", persistSettings);
   promptsInput.addEventListener("input", persistSettings);
+  promptsInput.addEventListener("input", updatePromptCount);
 
   startBtn.addEventListener("click", onStart);
   stopBtn.addEventListener("click", onStop);
+  clearPromptsBtn.addEventListener("click", onClearPrompts);
 
   chrome.storage.onChanged.addListener(onStorageChanged);
 
@@ -55,6 +61,7 @@ async function loadSettings() {
   modeImageInput.checked = mode === "image";
   modeVideoInput.checked = mode === "video";
   promptsInput.value = settings.promptsText || "";
+  updatePromptCount();
 }
 
 async function persistSettings() {
@@ -71,10 +78,7 @@ async function persistSettings() {
 }
 
 async function onStart() {
-  const prompts = promptsInput.value
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
+  const prompts = getPromptLines();
 
   if (!prompts.length) {
     setStatus("Please add at least one prompt line.", true);
@@ -125,6 +129,7 @@ async function onStart() {
 
   await persistSettings();
   setStatus(`Started. Total prompts: ${prompts.length}`);
+  window.close();
 }
 
 async function onStop() {
@@ -146,6 +151,28 @@ async function onStop() {
   }
 
   setStatus("Stop requested.");
+}
+
+async function onClearPrompts() {
+  promptsInput.value = "";
+  updatePromptCount();
+  await persistSettings();
+  setStatus("Cleared all prompts.");
+}
+
+function getPromptLines(): string[] {
+  return promptsInput.value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function updatePromptCount() {
+  if (!totalPromptsEl) {
+    return;
+  }
+
+  totalPromptsEl.textContent = String(getPromptLines().length);
 }
 
 function setStatus(text: string, isError = false) {
