@@ -1,12 +1,38 @@
 import { isVisible, sleep } from "./utils";
 
 export function findPromptInput(): HTMLElement | null {
+  const preferredSlateEditors = Array.from(
+    document.querySelectorAll(
+      "[role='textbox'][contenteditable='true'][data-slate-editor='true']",
+    ),
+  ) as HTMLElement[];
+
+  const placeholderMatchedEditor = preferredSlateEditors.find((editor) => {
+    if (!isVisible(editor)) {
+      return false;
+    }
+
+    const placeholder =
+      editor
+        .querySelector("[data-slate-placeholder='true']")
+        ?.textContent?.trim()
+        .toLowerCase() || "";
+
+    return placeholder.includes("bạn muốn tạo gì?");
+  });
+  if (placeholderMatchedEditor) {
+    return placeholderMatchedEditor;
+  }
+
   const selectors = [
+    "[role='textbox'][contenteditable='true'][data-slate-editor='true'][aria-multiline='true']",
+    "[role='textbox'][contenteditable='true'][data-slate-editor='true']",
+    "div[contenteditable='true'][data-slate-editor='true']",
     "textarea",
     "textarea[placeholder*='Prompt' i]",
     "textarea[placeholder*='Describe' i]",
-    "div[contenteditable='true']",
-    "[role='textbox'][contenteditable='true']",
+    "div[data-slate-editor='true']",
+    "[role='textbox'][data-slate-editor='true']",
   ];
 
   for (const selector of selectors) {

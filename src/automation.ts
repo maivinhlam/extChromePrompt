@@ -121,7 +121,7 @@ export async function startAutomation(config: {
     );
 
     if (!TEST_MODE) {
-      await selectModelAndModeTab(state.mode);
+      // await selectModelAndModeTab(state.mode);
     }
 
     if (TEST_MODE) {
@@ -176,7 +176,7 @@ export async function startAutomation(config: {
       if (imageNames.length > 0) {
         await selectReferenceImage(imageNames);
       }
-      await sleep(1000);
+
       promptStatuses[i] = "done";
       await saveAutomationState({
         running: true,
@@ -192,8 +192,9 @@ export async function startAutomation(config: {
         () => state.stopRequested,
         appendAutomationLog,
       );
+      await sleep(1000);
+      // await clickCreateButton();
 
-      await clickCreateButton();
       await appendAutomationLog(
         "Prompt sent. Moving to next prompt immediately.",
       );

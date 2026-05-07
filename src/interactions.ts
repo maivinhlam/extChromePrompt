@@ -17,7 +17,7 @@ import {
   countMainMediaItems,
   getLatestMainMediaContainer,
 } from "./media-utils";
-import { formatSceneName } from "./formatting";
+import { cleanPromptText, formatSceneName } from "./formatting";
 import { state, TEST_MODE } from "./constants";
 
 let pageInteractionLock: Promise<void> = Promise.resolve();
@@ -43,14 +43,14 @@ async function withPageInteractionLock<T>(
 
 function getTypingDelay(character: string): number {
   if (character === " ") {
-    return 10;
+    return 5;
   }
 
   if (/[.,;:!?]/.test(character)) {
-    return 12;
+    return 6;
   }
 
-  return 11;
+  return 4;
 }
 
 async function typeTextIntoField(
@@ -147,6 +147,13 @@ async function ensurePageCanOpenNativeUi(timeoutMs = 2000): Promise<boolean> {
 
 export async function fillPromptInput(prompt: string): Promise<boolean> {
   return withPageInteractionLock(async () => {
+    /**
+     * Loại bỏ phần "SCENE <số>: <tên scene> |" ở đầu và "IMAGES: ..." cùng mọi nội dung phía sau.
+     * Trả về phần mô tả chính giữa (đã trim).
+     */
+
+    const newPrompt = cleanPromptText(prompt);
+
     const promptInput = findPromptInput();
     if (!promptInput) {
       throw new Error("Could not find Flow prompt input.");
@@ -165,8 +172,8 @@ export async function fillPromptInput(prompt: string): Promise<boolean> {
       promptInput instanceof HTMLTextAreaElement ||
       promptInput instanceof HTMLInputElement
     ) {
-      await typeTextIntoField(promptInput, prompt);
-      console.log(`[AutoFlow] Da nhap: ${prompt.substring(0, 30)}...`);
+      await typeTextIntoField(promptInput, newPrompt);
+      console.log(`[AutoFlow] Da nhap: ${newPrompt.substring(0, 30)}...`);
       return true;
     }
 
@@ -216,7 +223,7 @@ export async function fillPromptInput(prompt: string): Promise<boolean> {
 
     ensureCaretAtEnd();
 
-    for (const character of prompt) {
+    for (const character of newPrompt) {
       editor.dispatchEvent(
         new KeyboardEvent("keydown", {
           bubbles: true,
@@ -254,6 +261,34 @@ export async function fillPromptInput(prompt: string): Promise<boolean> {
 
     editor.dispatchEvent(new Event("change", { bubbles: true }));
 
+    editor.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+        key: "Enter",
+        code: "Enter",
+      }),
+    );
+    editor.dispatchEvent(
+      new KeyboardEvent("keypress", {
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+        key: "Enter",
+        code: "Enter",
+      }),
+    );
+    editor.dispatchEvent(
+      new KeyboardEvent("keyup", {
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+        key: "Enter",
+        code: "Enter",
+      }),
+    );
+
     console.log(`[AutoFlow] Da nhap: ${prompt.substring(0, 30)}...`);
     return true;
   });
@@ -267,8 +302,7 @@ export async function clickCreateButton(): Promise<void> {
     throw new Error("Could not find send button.");
   }
   await appendAutomationLog("Found send button.");
-
-  sendButton.click();
+  await safeClick(sendButton);
 }
 
 export async function safeClick(element: HTMLElement | null): Promise<boolean> {
@@ -575,7 +609,7 @@ export async function selectReferenceImage(
       await openButton.click();
     }
 
-    await sleep(700);
+    await sleep(300);
   });
 }
 
@@ -1162,7 +1196,7 @@ export async function downloadMediaItem(
       return false;
     }
 
-    await sleep(1000);
+    await sleep(300);
 
     const downloadButton = findButtonByText([
       "tải xuống",
@@ -1174,7 +1208,7 @@ export async function downloadMediaItem(
     }
 
     downloadButton.click();
-    await sleep(1000);
+    await sleep(300);
 
     const qualityButton = findButtonByText([
       "kích thước gốc",
@@ -1187,7 +1221,7 @@ export async function downloadMediaItem(
       return false;
     }
 
-    await sleep(1000);
+    await sleep(300);
     qualityButton.click();
     await waitForTransientUiToClose(3000);
     await sleep(300);

@@ -120,3 +120,22 @@ export function setInputValue(node: HTMLElement, value: string): void {
   );
   node.dispatchEvent(new Event("change", { bubbles: true }));
 }
+
+/**
+ * Loại bỏ phần "TênTrướcDauHaiCham:" ở đầu và "IMAGES: ..." cùng mọi nội dung phía sau.
+ * Trả về phần mô tả chính giữa đã được trim và loại bỏ các dấu '|' thừa.
+ */
+export function cleanPromptText(input: string): string {
+  if (typeof input !== "string") return "";
+
+  // 1) Xóa phần tên ở đầu tới dấu ":" đầu tiên (ví dụ "Image 22.1:")
+  const afterColon = input.replace(/^[^:]+:\s*/u, "");
+
+  // 2) Xóa phần "IMAGES:" và mọi thứ phía sau (cho phép nhiều dòng), không phân biệt hoa thường
+  const beforeImages = afterColon.replace(/\s*IMAGES:\s*[\s\S]*$/i, "");
+
+  // 3) Loại bỏ các dấu '|' thừa ở đầu/cuối và trim khoảng trắng
+  const cleaned = beforeImages.replace(/^\s*\|+|\|+\s*$/g, "").trim();
+
+  return cleaned;
+}
