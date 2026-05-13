@@ -193,7 +193,7 @@ export async function startAutomation(config: {
         appendAutomationLog,
       );
       await sleep(1000);
-      // await clickCreateButton();
+      await clickCreateButton();
 
       await appendAutomationLog(
         "Prompt sent. Moving to next prompt immediately.",
@@ -232,7 +232,6 @@ export async function startAutomation(config: {
           () => state.stopRequested,
         );
 
-        console.log("🚀 ~ startAutomation ~ tileResult:", tileResult);
         if (tileResult.status === "failed") {
           await queuePromptForRetry(prompt);
           return;

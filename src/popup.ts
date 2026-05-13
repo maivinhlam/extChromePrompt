@@ -79,6 +79,8 @@ async function persistSettings() {
 
 async function onStart() {
   const prompts = getPromptLines();
+  setStatus(`Started. Total prompts: ${prompts.length}`);
+  console.log("🚀 ~ onStart ~ prompts.length:", prompts.length);
 
   if (!prompts.length) {
     setStatus("Please add at least one prompt line.", true);
@@ -128,7 +130,7 @@ async function onStart() {
   }
 
   await persistSettings();
-  setStatus(`Started. Total prompts: ${prompts.length}`);
+
   window.close();
 }
 

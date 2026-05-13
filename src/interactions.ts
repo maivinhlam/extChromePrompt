@@ -22,6 +22,8 @@ import { state, TEST_MODE } from "./constants";
 
 let pageInteractionLock: Promise<void> = Promise.resolve();
 
+type DebuggerMouseButton = "left" | "right" | "middle";
+
 async function withPageInteractionLock<T>(
   action: () => Promise<T>,
 ): Promise<T> {
@@ -145,6 +147,134 @@ async function ensurePageCanOpenNativeUi(timeoutMs = 2000): Promise<boolean> {
   return !document.hidden;
 }
 
+function getElementClickPoint(element: HTMLElement): { x: number; y: number } {
+  const rect = element.getBoundingClientRect();
+  return {
+    x: rect.left + Math.max(1, Math.min(rect.width / 2, rect.width - 1)),
+    y: rect.top + Math.max(1, Math.min(rect.height / 2, rect.height - 1)),
+  };
+}
+
+async function debuggerClickAtPoint(
+  x: number,
+  y: number,
+  button: DebuggerMouseButton = "left",
+): Promise<boolean> {
+  const response = await chrome.runtime
+    .sendMessage({
+      type: "DEBUGGER_CLICK",
+      x,
+      y,
+      button,
+    })
+    .catch(() => null);
+
+  return !!response?.ok;
+}
+
+async function debuggerClickElement(
+  element: HTMLElement,
+  button: DebuggerMouseButton = "left",
+): Promise<boolean> {
+  if (!isVisible(element)) {
+    return false;
+  }
+
+  element.scrollIntoView({ block: "center", inline: "nearest" });
+  element.focus();
+  await sleep(80);
+
+  const { x, y } = getElementClickPoint(element);
+  return debuggerClickAtPoint(x, y, button);
+}
+
+/**
+ * Giả lập gõ văn bản vào một input/textarea
+ * @param {HTMLElement} element - Phần tử nhập liệu
+ * @param {string} text - Nội dung cần nhập
+ */
+async function humanType(element: HTMLElement, text: string): Promise<void> {
+  element.focus();
+
+  const typos = "qwertyuiopasdfghjklzxcvbnm"; // Các phím có thể gõ nhầm
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+
+    // 10% cơ hội gõ sai nếu là ký tự bình thường
+    if (Math.random() < 0.1 && char !== " ") {
+      const wrongChar = typos[Math.floor(Math.random() * typos.length)];
+      console.log("🚀 ~ humanType ~ wrongChar:", wrongChar);
+      await typeChar(element, wrongChar);
+      await new Promise((r) => setTimeout(r, 150 + Math.random() * 200)); // Đợi một chút khi nhận ra sai
+      await backspace(element);
+      await new Promise((r) => setTimeout(r, 100 + Math.random() * 100)); // Đợi trước khi gõ lại
+    }
+
+    await typeChar(element, char);
+
+    // Tính toán thời gian nghỉ
+    let delay = 50 + Math.random() * 150; // Tốc độ gõ cơ bản
+
+    if (char === "." || char === "?" || char === "!") {
+      delay += 500 + Math.random() * 500; // Nghỉ dài sau cuối câu
+    } else if (char === "," || char === ";") {
+      delay += 200 + Math.random() * 300; // Nghỉ vừa sau dấu phẩy
+    }
+
+    await new Promise((r) => setTimeout(r, delay));
+  }
+
+  // Sau khi gõ xong, nhấn Enter
+  const enterEvent = new KeyboardEvent("keydown", {
+    key: "Enter",
+    code: "Enter",
+    keyCode: 13,
+    which: 13,
+    bubbles: true,
+  });
+  element.dispatchEvent(enterEvent);
+}
+
+// Hàm hỗ trợ gõ từng ký tự
+async function typeChar(element: HTMLElement, char: string): Promise<void> {
+  const eventObj = { key: char, char: char, bubbles: true };
+  element.dispatchEvent(new KeyboardEvent("keydown", eventObj));
+  element.dispatchEvent(new KeyboardEvent("keypress", eventObj));
+
+  // Cập nhật giá trị trực tiếp cho input
+  if (element.tagName === "INPUT" || element.tagName === "TEXTAREA") {
+    const input = element as HTMLInputElement | HTMLTextAreaElement;
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? input.value.length;
+    input.value =
+      input.value.substring(0, start) + char + input.value.substring(end);
+    input.selectionStart = input.selectionEnd = start + 1;
+  }
+
+  element.dispatchEvent(new InputEvent("input", { data: char, bubbles: true }));
+  element.dispatchEvent(new KeyboardEvent("keyup", eventObj));
+}
+
+// Hàm hỗ trợ xoá ký tự (Backspace)
+async function backspace(element: HTMLElement): Promise<void> {
+  element.dispatchEvent(
+    new KeyboardEvent("keydown", {
+      key: "Backspace",
+      keyCode: 8,
+      bubbles: true,
+    }),
+  );
+  if (element.tagName === "INPUT" || element.tagName === "TEXTAREA") {
+    const input = element as HTMLInputElement | HTMLTextAreaElement;
+    input.value = input.value.slice(0, -1);
+  }
+  element.dispatchEvent(new InputEvent("input", { bubbles: true }));
+  element.dispatchEvent(
+    new KeyboardEvent("keyup", { key: "Backspace", keyCode: 8, bubbles: true }),
+  );
+}
+
 export async function fillPromptInput(prompt: string): Promise<boolean> {
   return withPageInteractionLock(async () => {
     /**
@@ -167,7 +297,9 @@ export async function fillPromptInput(prompt: string): Promise<boolean> {
     }
 
     editor.focus();
+    // await humanType(promptInput, newPrompt);
 
+    // return true;
     if (
       promptInput instanceof HTMLTextAreaElement ||
       promptInput instanceof HTMLInputElement
@@ -176,6 +308,8 @@ export async function fillPromptInput(prompt: string): Promise<boolean> {
       console.log(`[AutoFlow] Da nhap: ${newPrompt.substring(0, 30)}...`);
       return true;
     }
+
+    await sleep(120);
 
     const selection = window.getSelection();
     if (!selection) {
@@ -197,6 +331,8 @@ export async function fillPromptInput(prompt: string): Promise<boolean> {
     );
     document.execCommand("insertText", false, "");
     editor.dispatchEvent(new Event("input", { bubbles: true }));
+
+    await sleep(180);
 
     const ensureCaretAtEnd = (): void => {
       const targetNode =
@@ -256,10 +392,12 @@ export async function fillPromptInput(prompt: string): Promise<boolean> {
         }),
       );
       ensureCaretAtEnd();
-      await sleep(getTypingDelay(character));
+      await sleep(getTypingDelay(character) + 8);
     }
 
     editor.dispatchEvent(new Event("change", { bubbles: true }));
+
+    await sleep(220);
 
     editor.dispatchEvent(
       new KeyboardEvent("keydown", {
@@ -310,70 +448,10 @@ export async function safeClick(element: HTMLElement | null): Promise<boolean> {
     return false;
   }
 
-  element.scrollIntoView({ block: "center", inline: "nearest" });
-  element.focus();
-
-  element.click();
-  await sleep(800);
-
-  const rect = element.getBoundingClientRect();
-  const x = rect.left + Math.max(1, Math.min(rect.width / 2, rect.width - 1));
-  const y = rect.top + Math.max(1, Math.min(rect.height / 2, rect.height - 1));
-
-  element.dispatchEvent(
-    new PointerEvent("pointerdown", {
-      bubbles: true,
-      cancelable: true,
-      pointerType: "mouse",
-      clientX: x,
-      clientY: y,
-      button: 0,
-      buttons: 1,
-      isPrimary: true,
-    }),
-  );
-  element.dispatchEvent(
-    new MouseEvent("mousedown", {
-      bubbles: true,
-      cancelable: true,
-      clientX: x,
-      clientY: y,
-      button: 0,
-      buttons: 1,
-    }),
-  );
-  element.dispatchEvent(
-    new MouseEvent("mouseup", {
-      bubbles: true,
-      cancelable: true,
-      clientX: x,
-      clientY: y,
-      button: 0,
-      buttons: 0,
-    }),
-  );
-  element.dispatchEvent(
-    new PointerEvent("pointerup", {
-      bubbles: true,
-      cancelable: true,
-      pointerType: "mouse",
-      clientX: x,
-      clientY: y,
-      button: 0,
-      buttons: 0,
-      isPrimary: true,
-    }),
-  );
-  element.dispatchEvent(
-    new MouseEvent("click", {
-      bubbles: true,
-      cancelable: true,
-      clientX: x,
-      clientY: y,
-      button: 0,
-      buttons: 0,
-    }),
-  );
+  const clicked = await debuggerClickElement(element);
+  if (!clicked) {
+    return false;
+  }
 
   await sleep(80);
   return true;
@@ -395,6 +473,7 @@ async function openContextMenuAtContainerCenter(
   await sleep(80);
 
   const rect = mediaContainer.getBoundingClientRect();
+  console.log("🚀 ~ openContextMenuAtContainerCenter ~ rect:", rect);
   const clientX = rect.left + rect.width / 2;
   const clientY = rect.top + rect.height / 2;
 
@@ -402,65 +481,14 @@ async function openContextMenuAtContainerCenter(
     clientX,
     clientY,
   ) as HTMLElement | null;
-  const eventTarget =
-    pointTarget && mediaContainer.contains(pointTarget)
-      ? pointTarget
-      : mediaContainer;
+  if (!pointTarget || !mediaContainer.contains(pointTarget)) {
+    return false;
+  }
 
-  eventTarget.dispatchEvent(
-    new PointerEvent("pointerdown", {
-      bubbles: true,
-      cancelable: true,
-      pointerType: "mouse",
-      clientX,
-      clientY,
-      button: 2,
-      buttons: 2,
-      isPrimary: true,
-    }),
-  );
-  eventTarget.dispatchEvent(
-    new MouseEvent("mousedown", {
-      bubbles: true,
-      cancelable: true,
-      clientX,
-      clientY,
-      button: 2,
-      buttons: 2,
-    }),
-  );
-  eventTarget.dispatchEvent(
-    new MouseEvent("contextmenu", {
-      bubbles: true,
-      cancelable: true,
-      clientX,
-      clientY,
-      button: 2,
-      buttons: 2,
-    }),
-  );
-  eventTarget.dispatchEvent(
-    new MouseEvent("mouseup", {
-      bubbles: true,
-      cancelable: true,
-      clientX,
-      clientY,
-      button: 2,
-      buttons: 0,
-    }),
-  );
-  eventTarget.dispatchEvent(
-    new PointerEvent("pointerup", {
-      bubbles: true,
-      cancelable: true,
-      pointerType: "mouse",
-      clientX,
-      clientY,
-      button: 2,
-      buttons: 0,
-      isPrimary: true,
-    }),
-  );
+  const opened = await debuggerClickAtPoint(clientX, clientY, "right");
+  if (!opened) {
+    return false;
+  }
 
   return true;
 }
@@ -580,7 +608,7 @@ export async function selectReferenceImage(
 
     for (let i = 0; i < expectedNames.length; i++) {
       await sleep(300);
-      await openButton.click();
+      await safeClick(openButton);
       await sleep(500);
 
       const dialogAfter = await waitForDialog(500);
@@ -596,7 +624,7 @@ export async function selectReferenceImage(
         const item = findImgItemByAlt(imageName, dialogAfter);
         if (item) {
           await sleep(300);
-          await item.click();
+          await safeClick(item);
           await appendAutomationLog(`Selected reference image: ${imageName}`);
           await waitForTransientUiToClose(300);
         }
@@ -606,7 +634,7 @@ export async function selectReferenceImage(
         );
       }
 
-      await openButton.click();
+      await safeClick(openButton);
     }
 
     await sleep(300);
@@ -621,23 +649,15 @@ export async function renameLatestGeneratedMedia(
     return;
   }
 
-  const rect = latest.getBoundingClientRect();
-  latest.dispatchEvent(
-    new MouseEvent("contextmenu", {
-      bubbles: true,
-      cancelable: true,
-      clientX: rect.left + Math.min(20, rect.width / 2),
-      clientY: rect.top + Math.min(20, rect.height / 2),
-      button: 2,
-    }),
-  );
+  const { x, y } = getElementClickPoint(latest);
+  await debuggerClickAtPoint(x, y, "right");
   await sleep(240);
 
   const renameButton = findButtonByText(["doi ten", "rename", "whiteboard"]);
   if (!renameButton) {
     return;
   }
-  renameButton.click();
+  await safeClick(renameButton);
   await sleep(220);
 
   const input =
@@ -665,7 +685,7 @@ export async function renameLatestGeneratedMedia(
 
   const saveButton = findButtonByText(["doi ten", "rename", "save"]);
   if (saveButton) {
-    saveButton.click();
+    await safeClick(saveButton);
     await sleep(200);
   }
 }
@@ -703,14 +723,12 @@ function isTileGenerationComplete(root: HTMLElement): boolean {
     text.includes("play_circle") &&
     !hasProgressPercentage(text)
   ) {
-    console.log("🚀 ~ isTileGenerationComplete ~ text:", text);
     return true;
   }
   const statusTerms = ["dang tao", "dang xu ly", "generating", "processing"];
 
   // Strict mode: if no explicit percentage is present, do not consider done.
   if (statusTerms.some((term) => text.includes(term))) {
-    console.log("🚀 ~ isTileGenerationComplete ~ text:", text);
     return false;
   }
 
@@ -881,7 +899,6 @@ export async function waitForTileDoneById(
     }
 
     if (text.includes("không thành công") && !hasProgressPercentage(text)) {
-      console.log("🚀 ~ isTileGenerationComplete ~ text:", text);
       return { status: "failed" };
     }
 
@@ -1036,7 +1053,6 @@ export async function waitForFirstRowItemDone(
         }
 
         const text = (firstRowTile.textContent || "").toLowerCase();
-        console.log("🚀 ~ checkNow ~ text:", text);
         if (
           text.includes("flow đang có lượng truy cập cao") ||
           text.includes("we noticed some unusual activity")
@@ -1045,7 +1061,6 @@ export async function waitForFirstRowItemDone(
         }
 
         if (text.includes("không thành công") && !hasProgressPercentage(text)) {
-          console.log("🚀 ~ checkNow ~ text: không thành công", text);
           finalize(null);
         }
       } finally {
@@ -1076,50 +1091,21 @@ export async function renameMediaItem(
   mediaContainer: HTMLElement,
   newName: string,
 ): Promise<boolean> {
+  console.log("🚀 ~ renameMediaItem ~ mediaContainer:", mediaContainer);
   return withPageInteractionLock(async () => {
     const trimmed = String(newName || "").trim();
     if (!trimmed) {
-      console.log("🚀 ~ renameMediaItem ~ trimmed:", trimmed);
-
       return false;
     }
     await sleep(1000);
-    let contextMenuOpened =
-      await openContextMenuAtContainerCenter(mediaContainer);
-    if (!contextMenuOpened) {
-      // try the open again in case the first attempt failed due to transient UI state
-      // we need to click the out side of the tile to make sure the context menu will be associated with the correct tile, so we cannot just retry clicking the rename button if we fail to find it - we have to reopen the context menu
-      console.log("🚀 ~ renameMediaItem ~ cant open context menu:", newName);
-
-      await sleep(500);
-      await clickOutsideTile(mediaContainer);
-      await sleep(500);
-      contextMenuOpened =
-        await openContextMenuAtContainerCenter(mediaContainer);
-    }
+    await openContextMenuAtContainerCenter(mediaContainer);
 
     await sleep(250);
 
     let renameButton = findButtonByText(["doi ten", "rename", "Đổi tên"]);
-    if (!renameButton) {
-      await sleep(550);
 
-      contextMenuOpened =
-        await openContextMenuAtContainerCenter(mediaContainer);
-      renameButton = findButtonByText(["doi ten", "rename", "Đổi tên"]);
-      if (!renameButton) {
-        console.log(
-          "🚀 ~ renameMediaItem ~ renameButton: ",
-          newName,
-          ": ",
-          renameButton,
-        );
-        return false;
-      }
-    }
-
-    renameButton.click();
-    await sleep(1050);
+    await safeClick(renameButton);
+    await sleep(250);
 
     const input =
       (document.querySelector(
@@ -1207,7 +1193,7 @@ export async function downloadMediaItem(
       return false;
     }
 
-    downloadButton.click();
+    await safeClick(downloadButton);
     await sleep(300);
 
     const qualityButton = findButtonByText([
@@ -1222,7 +1208,7 @@ export async function downloadMediaItem(
     }
 
     await sleep(300);
-    qualityButton.click();
+    await safeClick(qualityButton);
     await waitForTransientUiToClose(3000);
     await sleep(300);
 
@@ -1251,15 +1237,9 @@ export async function waitForMediaIncrease(
   await appendAutomationLog("No new media detected before timeout.");
 }
 
-function clickOutsideTile(mediaContainer: HTMLElement) {
+async function clickOutsideTile(mediaContainer: HTMLElement): Promise<void> {
   const rect = mediaContainer.getBoundingClientRect();
   const x = rect.left - 10;
   const y = rect.top - 10;
-  const event = new MouseEvent("click", {
-    bubbles: true,
-    cancelable: true,
-    clientX: x,
-    clientY: y,
-  });
-  document.elementFromPoint(x, y)?.dispatchEvent(event);
+  await debuggerClickAtPoint(x, y, "left");
 }

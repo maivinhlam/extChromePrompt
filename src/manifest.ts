@@ -4,7 +4,7 @@ const manifest = {
   version: "1.0.0",
   description:
     "Run prompt lines in Google Labs Flow with timed sending, retries, and auto download naming.",
-  permissions: ["activeTab", "storage", "downloads", "tabs"],
+  permissions: ["activeTab", "storage", "downloads", "tabs", "debugger"],
   host_permissions: ["https://labs.google/*", "https://*.labs.google/*"],
   background: {
     service_worker: "src/background.ts",
