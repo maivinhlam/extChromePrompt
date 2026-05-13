@@ -188,54 +188,6 @@ async function debuggerClickElement(
   return debuggerClickAtPoint(x, y, button);
 }
 
-/**
- * Giả lập gõ văn bản vào một input/textarea
- * @param {HTMLElement} element - Phần tử nhập liệu
- * @param {string} text - Nội dung cần nhập
- */
-async function humanType(element: HTMLElement, text: string): Promise<void> {
-  element.focus();
-
-  const typos = "qwertyuiopasdfghjklzxcvbnm"; // Các phím có thể gõ nhầm
-
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-
-    // 10% cơ hội gõ sai nếu là ký tự bình thường
-    if (Math.random() < 0.1 && char !== " ") {
-      const wrongChar = typos[Math.floor(Math.random() * typos.length)];
-      console.log("🚀 ~ humanType ~ wrongChar:", wrongChar);
-      await typeChar(element, wrongChar);
-      await new Promise((r) => setTimeout(r, 150 + Math.random() * 200)); // Đợi một chút khi nhận ra sai
-      await backspace(element);
-      await new Promise((r) => setTimeout(r, 100 + Math.random() * 100)); // Đợi trước khi gõ lại
-    }
-
-    await typeChar(element, char);
-
-    // Tính toán thời gian nghỉ
-    let delay = 50 + Math.random() * 150; // Tốc độ gõ cơ bản
-
-    if (char === "." || char === "?" || char === "!") {
-      delay += 500 + Math.random() * 500; // Nghỉ dài sau cuối câu
-    } else if (char === "," || char === ";") {
-      delay += 200 + Math.random() * 300; // Nghỉ vừa sau dấu phẩy
-    }
-
-    await new Promise((r) => setTimeout(r, delay));
-  }
-
-  // Sau khi gõ xong, nhấn Enter
-  const enterEvent = new KeyboardEvent("keydown", {
-    key: "Enter",
-    code: "Enter",
-    keyCode: 13,
-    which: 13,
-    bubbles: true,
-  });
-  element.dispatchEvent(enterEvent);
-}
-
 // Hàm hỗ trợ gõ từng ký tự
 async function typeChar(element: HTMLElement, char: string): Promise<void> {
   const eventObj = { key: char, char: char, bubbles: true };
@@ -297,138 +249,146 @@ export async function fillPromptInput(prompt: string): Promise<boolean> {
     }
 
     editor.focus();
-    // await humanType(promptInput, newPrompt);
 
-    // return true;
-    if (
-      promptInput instanceof HTMLTextAreaElement ||
-      promptInput instanceof HTMLInputElement
-    ) {
-      await typeTextIntoField(promptInput, newPrompt);
-      console.log(`[AutoFlow] Da nhap: ${newPrompt.substring(0, 30)}...`);
-      return true;
+    // Tell the background script to start typing
+    const response = await chrome.runtime.sendMessage({
+      action: "PERFORM_TYPE",
+      text: newPrompt,
+    });
+    if (response?.status === "completed") {
+      console.log("This specific typing task is DONE!");
     }
-
-    await sleep(120);
-
-    const selection = window.getSelection();
-    if (!selection) {
-      return false;
-    }
-
-    const range = document.createRange();
-    range.selectNodeContents(editor);
-    selection.removeAllRanges();
-    selection.addRange(range);
-
-    editor.dispatchEvent(
-      new InputEvent("beforeinput", {
-        bubbles: true,
-        cancelable: true,
-        inputType: "deleteByCut",
-        data: null,
-      }),
-    );
-    document.execCommand("insertText", false, "");
-    editor.dispatchEvent(new Event("input", { bubbles: true }));
-
-    await sleep(180);
-
-    const ensureCaretAtEnd = (): void => {
-      const targetNode =
-        editor.querySelector("span[data-slate-string='true']") || editor;
-      const endRange = document.createRange();
-
-      let caretNode: Node = targetNode;
-      if (targetNode.firstChild) {
-        caretNode = targetNode.firstChild;
-      }
-
-      if (caretNode.nodeType === Node.TEXT_NODE) {
-        const length = caretNode.textContent?.length || 0;
-        endRange.setStart(caretNode, length);
-      } else {
-        const childCount = caretNode.childNodes.length;
-        endRange.setStart(caretNode, childCount);
-      }
-
-      endRange.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(endRange);
-    };
-
-    ensureCaretAtEnd();
-
-    for (const character of newPrompt) {
-      editor.dispatchEvent(
-        new KeyboardEvent("keydown", {
-          bubbles: true,
-          cancelable: true,
-          key: character,
-        }),
-      );
-      editor.dispatchEvent(
-        new InputEvent("beforeinput", {
-          bubbles: true,
-          cancelable: true,
-          inputType: "insertText",
-          data: character,
-        }),
-      );
-      document.execCommand("insertText", false, character);
-      editor.dispatchEvent(
-        new InputEvent("input", {
-          bubbles: true,
-          cancelable: true,
-          inputType: "insertText",
-          data: character,
-        }),
-      );
-      editor.dispatchEvent(
-        new KeyboardEvent("keyup", {
-          bubbles: true,
-          cancelable: true,
-          key: character,
-        }),
-      );
-      ensureCaretAtEnd();
-      await sleep(getTypingDelay(character) + 8);
-    }
-
-    editor.dispatchEvent(new Event("change", { bubbles: true }));
-
-    await sleep(220);
-
-    editor.dispatchEvent(
-      new KeyboardEvent("keydown", {
-        bubbles: true,
-        cancelable: true,
-        composed: true,
-        key: "Enter",
-        code: "Enter",
-      }),
-    );
-    editor.dispatchEvent(
-      new KeyboardEvent("keypress", {
-        bubbles: true,
-        cancelable: true,
-        composed: true,
-        key: "Enter",
-        code: "Enter",
-      }),
-    );
-    editor.dispatchEvent(
-      new KeyboardEvent("keyup", {
-        bubbles: true,
-        cancelable: true,
-        composed: true,
-        key: "Enter",
-        code: "Enter",
-      }),
-    );
-
-    console.log(`[AutoFlow] Da nhap: ${prompt.substring(0, 30)}...`);
     return true;
+
+    //   if (
+    //     promptInput instanceof HTMLTextAreaElement ||
+    //     promptInput instanceof HTMLInputElement
+    //   ) {
+    //     await typeTextIntoField(promptInput, newPrompt);
+    //     console.log(`[AutoFlow] Da nhap: ${newPrompt.substring(0, 30)}...`);
+    //     return true;
+    //   }
+
+    //   await sleep(120);
+
+    //   const selection = window.getSelection();
+    //   if (!selection) {
+    //     return false;
+    //   }
+
+    //   const range = document.createRange();
+    //   range.selectNodeContents(editor);
+    //   selection.removeAllRanges();
+    //   selection.addRange(range);
+
+    //   editor.dispatchEvent(
+    //     new InputEvent("beforeinput", {
+    //       bubbles: true,
+    //       cancelable: true,
+    //       inputType: "deleteByCut",
+    //       data: null,
+    //     }),
+    //   );
+    //   document.execCommand("insertText", false, "");
+    //   editor.dispatchEvent(new Event("input", { bubbles: true }));
+
+    //   await sleep(180);
+
+    //   const ensureCaretAtEnd = (): void => {
+    //     const targetNode =
+    //       editor.querySelector("span[data-slate-string='true']") || editor;
+    //     const endRange = document.createRange();
+
+    //     let caretNode: Node = targetNode;
+    //     if (targetNode.firstChild) {
+    //       caretNode = targetNode.firstChild;
+    //     }
+
+    //     if (caretNode.nodeType === Node.TEXT_NODE) {
+    //       const length = caretNode.textContent?.length || 0;
+    //       endRange.setStart(caretNode, length);
+    //     } else {
+    //       const childCount = caretNode.childNodes.length;
+    //       endRange.setStart(caretNode, childCount);
+    //     }
+
+    //     endRange.collapse(true);
+    //     selection.removeAllRanges();
+    //     selection.addRange(endRange);
+    //   };
+
+    //   ensureCaretAtEnd();
+
+    //   for (const character of newPrompt) {
+    //     editor.dispatchEvent(
+    //       new KeyboardEvent("keydown", {
+    //         bubbles: true,
+    //         cancelable: true,
+    //         key: character,
+    //       }),
+    //     );
+    //     editor.dispatchEvent(
+    //       new InputEvent("beforeinput", {
+    //         bubbles: true,
+    //         cancelable: true,
+    //         inputType: "insertText",
+    //         data: character,
+    //       }),
+    //     );
+    //     document.execCommand("insertText", false, character);
+    //     editor.dispatchEvent(
+    //       new InputEvent("input", {
+    //         bubbles: true,
+    //         cancelable: true,
+    //         inputType: "insertText",
+    //         data: character,
+    //       }),
+    //     );
+    //     editor.dispatchEvent(
+    //       new KeyboardEvent("keyup", {
+    //         bubbles: true,
+    //         cancelable: true,
+    //         key: character,
+    //       }),
+    //     );
+    //     ensureCaretAtEnd();
+    //     await sleep(getTypingDelay(character) + 8);
+    //   }
+
+    //   editor.dispatchEvent(new Event("change", { bubbles: true }));
+
+    //   await sleep(220);
+
+    //   editor.dispatchEvent(
+    //     new KeyboardEvent("keydown", {
+    //       bubbles: true,
+    //       cancelable: true,
+    //       composed: true,
+    //       key: "Enter",
+    //       code: "Enter",
+    //     }),
+    //   );
+    //   editor.dispatchEvent(
+    //     new KeyboardEvent("keypress", {
+    //       bubbles: true,
+    //       cancelable: true,
+    //       composed: true,
+    //       key: "Enter",
+    //       code: "Enter",
+    //     }),
+    //   );
+    //   editor.dispatchEvent(
+    //     new KeyboardEvent("keyup", {
+    //       bubbles: true,
+    //       cancelable: true,
+    //       composed: true,
+    //       key: "Enter",
+    //       code: "Enter",
+    //     }),
+    //   );
+
+    //   console.log(`[AutoFlow] Da nhap: ${prompt.substring(0, 30)}...`);
+    //   return true;
   });
 }
 
@@ -441,6 +401,7 @@ export async function clickCreateButton(): Promise<void> {
   }
   await appendAutomationLog("Found send button.");
   await safeClick(sendButton);
+  await appendAutomationLog("Prompt sent. Moving to next prompt immediately.");
 }
 
 export async function safeClick(element: HTMLElement | null): Promise<boolean> {

@@ -169,6 +169,8 @@ export async function startAutomation(config: {
         () => state.stopRequested,
         appendAutomationLog,
       );
+
+      // 2. Tell the background script to start typing
       await fillPromptInput(prompt);
 
       // if (state.mode === "video")
@@ -192,12 +194,9 @@ export async function startAutomation(config: {
         () => state.stopRequested,
         appendAutomationLog,
       );
-      await sleep(1000);
-      await clickCreateButton();
 
-      await appendAutomationLog(
-        "Prompt sent. Moving to next prompt immediately.",
-      );
+      // await sleep(1000);
+      // await clickCreateButton();
 
       const renameTo = extractPromptPrefixName(
         prompt,

@@ -1,3 +1,5 @@
+import { nativeClear, nativeType } from "./input";
+
 export {};
 
 type PendingDownload = {
@@ -55,6 +57,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message?.type === "DEBUGGER_CLICK") {
     void dispatchDebuggerClick(sender, message as DebuggerClickMessage)
+      .then(() => sendResponse({ ok: true }))
+      .catch((error: Error) =>
+        sendResponse({ ok: false, error: error.message }),
+      );
+    return true;
+  }
+
+  if (message?.action === "PERFORM_TYPE") {
+    console.log("🚀 ~ message.text:", message.text);
+
+    void handleTypingFlow(sender, message.text)
       .then(() => sendResponse({ ok: true }))
       .catch((error: Error) =>
         sendResponse({ ok: false, error: error.message }),
@@ -223,4 +236,34 @@ function detectFileExtension(item: chrome.downloads.DownloadItem) {
   }
 
   return "bin";
+}
+
+/**
+ * A wrapper to handle the clear + type sequence
+ */
+async function handleTypingFlow(
+  sender: chrome.runtime.MessageSender,
+  text: string,
+): Promise<void> {
+  const tabId = sender.tab?.id;
+
+  if (typeof tabId !== "number") {
+    throw new Error("Could not resolve sender tab for typing.");
+  }
+  const target = { tabId };
+
+  try {
+    // Optional: You might want to Clear first before Typing
+    await chrome.debugger.attach(target, "1.3");
+    await nativeClear(target);
+    await chrome.debugger.detach(target);
+
+    // Call the function you just created
+    await nativeType(tabId, text);
+
+    console.log("Automation completed successfully.");
+  } catch (error) {
+    console.error("Automation failed:", error);
+    throw error;
+  }
 }
