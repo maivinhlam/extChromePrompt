@@ -24,6 +24,8 @@ import {
 import { pauseBeforeStep, sleep } from "./utils";
 import { test } from "./test";
 
+const MAX_PENDING_RENAME_TASKS = 5;
+
 function createInitialPromptStatuses(length: number): PromptStatus[] {
   return Array.from({ length }, () => "pending");
 }
@@ -46,6 +48,7 @@ export async function startAutomation(config: {
   state.prompts = config.prompts;
   state.mode = config.mode === "video" ? "video" : "image";
   state.intervalMs = Math.max(1000, Number(config.intervalMs || 15000));
+  console.log("🚀 ~ startAutomation ~ state.intervalMs:", state.intervalMs);
 
   let promptStatuses = createInitialPromptStatuses(state.prompts.length);
   let startIndex = 0;
@@ -78,6 +81,21 @@ export async function startAutomation(config: {
   }
 
   try {
+    const waitForPendingRenameTasks = async (): Promise<void> => {
+      if (!pendingRenameTasks.length) {
+        return;
+      }
+
+      const tasksToWait = pendingRenameTasks.splice(
+        0,
+        pendingRenameTasks.length,
+      );
+      await appendAutomationLog(
+        `Waiting for ${tasksToWait.length} rename task(s) to finish.`,
+      );
+      await Promise.allSettled(tasksToWait);
+    };
+
     const queuePromptForRetry = async (
       promptToRetry: string,
     ): Promise<void> => {
@@ -194,13 +212,13 @@ export async function startAutomation(config: {
 
       let waitingTime = 60000;
       if (state.mode === "video") {
-        waitingTime = Math.max(180000, state.intervalMs * 4);
+        waitingTime = 180000;
       }
 
       const renameTask = (async (): Promise<void> => {
         const newTileId = await waitForNewTopRowTileId(
           knownTopRowTileIds,
-          Math.max(waitingTime, state.intervalMs * 2),
+          waitingTime,
           () => state.stopRequested,
         );
 
@@ -217,7 +235,7 @@ export async function startAutomation(config: {
 
         const tileResult = await waitForTileDoneById(
           newTileId,
-          Math.max(waitingTime, state.intervalMs * 6),
+          waitingTime,
           () => state.stopRequested,
         );
 
@@ -267,24 +285,14 @@ export async function startAutomation(config: {
       pendingRenameTasks.push(renameTask);
       i += 1;
 
-      if (i >= state.prompts.length && pendingRenameTasks.length) {
-        const tasksToWait = pendingRenameTasks.splice(
-          0,
-          pendingRenameTasks.length,
-        );
-        await appendAutomationLog(
-          `Waiting for ${tasksToWait.length} rename task(s) to finish.`,
-        );
-        await Promise.allSettled(tasksToWait);
+      if (pendingRenameTasks.length >= MAX_PENDING_RENAME_TASKS) {
+        await waitForPendingRenameTasks();
       }
+
+      await sleep(state.intervalMs);
     }
 
-    if (pendingRenameTasks.length) {
-      await appendAutomationLog(
-        `Waiting for ${pendingRenameTasks.length} rename task(s) to finish.`,
-      );
-      await Promise.allSettled(pendingRenameTasks);
-    }
+    await waitForPendingRenameTasks();
 
     await clearAutomationState();
     await appendAutomationLog("Automation completed.");

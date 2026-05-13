@@ -1,4 +1,4 @@
-import { SPEED_FACTOR } from "./constants";
+import { sleep } from "./utils";
 
 /**
  * Sends a native Enter key event to the target tab.
@@ -113,15 +113,10 @@ function startAutoFill(selector: string, promptText: string): void {
 }
 
 /**
- * Types a string into the focused element using native hardware events.
- * Includes simulated human errors and variable typing rhythms.
+ * Pastes a string into the focused element using the debugger protocol.
  */
 export async function nativeType(tabId: number, text: string): Promise<void> {
-  // CONFIGURATION: Adjust this factor to speed up or slow down
-  // < 1.0 is faster, 1.0 is normal, > 1.0 is slower
-
   const target: chrome.debugger.Debuggee = { tabId };
-  const typos = "qwertyuiopasdfghjklzxcvbnm";
   let attachedHere = false;
 
   try {
@@ -139,37 +134,11 @@ export async function nativeType(tabId: number, text: string): Promise<void> {
       }
     }
 
-    for (let i = 0; i < text.length; i++) {
-      const char = text[i];
+    await chrome.debugger.sendCommand(target, "Input.insertText", {
+      text,
+    });
 
-      // --- 1. SIMULATED TYPO ---
-      if (Math.random() < 0.03 && char !== " " && char !== "\n") {
-        const wrongChar = typos[Math.floor(Math.random() * typos.length)];
-        await sendKey(target, wrongChar);
-
-        await delay((100 + Math.random() * 100) * SPEED_FACTOR); // Adjusted delay
-        await sendKey(target, "Backspace", 8);
-        await delay((50 + Math.random() * 50) * SPEED_FACTOR); // Adjusted delay
-      }
-
-      // --- 2. TYPE ACTUAL CHARACTER ---
-      await sendKey(target, char);
-
-      // --- 3. DYNAMIC TYPING RHYTHM ---
-      let waitTime = 20 + Math.random() * 40; // Base interval: 20-60ms
-
-      if ([".", "!", "?"].includes(char)) {
-        waitTime += 300 + Math.random() * 300; // Sentence pause
-      } else if ([",", ";", ":"].includes(char)) {
-        waitTime += 100 + Math.random() * 150; // Comma pause
-      } else if (char === " ") {
-        waitTime += 20 + Math.random() * 30; // Word gap
-      }
-
-      // Apply the Speed Factor to the final wait time
-      await delay(waitTime * SPEED_FACTOR);
-    }
-
+    await sleep(1000); // Wait for the text to be processed before sending Enter
     await sendEnterKey(target);
     if (attachedHere) {
       await chrome.debugger.detach(target);
@@ -181,6 +150,7 @@ export async function nativeType(tabId: number, text: string): Promise<void> {
     }
   }
 }
+
 /**
  * Helper to dispatch a single key down/up sequence
  */

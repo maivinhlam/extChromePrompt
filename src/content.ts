@@ -334,7 +334,7 @@ function injectPanel(): void {
       <div class="bottom-bar">
         <label class="interval-item">
           <span>Time between two prompt</span>
-          <input id="intervalSeconds" type="number" min="1" step="1" value="15" />
+          <input id="intervalSeconds" type="text" inputmode="numeric" value="15" />
           <span>seconds</span>
         </label>
       </div>
@@ -464,6 +464,17 @@ function injectPanel(): void {
     statusEl.style.color = isError ? "#8a1d1d" : "#2f594a";
   };
 
+  const getIntervalSeconds = (): number => {
+    const digitsOnly = intervalInput.value.replace(/\D+/g, "");
+    const parsed = Number(digitsOnly);
+
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 15;
+  };
+
+  const normalizeIntervalInput = (): void => {
+    intervalInput.value = String(getIntervalSeconds());
+  };
+
   const formatLogTime = (timestamp?: number): string => {
     if (!timestamp) {
       return "--:--:--";
@@ -487,7 +498,7 @@ function injectPanel(): void {
     ] || {}) as RunnerSettings;
     const updated: RunnerSettings = {
       ...existing,
-      intervalSeconds: Number(intervalInput.value || 15),
+      intervalSeconds: getIntervalSeconds(),
       mode: modeVideoInput.checked ? "video" : "image",
       promptsText: promptsInput.value,
     };
@@ -499,6 +510,11 @@ function injectPanel(): void {
     const settings = (data[STORAGE_KEY] || {}) as RunnerSettings;
 
     intervalInput.value = String(settings.intervalSeconds || 15);
+    console.log(
+      "🚀 ~ loadSettings ~ intervalInput.value:",
+      intervalInput.value,
+    );
+
     const mode: PromptMode = settings.mode === "video" ? "video" : "image";
     modeImageInput.checked = mode === "image";
     modeVideoInput.checked = mode === "video";
@@ -529,7 +545,7 @@ function injectPanel(): void {
     void startAutomation({
       prompts,
       mode: modeVideoInput.checked ? "video" : "image",
-      intervalMs: Math.max(1, Number(intervalInput.value || 15)) * 1000,
+      intervalMs: getIntervalSeconds() * 1000,
     }).catch((error: Error) => {
       setStatus(error.message || "Could not start automation.", true);
     });
@@ -586,8 +602,10 @@ function injectPanel(): void {
   };
 
   intervalInput.addEventListener("input", () => {
+    intervalInput.value = intervalInput.value.replace(/\D+/g, "");
     void persistSettings();
   });
+  intervalInput.addEventListener("blur", normalizeIntervalInput);
   modeImageInput.addEventListener("change", () => {
     void persistSettings();
   });
