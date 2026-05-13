@@ -100,6 +100,15 @@ label {
   margin-top: 10px;
 }
 
+.import-btn-row {
+  display: flex;
+  margin-top: 8px;
+}
+
+#importBtn {
+  width: 100%;
+}
+
 textarea,
 input[type="file"] {
   width: 100%;
@@ -214,7 +223,7 @@ button.secondary:hover {
   border-radius: 10px;
   background: #fff;
   padding: 8px;
-  height: 170px;
+  height: 301x;
   overflow-y: auto;
   font-size: 12px;
   line-height: 1.35;

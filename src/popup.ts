@@ -27,9 +27,11 @@ const statusEl = document.getElementById("status") as HTMLElement;
 const clearPromptsBtn = document.getElementById(
   "clearPromptsBtn",
 ) as HTMLButtonElement;
+const importBtn = document.getElementById("importBtn") as HTMLButtonElement;
 const startBtn = document.getElementById("startBtn") as HTMLButtonElement;
 const stopBtn = document.getElementById("stopBtn") as HTMLButtonElement;
 const logsEl = document.getElementById("logs") as HTMLElement;
+const DEFAULT_PROMPTS_TEXT = "SCENE 1: A cinematic shot of a forest at sunrise";
 
 init().catch((error: Error) => setStatus(`Init error: ${error.message}`, true));
 
@@ -46,6 +48,9 @@ async function init() {
   startBtn.addEventListener("click", onStart);
   stopBtn.addEventListener("click", onStop);
   clearPromptsBtn.addEventListener("click", onClearPrompts);
+  importBtn.addEventListener("click", () => {
+    void onImportPrompts();
+  });
 
   chrome.storage.onChanged.addListener(onStorageChanged);
 
@@ -160,6 +165,29 @@ async function onClearPrompts() {
   updatePromptCount();
   await persistSettings();
   setStatus("Cleared all prompts.");
+}
+
+async function onImportPrompts() {
+  const importedText = window.prompt(
+    "Please enter your prompt:",
+    promptsInput.value || DEFAULT_PROMPTS_TEXT,
+  );
+
+  if (importedText === null) {
+    setStatus("Import canceled.");
+    return;
+  }
+
+  const nextPrompts = importedText.trim();
+  if (!nextPrompts) {
+    setStatus("Nothing to import.", true);
+    return;
+  }
+
+  promptsInput.value = nextPrompts;
+  updatePromptCount();
+  await persistSettings();
+  setStatus(`Imported ${getPromptLines().length} prompts.`);
 }
 
 function getPromptLines(): string[] {

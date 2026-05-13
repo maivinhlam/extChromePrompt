@@ -1,3 +1,5 @@
+import { SPEED_FACTOR } from "./constants";
+
 /**
  * Sends a native Enter key event to the target tab.
  */
@@ -117,13 +119,25 @@ function startAutoFill(selector: string, promptText: string): void {
 export async function nativeType(tabId: number, text: string): Promise<void> {
   // CONFIGURATION: Adjust this factor to speed up or slow down
   // < 1.0 is faster, 1.0 is normal, > 1.0 is slower
-  const SPEED_FACTOR = 0.2;
 
   const target: chrome.debugger.Debuggee = { tabId };
   const typos = "qwertyuiopasdfghjklzxcvbnm";
+  let attachedHere = false;
 
   try {
-    await chrome.debugger.attach(target, "1.3");
+    try {
+      await chrome.debugger.attach(target, "1.3");
+      attachedHere = true;
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : String(error || "Unknown error");
+
+      if (!message.includes("Another debugger is already attached")) {
+        throw error;
+      }
+    }
 
     for (let i = 0; i < text.length; i++) {
       const char = text[i];
@@ -157,10 +171,14 @@ export async function nativeType(tabId: number, text: string): Promise<void> {
     }
 
     await sendEnterKey(target);
-    await chrome.debugger.detach(target);
+    if (attachedHere) {
+      await chrome.debugger.detach(target);
+    }
   } catch (err) {
     console.error("Native typing failed:", err);
-    chrome.debugger.detach(target).catch(() => {});
+    if (attachedHere) {
+      chrome.debugger.detach(target).catch(() => {});
+    }
   }
 }
 /**

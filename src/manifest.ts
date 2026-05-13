@@ -4,7 +4,7 @@ const manifest = {
   version: "1.0.0",
   description:
     "Run prompt lines in Google Labs Flow with timed sending, retries, and auto download naming.",
-  permissions: ["activeTab", "storage", "downloads", "tabs", "debugger"],
+  permissions: ["activeTab", "storage", "downloads", "tabs", "clipboardRead", "debugger"],
   host_permissions: ["https://labs.google/*", "https://*.labs.google/*"],
   background: {
     service_worker: "src/background.ts",
@@ -25,6 +25,12 @@ const manifest = {
       matches: ["https://labs.google/*", "https://*.labs.google/*"],
       js: ["src/content.ts"],
       run_at: "document_idle",
+    },
+  ],
+  web_accessible_resources: [
+    {
+      resources: ["popup.html", "popup.css"],
+      matches: ["https://labs.google/*", "https://*.labs.google/*"],
     },
   ],
 } satisfies chrome.runtime.ManifestV3;

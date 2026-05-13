@@ -8,7 +8,6 @@ import {
 } from "./storage";
 import {
   fillPromptInput,
-  clickCreateButton,
   selectModelAndModeTab,
   selectReferenceImage,
   getTopRowTileIds,
@@ -188,20 +187,11 @@ export async function startAutomation(config: {
         promptStatuses,
       });
 
-      // eslint-disable-next-line no-unreachable
-      await pauseBeforeStep(
-        "Click Create.",
-        () => state.stopRequested,
-        appendAutomationLog,
-      );
-
-      // await sleep(1000);
-      // await clickCreateButton();
-
       const renameTo = extractPromptPrefixName(
         prompt,
         formatSceneName(numbers.scene, ""),
       );
+
       let waitingTime = 60000;
       if (state.mode === "video") {
         waitingTime = Math.max(180000, state.intervalMs * 4);
@@ -298,6 +288,7 @@ export async function startAutomation(config: {
 
     await clearAutomationState();
     await appendAutomationLog("Automation completed.");
+    window.alert("Automation completed.");
   } catch (error) {
     await appendAutomationLog(`Automation error: ${(error as Error).message}`);
     throw error;

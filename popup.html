@@ -27,12 +27,15 @@
       <span>Total: <span id="totalPrompts">0</span></span>
     </label>
 
-    <textarea id="prompts"
-      placeholder="SCENE 1: A cinematic shot of a forest at sunrise&#10;SCENE 2: Slow camera pan above misty mountains"></textarea>
+    <textarea id="prompts" placeholder="SCENE 1: A cinematic shot of a forest at sunrise"></textarea>
 
     <div class="status-row">
       <p id="status" class="status">Ready.</p>
       <button id="clearPromptsBtn" type="button" class="secondary clear-prompts-btn">Clear</button>
+    </div>
+
+    <div class="import-btn-row">
+      <button id="importBtn" type="button">Import Prompt</button>
     </div>
 
     <div class="bottom-bar">
@@ -47,11 +50,6 @@
       <button id="startBtn" type="button">Start</button>
       <button id="stopBtn" type="button" class="secondary">Stop</button>
     </div>
-
-    <section class="logs-section" style="display: none;">
-      <h2>Logs</h2>
-      <div id="logs" class="logs" aria-live="polite"></div>
-    </section>
   </main>
 
   <script type="module" src="/src/popup.ts"></script>

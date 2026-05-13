@@ -65,8 +65,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message?.action === "PERFORM_TYPE") {
-    console.log("🚀 ~ message.text:", message.text);
-
     void handleTypingFlow(sender, message.text)
       .then(() => sendResponse({ ok: true }))
       .catch((error: Error) =>
@@ -253,17 +251,13 @@ async function handleTypingFlow(
   const target = { tabId };
 
   try {
-    // Optional: You might want to Clear first before Typing
-    await chrome.debugger.attach(target, "1.3");
+    await ensureDebuggerAttached(target);
     await nativeClear(target);
-    await chrome.debugger.detach(target);
 
-    // Call the function you just created
     await nativeType(tabId, text);
 
     console.log("Automation completed successfully.");
   } catch (error) {
-    console.error("Automation failed:", error);
     throw error;
   }
 }

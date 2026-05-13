@@ -259,136 +259,6 @@ export async function fillPromptInput(prompt: string): Promise<boolean> {
       console.log("This specific typing task is DONE!");
     }
     return true;
-
-    //   if (
-    //     promptInput instanceof HTMLTextAreaElement ||
-    //     promptInput instanceof HTMLInputElement
-    //   ) {
-    //     await typeTextIntoField(promptInput, newPrompt);
-    //     console.log(`[AutoFlow] Da nhap: ${newPrompt.substring(0, 30)}...`);
-    //     return true;
-    //   }
-
-    //   await sleep(120);
-
-    //   const selection = window.getSelection();
-    //   if (!selection) {
-    //     return false;
-    //   }
-
-    //   const range = document.createRange();
-    //   range.selectNodeContents(editor);
-    //   selection.removeAllRanges();
-    //   selection.addRange(range);
-
-    //   editor.dispatchEvent(
-    //     new InputEvent("beforeinput", {
-    //       bubbles: true,
-    //       cancelable: true,
-    //       inputType: "deleteByCut",
-    //       data: null,
-    //     }),
-    //   );
-    //   document.execCommand("insertText", false, "");
-    //   editor.dispatchEvent(new Event("input", { bubbles: true }));
-
-    //   await sleep(180);
-
-    //   const ensureCaretAtEnd = (): void => {
-    //     const targetNode =
-    //       editor.querySelector("span[data-slate-string='true']") || editor;
-    //     const endRange = document.createRange();
-
-    //     let caretNode: Node = targetNode;
-    //     if (targetNode.firstChild) {
-    //       caretNode = targetNode.firstChild;
-    //     }
-
-    //     if (caretNode.nodeType === Node.TEXT_NODE) {
-    //       const length = caretNode.textContent?.length || 0;
-    //       endRange.setStart(caretNode, length);
-    //     } else {
-    //       const childCount = caretNode.childNodes.length;
-    //       endRange.setStart(caretNode, childCount);
-    //     }
-
-    //     endRange.collapse(true);
-    //     selection.removeAllRanges();
-    //     selection.addRange(endRange);
-    //   };
-
-    //   ensureCaretAtEnd();
-
-    //   for (const character of newPrompt) {
-    //     editor.dispatchEvent(
-    //       new KeyboardEvent("keydown", {
-    //         bubbles: true,
-    //         cancelable: true,
-    //         key: character,
-    //       }),
-    //     );
-    //     editor.dispatchEvent(
-    //       new InputEvent("beforeinput", {
-    //         bubbles: true,
-    //         cancelable: true,
-    //         inputType: "insertText",
-    //         data: character,
-    //       }),
-    //     );
-    //     document.execCommand("insertText", false, character);
-    //     editor.dispatchEvent(
-    //       new InputEvent("input", {
-    //         bubbles: true,
-    //         cancelable: true,
-    //         inputType: "insertText",
-    //         data: character,
-    //       }),
-    //     );
-    //     editor.dispatchEvent(
-    //       new KeyboardEvent("keyup", {
-    //         bubbles: true,
-    //         cancelable: true,
-    //         key: character,
-    //       }),
-    //     );
-    //     ensureCaretAtEnd();
-    //     await sleep(getTypingDelay(character) + 8);
-    //   }
-
-    //   editor.dispatchEvent(new Event("change", { bubbles: true }));
-
-    //   await sleep(220);
-
-    //   editor.dispatchEvent(
-    //     new KeyboardEvent("keydown", {
-    //       bubbles: true,
-    //       cancelable: true,
-    //       composed: true,
-    //       key: "Enter",
-    //       code: "Enter",
-    //     }),
-    //   );
-    //   editor.dispatchEvent(
-    //     new KeyboardEvent("keypress", {
-    //       bubbles: true,
-    //       cancelable: true,
-    //       composed: true,
-    //       key: "Enter",
-    //       code: "Enter",
-    //     }),
-    //   );
-    //   editor.dispatchEvent(
-    //     new KeyboardEvent("keyup", {
-    //       bubbles: true,
-    //       cancelable: true,
-    //       composed: true,
-    //       key: "Enter",
-    //       code: "Enter",
-    //     }),
-    //   );
-
-    //   console.log(`[AutoFlow] Da nhap: ${prompt.substring(0, 30)}...`);
-    //   return true;
   });
 }
 
@@ -434,7 +304,6 @@ async function openContextMenuAtContainerCenter(
   await sleep(80);
 
   const rect = mediaContainer.getBoundingClientRect();
-  console.log("🚀 ~ openContextMenuAtContainerCenter ~ rect:", rect);
   const clientX = rect.left + rect.width / 2;
   const clientY = rect.top + rect.height / 2;
 
@@ -600,55 +469,6 @@ export async function selectReferenceImage(
 
     await sleep(300);
   });
-}
-
-export async function renameLatestGeneratedMedia(
-  newName: string,
-): Promise<void> {
-  const latest = getLatestMainMediaContainer();
-  if (!latest) {
-    return;
-  }
-
-  const { x, y } = getElementClickPoint(latest);
-  await debuggerClickAtPoint(x, y, "right");
-  await sleep(240);
-
-  const renameButton = findButtonByText(["doi ten", "rename", "whiteboard"]);
-  if (!renameButton) {
-    return;
-  }
-  await safeClick(renameButton);
-  await sleep(220);
-
-  const input =
-    (document.querySelector(
-      "[role='dialog'] input[type='text']",
-    ) as HTMLInputElement | null) ||
-    (document.querySelector(
-      "[role='dialog'] textarea",
-    ) as HTMLTextAreaElement | null) ||
-    (document.querySelector("input[type='text']") as HTMLInputElement | null);
-
-  if (!input) {
-    return;
-  }
-
-  if (
-    input instanceof HTMLInputElement ||
-    input instanceof HTMLTextAreaElement
-  ) {
-    input.focus();
-    input.value = newName;
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-    input.dispatchEvent(new Event("change", { bubbles: true }));
-  }
-
-  const saveButton = findButtonByText(["doi ten", "rename", "save"]);
-  if (saveButton) {
-    await safeClick(saveButton);
-    await sleep(200);
-  }
 }
 
 function getFirstRowPrimaryTileContainer(): HTMLElement | null {
@@ -1052,7 +872,6 @@ export async function renameMediaItem(
   mediaContainer: HTMLElement,
   newName: string,
 ): Promise<boolean> {
-  console.log("🚀 ~ renameMediaItem ~ mediaContainer:", mediaContainer);
   return withPageInteractionLock(async () => {
     const trimmed = String(newName || "").trim();
     if (!trimmed) {
@@ -1064,6 +883,9 @@ export async function renameMediaItem(
     await sleep(250);
 
     let renameButton = findButtonByText(["doi ten", "rename", "Đổi tên"]);
+    console.log("🚀 ~ renameMediaItem ~ renameButton:", renameButton);
+
+    renameButton.focus();
 
     await safeClick(renameButton);
     await sleep(250);
@@ -1078,7 +900,6 @@ export async function renameMediaItem(
       (document.querySelector("input[type='text']") as HTMLInputElement | null);
 
     if (!input) {
-      console.log("🚀 ~ renameMediaItem ~ input:", input);
       return false;
     }
 
