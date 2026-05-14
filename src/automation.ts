@@ -1,10 +1,11 @@
-import { state, TEST_MODE } from "./constants";
-import type { AutomationStatePayload, PromptMode, PromptStatus } from "./types";
+import { state, TEST_MODE, MAX_PENDING_TASKS } from "./constants";
+import type { PromptMode, PromptStatus } from "./types";
 import {
   loadAutomationState,
   saveAutomationState,
   clearAutomationState,
   appendAutomationLog,
+  setAutomationStatus,
 } from "./storage";
 import {
   fillPromptInput,
@@ -13,7 +14,6 @@ import {
   getTopRowTileIds,
   waitForNewTopRowTileId,
   waitForTileDoneById,
-  renameMediaItem,
   downloadMediaItem,
 } from "./interactions";
 import {
@@ -24,10 +24,61 @@ import {
 import { pauseBeforeStep, sleep } from "./utils";
 import { test } from "./test";
 
-const MAX_PENDING_RENAME_TASKS = 5;
-
 function createInitialPromptStatuses(length: number): PromptStatus[] {
   return Array.from({ length }, () => "pending");
+}
+
+async function waitWhilePaused(): Promise<boolean> {
+  let loggedPause = false;
+
+  while (state.pauseRequested) {
+    if (state.stopRequested) {
+      await setAutomationStatus("Stop requested.");
+      return false;
+    }
+
+    if (!loggedPause) {
+      await appendAutomationLog("Automation paused.");
+      await setAutomationStatus("Paused. Click Resume to continue.");
+      loggedPause = true;
+    }
+
+    await sleep(200);
+  }
+
+  if (loggedPause) {
+    await appendAutomationLog("Automation resumed.");
+    await setAutomationStatus("Automation resumed.");
+  }
+
+  return !state.stopRequested;
+}
+
+async function waitForNextPromptCountdown(
+  intervalMs: number,
+  nextPrompt?: string,
+): Promise<void> {
+  const totalSeconds = Math.max(1, Math.ceil(intervalMs / 1000));
+
+  for (let secondsLeft = totalSeconds; secondsLeft >= 1; secondsLeft -= 1) {
+    const canContinue = await waitWhilePaused();
+    if (!canContinue) {
+      return;
+    }
+
+    if (state.stopRequested) {
+      await setAutomationStatus("Stop requested.");
+      return;
+    }
+
+    await setAutomationStatus(
+      `Start next prompt (${nextPrompt || "N/A"}) in ${secondsLeft} second${secondsLeft === 1 ? "" : "s"}...`,
+    );
+
+    const sleepMs =
+      secondsLeft === 1 ? intervalMs - (totalSeconds - 1) * 1000 : 1000;
+    await sleep(Math.max(1, sleepMs));
+  }
 }
 
 export async function startAutomation(config: {
@@ -45,15 +96,15 @@ export async function startAutomation(config: {
 
   state.running = true;
   state.stopRequested = false;
+  state.pauseRequested = false;
   state.prompts = config.prompts;
   state.mode = config.mode === "video" ? "video" : "image";
   state.intervalMs = Math.max(1000, Number(config.intervalMs || 15000));
-  console.log("🚀 ~ startAutomation ~ state.intervalMs:", state.intervalMs);
 
   let promptStatuses = createInitialPromptStatuses(state.prompts.length);
   let startIndex = 0;
   let activePromptIndex = 0;
-  const pendingRenameTasks: Promise<void>[] = [];
+  const pendingTasks: Promise<void>[] = [];
 
   const savedState = await loadAutomationState();
   if (
@@ -81,17 +132,17 @@ export async function startAutomation(config: {
   }
 
   try {
-    const waitForPendingRenameTasks = async (): Promise<void> => {
-      if (!pendingRenameTasks.length) {
+    const waitForPendingTasks = async (): Promise<void> => {
+      if (!pendingTasks.length) {
         return;
       }
 
-      const tasksToWait = pendingRenameTasks.splice(
-        0,
-        pendingRenameTasks.length,
-      );
+      const tasksToWait = pendingTasks.splice(0, pendingTasks.length);
       await appendAutomationLog(
-        `Waiting for ${tasksToWait.length} rename task(s) to finish.`,
+        `Waiting for ${tasksToWait.length} task(s) to finish.`,
+      );
+      await setAutomationStatus(
+        `Waiting for ${tasksToWait.length} task(s) to finish.`,
       );
       await Promise.allSettled(tasksToWait);
     };
@@ -103,6 +154,9 @@ export async function startAutomation(config: {
       promptStatuses.push("pending");
 
       await appendAutomationLog(
+        `Generation failed. Re-queued prompt at the end (${state.prompts.length}/${state.prompts.length}).`,
+      );
+      await setAutomationStatus(
         `Generation failed. Re-queued prompt at the end (${state.prompts.length}/${state.prompts.length}).`,
       );
 
@@ -117,6 +171,9 @@ export async function startAutomation(config: {
 
     await appendAutomationLog(
       `Automation started. Mode: ${state.mode}. Total prompts: ${state.prompts.length}.`,
+    );
+    await setAutomationStatus(
+      `Started. Total prompts: ${state.prompts.length}`,
     );
 
     if (startIndex > 0) {
@@ -142,7 +199,7 @@ export async function startAutomation(config: {
     }
 
     if (TEST_MODE) {
-      test(pendingRenameTasks).catch(async (error: unknown) => {
+      test(pendingTasks).catch(async (error: unknown) => {
         await appendAutomationLog(
           `Test function error: ${(error as Error).message}`,
         );
@@ -151,6 +208,11 @@ export async function startAutomation(config: {
     }
 
     for (let i = startIndex; i < state.prompts.length; ) {
+      const canContinue = await waitWhilePaused();
+      if (!canContinue) {
+        break;
+      }
+
       activePromptIndex = i;
       const prompt = state.prompts[i];
       const numbers = parseSceneNumbers(prompt, i + 1);
@@ -168,18 +230,19 @@ export async function startAutomation(config: {
         await appendAutomationLog(
           "Stop requested. Exiting before next prompt.",
         );
+        await setAutomationStatus("Stop requested.");
         break;
       }
-      console.log(
-        "🚀 ~ startAutomation ~ ",
-        `Prompt ${i + 1}/${state.prompts.length}: SCENE ${numbers.scene}.`,
-      );
 
       await appendAutomationLog(
         `Prompt ${i + 1}/${state.prompts.length}: SCENE ${numbers.scene}.`,
       );
 
       const knownTopRowTileIds = new Set(getTopRowTileIds());
+
+      if (!(await waitWhilePaused())) {
+        break;
+      }
 
       await pauseBeforeStep(
         "Fill prompt input.",
@@ -188,6 +251,10 @@ export async function startAutomation(config: {
       );
 
       // 2. Tell the background script to start typing
+      if (!(await waitWhilePaused())) {
+        break;
+      }
+
       await fillPromptInput(prompt);
 
       // if (state.mode === "video")
@@ -205,7 +272,7 @@ export async function startAutomation(config: {
         promptStatuses,
       });
 
-      const renameTo = extractPromptPrefixName(
+      const sceneName = extractPromptPrefixName(
         prompt,
         formatSceneName(numbers.scene, ""),
       );
@@ -215,7 +282,11 @@ export async function startAutomation(config: {
         waitingTime = 180000;
       }
 
-      const renameTask = (async (): Promise<void> => {
+      const pendingTask = (async (): Promise<void> => {
+        if (!(await waitWhilePaused())) {
+          return;
+        }
+
         const newTileId = await waitForNewTopRowTileId(
           knownTopRowTileIds,
           waitingTime,
@@ -224,13 +295,13 @@ export async function startAutomation(config: {
 
         if (!newTileId) {
           await appendAutomationLog(
-            `Rename skipped for '${renameTo}': no new tile detected in time.`,
+            `Task skipped for '${sceneName}': no new tile detected in time.`,
           );
           return;
         }
 
         await appendAutomationLog(
-          `Detected new tile for '${renameTo}' (${newTileId}). Waiting for 100%.`,
+          `Detected new tile for '${sceneName}' (${newTileId}). Waiting for 100%.`,
         );
 
         const tileResult = await waitForTileDoneById(
@@ -246,7 +317,7 @@ export async function startAutomation(config: {
 
         if (tileResult.status !== "completed") {
           await appendAutomationLog(
-            `Rename skipped for '${renameTo}': tile did not reach 100% in time.`,
+            `Task skipped for '${sceneName}': tile did not reach 100% in time.`,
           );
           return;
         }
@@ -254,53 +325,54 @@ export async function startAutomation(config: {
         const completedTile = tileResult.tile;
 
         await sleep(10000);
-        const renamed = await renameMediaItem(completedTile, renameTo);
-        if (renamed) {
-          await appendAutomationLog(`Renamed '${renameTo}' successfully.`);
 
-          if (state.mode === "video") {
-            await appendAutomationLog(`Downloading '${renameTo}'...`);
-            const downloaded = await downloadMediaItem(completedTile);
-            if (downloaded) {
-              await appendAutomationLog(
-                `Downloaded '${renameTo}' successfully.`,
-              );
-            } else {
-              await appendAutomationLog(
-                `Download skipped for '${renameTo}': API request or menu flow failed.`,
-              );
-            }
+        if (!(await waitWhilePaused())) {
+          return;
+        }
+
+        if (state.mode === "video") {
+          await appendAutomationLog(`Downloading '${sceneName}'...`);
+          const downloaded = await downloadMediaItem(completedTile, sceneName);
+          if (downloaded) {
+            await appendAutomationLog(
+              `Downloaded '${sceneName}' successfully.`,
+            );
+          } else {
+            await appendAutomationLog(
+              `Download skipped for '${sceneName}': API request or menu flow failed.`,
+            );
           }
-        } else {
-          await appendAutomationLog(
-            `Rename skipped for '${renameTo}': could not open Rename dialog.`,
-          );
         }
       })().catch(async (error: unknown) => {
         await appendAutomationLog(
-          `Rename task failed for '${renameTo}': ${(error as Error).message}`,
+          `Task failed for '${sceneName}': ${(error as Error).message}`,
         );
       });
 
-      pendingRenameTasks.push(renameTask);
+      pendingTasks.push(pendingTask);
       i += 1;
 
-      if (pendingRenameTasks.length >= MAX_PENDING_RENAME_TASKS) {
-        await waitForPendingRenameTasks();
+      if (pendingTasks.length >= MAX_PENDING_TASKS) {
+        await waitForPendingTasks();
       }
 
-      await sleep(state.intervalMs);
+      if (i < state.prompts.length && !state.stopRequested) {
+        await waitForNextPromptCountdown(state.intervalMs, sceneName);
+      }
     }
 
-    await waitForPendingRenameTasks();
+    await waitForPendingTasks();
 
     await clearAutomationState();
     await appendAutomationLog("Automation completed.");
+    await setAutomationStatus("Automation completed.");
     window.alert("Automation completed.");
   } catch (error) {
     await appendAutomationLog(`Automation error: ${(error as Error).message}`);
+    await setAutomationStatus((error as Error).message || "Automation error.");
     throw error;
   } finally {
+    state.pauseRequested = false;
     state.running = false;
   }
 }

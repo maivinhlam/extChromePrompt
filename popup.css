@@ -15,7 +15,7 @@
 body {
   margin: 0;
   width: 420px;
-  min-height: 560px;
+  min-height: 160px;
   background: var(--bg);
   color: var(--ink);
   font-family: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
@@ -49,6 +49,23 @@ h1 {
   margin: 0 0 12px;
   font-size: 20px;
   letter-spacing: 0.2px;
+}
+
+.steps-list {
+  margin-top: 4px;
+}
+
+.step-item {
+  margin: 0;
+  padding: 10px 0;
+  font-size: 14px;
+  line-height: 1.45;
+  text-align: left;
+  border-top: 1px solid var(--border);
+}
+
+.step-item:last-child {
+  border-bottom: 1px solid var(--border);
 }
 
 .mode-group {

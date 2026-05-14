@@ -2,8 +2,12 @@ export {};
 
 import { setupMessageListener } from "./listeners";
 import { startAutomation } from "./automation";
-import { LOG_STORAGE_KEY, state } from "./constants";
-import { appendAutomationLog } from "./storage";
+import { LOG_STORAGE_KEY, STATUS_STORAGE_KEY, state } from "./constants";
+import {
+  appendAutomationLog,
+  loadAutomationStatus,
+  setAutomationStatus,
+} from "./storage";
 
 // ── Types ──────────────────────────────────────────────
 type PromptMode = "image" | "video";
@@ -194,7 +198,7 @@ function injectPanel(): void {
     }
     .actions {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 8px;
       margin-top: 12px;
     }
@@ -213,39 +217,7 @@ function injectPanel(): void {
       background: #7f7468;
     }
     #stopBtn:hover { background: #5f564d; }
-    .logs-section {
-      margin-top: 12px;
-    }
-    .logs-section h2 {
-      margin: 0 0 6px;
-      font-size: 12px;
-      color: #6d665f;
-      letter-spacing: 0.3px;
-      text-transform: uppercase;
-    }
-    #logs {
-      border: 1px solid #d7c7b8;
-      border-radius: 10px;
-      background: #fff;
-      padding: 8px;
-      height: 300px;
-      overflow-y: auto;
-      font-size: 12px;
-      line-height: 1.35;
-    }
-    .log-item {
-      margin: 0 0 6px;
-      color: #36312d;
-      word-break: break-word;
-    }
-    .log-item:last-child { margin-bottom: 0; }
-    .log-time {
-      color: #6d665f;
-      margin-right: 6px;
-    }
-    .log-empty {
-      color: #6d665f;
-    }
+
     #reopen-btn {
       position: fixed;
       top: 72px;
@@ -324,23 +296,25 @@ function injectPanel(): void {
 
       <div class="status-row">
         <p id="status">Ready.</p>
-        <button id="clearPromptsBtn" type="button" class="clear-prompts-btn">Clear</button>
       </div>
 
       <div class="import-btn-row">
         <button id="importBtn" type="button">Import Prompt</button>
+        <button id="clearPromptsBtn" type="button" class="clear-prompts-btn">Clear Prompt</button>
       </div>
-
       <div class="bottom-bar">
         <label class="interval-item">
           <span>Time between two prompt</span>
-          <input id="intervalSeconds" type="text" inputmode="numeric" value="15" />
+           <input type="number" id="intervalSeconds" name="intervalSeconds" min="1" max="500">
+           <button id="incrementBtn" type="button">+</button>
+           <button id="decrementBtn" type="button">−</button>
           <span>seconds</span>
         </label>
       </div>
 
       <div class="actions">
         <button id="startBtn" type="button">Start</button>
+        <button id="pauseBtn" type="button">Pause</button>
         <button id="stopBtn" type="button">Stop</button>
       </div>
     </main>
@@ -442,12 +416,20 @@ function injectPanel(): void {
   const promptsInput = shadow.getElementById("prompts") as HTMLTextAreaElement;
   const totalPromptsEl = shadow.getElementById("totalPrompts") as HTMLElement;
   const statusEl = shadow.getElementById("status") as HTMLElement;
+  const logEl = shadow.getElementById("log") as HTMLElement;
   const clearPromptsBtn = shadow.getElementById(
     "clearPromptsBtn",
   ) as HTMLButtonElement;
   const importBtn = shadow.getElementById("importBtn") as HTMLButtonElement;
   const startBtn = shadow.getElementById("startBtn") as HTMLButtonElement;
+  const pauseBtn = shadow.getElementById("pauseBtn") as HTMLButtonElement;
   const stopBtn = shadow.getElementById("stopBtn") as HTMLButtonElement;
+  const incrementBtn = shadow.getElementById(
+    "incrementBtn",
+  ) as HTMLButtonElement;
+  const decrementBtn = shadow.getElementById(
+    "decrementBtn",
+  ) as HTMLButtonElement;
 
   const getPromptLines = (): string[] =>
     promptsInput.value
@@ -459,9 +441,17 @@ function injectPanel(): void {
     totalPromptsEl.textContent = String(getPromptLines().length);
   };
 
+  const updatePauseButton = (): void => {
+    pauseBtn.textContent = state.pauseRequested ? "Resume" : "Pause";
+  };
+
   const setStatus = (text: string, isError = false): void => {
     statusEl.textContent = text;
     statusEl.style.color = isError ? "#8a1d1d" : "#2f594a";
+  };
+
+  const setLog = (text: string): void => {
+    logEl.textContent = text;
   };
 
   const getIntervalSeconds = (): number => {
@@ -510,10 +500,6 @@ function injectPanel(): void {
     const settings = (data[STORAGE_KEY] || {}) as RunnerSettings;
 
     intervalInput.value = String(settings.intervalSeconds || 15);
-    console.log(
-      "🚀 ~ loadSettings ~ intervalInput.value:",
-      intervalInput.value,
-    );
 
     const mode: PromptMode = settings.mode === "video" ? "video" : "image";
     modeImageInput.checked = mode === "image";
@@ -538,23 +524,64 @@ function injectPanel(): void {
     }
 
     await clearLogs();
+    state.pauseRequested = false;
+    await setAutomationStatus(`Started. Total prompts: ${prompts.length}`);
     await persistSettings();
 
     setStatus(`Started. Total prompts: ${prompts.length}`);
+    updatePauseButton();
 
     void startAutomation({
       prompts,
       mode: modeVideoInput.checked ? "video" : "image",
       intervalMs: getIntervalSeconds() * 1000,
     }).catch((error: Error) => {
+      state.pauseRequested = false;
+      updatePauseButton();
       setStatus(error.message || "Could not start automation.", true);
     });
   };
 
+  const onPause = async (): Promise<void> => {
+    if (!state.running) {
+      setStatus("Automation is not running.", true);
+      return;
+    }
+
+    state.pauseRequested = !state.pauseRequested;
+    updatePauseButton();
+
+    if (state.pauseRequested) {
+      await appendAutomationLog("Pause requested from embedded panel.");
+      await setAutomationStatus("Pause requested.");
+      setStatus("Pause requested.");
+      return;
+    }
+
+    await appendAutomationLog("Resume requested from embedded panel.");
+    await setAutomationStatus("Resume requested.");
+    setStatus("Resume requested.");
+  };
+
   const onStop = async (): Promise<void> => {
     state.stopRequested = true;
+    state.pauseRequested = false;
     await appendAutomationLog("Stop requested from embedded panel.");
+    await setAutomationStatus("Stop requested.");
+    updatePauseButton();
     setStatus("Stop requested.");
+  };
+
+  const onIncrementInterval = (): void => {
+    const current = getIntervalSeconds();
+    intervalInput.value = String(current + 1);
+    void persistSettings();
+  };
+
+  const onDecrementInterval = (): void => {
+    const current = getIntervalSeconds();
+    intervalInput.value = String(Math.max(1, current - 1));
+    void persistSettings();
   };
 
   const onClearPrompts = async (): Promise<void> => {
@@ -599,6 +626,24 @@ function injectPanel(): void {
         ? (changes[LOG_STORAGE_KEY].newValue as LogEntry[])
         : [];
     }
+
+    if (changes[STATUS_STORAGE_KEY]) {
+      const nextStatus =
+        typeof changes[STATUS_STORAGE_KEY].newValue === "string"
+          ? (changes[STATUS_STORAGE_KEY].newValue as string)
+          : "Ready.";
+
+      if (
+        nextStatus === "Automation completed." ||
+        nextStatus === "Stop requested." ||
+        nextStatus.startsWith("Automation error")
+      ) {
+        state.pauseRequested = false;
+        updatePauseButton();
+      }
+
+      setStatus(nextStatus);
+    }
   };
 
   intervalInput.addEventListener("input", () => {
@@ -620,8 +665,17 @@ function injectPanel(): void {
   startBtn.addEventListener("click", () => {
     void onStart();
   });
+  pauseBtn.addEventListener("click", () => {
+    void onPause();
+  });
   stopBtn.addEventListener("click", () => {
     void onStop();
+  });
+  incrementBtn.addEventListener("click", () => {
+    onIncrementInterval();
+  });
+  decrementBtn.addEventListener("click", () => {
+    onDecrementInterval();
   });
   clearPromptsBtn.addEventListener("click", () => {
     void onClearPrompts();
@@ -633,5 +687,12 @@ function injectPanel(): void {
 
   chrome.storage.onChanged.addListener(onStorageChanged);
 
-  void loadSettings();
+  updatePauseButton();
+
+  void Promise.all([
+    loadSettings(),
+    loadAutomationStatus().then((statusText) => {
+      setStatus(statusText);
+    }),
+  ]);
 }

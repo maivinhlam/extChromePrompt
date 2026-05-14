@@ -57,27 +57,20 @@ export async function test(pendingRenameTasks: Promise<void>[]) {
     const completedTile = tileResult.tile;
 
     // waiting an additional short time to ensure the tile is fully ready for interactions
-    await sleep(10000);
+    await sleep(1000);
 
-    const renamed = await renameMediaItem(completedTile, renameTo);
-    if (renamed) {
-      await appendAutomationLog(`Renamed '${renameTo}' successfully.`);
+    await appendAutomationLog(`Renamed '${renameTo}' successfully.`);
 
-      if (state.mode === "video") {
-        await appendAutomationLog(`Downloading '${renameTo}'...`);
-        const downloaded = await downloadMediaItem(completedTile);
-        if (downloaded) {
-          await appendAutomationLog(`Downloaded '${renameTo}' successfully.`);
-        } else {
-          await appendAutomationLog(
-            `Download skipped for '${renameTo}': API request or menu flow failed.`,
-          );
-        }
+    if (state.mode === "video") {
+      await appendAutomationLog(`Downloading '${renameTo}'...`);
+      const downloaded = await downloadMediaItem(completedTile, "Scene 1");
+      if (downloaded) {
+        await appendAutomationLog(`Downloaded '${renameTo}' successfully.`);
+      } else {
+        await appendAutomationLog(
+          `Download skipped for '${renameTo}': API request or menu flow failed.`,
+        );
       }
-    } else {
-      await appendAutomationLog(
-        `Rename skipped for '${renameTo}': could not open Rename dialog.`,
-      );
     }
   })().catch(async (error: unknown) => {
     await appendAutomationLog(

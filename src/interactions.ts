@@ -155,6 +155,90 @@ function getElementClickPoint(element: HTMLElement): { x: number; y: number } {
   };
 }
 
+function randomInt(min: number, max: number): number {
+  const lower = Math.ceil(Math.min(min, max));
+  const upper = Math.floor(Math.max(min, max));
+  return Math.floor(Math.random() * (upper - lower + 1)) + lower;
+}
+
+function dispatchHoverEvents(element: HTMLElement): void {
+  const { x, y } = getElementClickPoint(element);
+  const hoverEvents: Array<
+    | "pointerover"
+    | "pointerenter"
+    | "mouseover"
+    | "mouseenter"
+    | "pointermove"
+    | "mousemove"
+  > = [
+    "pointerover",
+    "pointerenter",
+    "mouseover",
+    "mouseenter",
+    "pointermove",
+    "mousemove",
+  ];
+
+  for (const eventName of hoverEvents) {
+    element.dispatchEvent(
+      new MouseEvent(eventName, {
+        bubbles: true,
+        cancelable: true,
+        clientX: x,
+        clientY: y,
+        view: window,
+      }),
+    );
+  }
+}
+
+function getHoverCandidates(mediaContainer: HTMLElement): HTMLElement[] {
+  const candidates = [
+    mediaContainer,
+    mediaContainer.querySelector("video"),
+    mediaContainer.querySelector("img"),
+    mediaContainer.parentElement,
+    mediaContainer.previousElementSibling,
+    mediaContainer.nextElementSibling,
+  ].filter(
+    (element): element is HTMLElement =>
+      !!element && element instanceof HTMLElement && isVisible(element),
+  );
+
+  return Array.from(new Set(candidates));
+}
+
+async function simulateHumanPresenceBeforeDownload(
+  mediaContainer: HTMLElement,
+): Promise<void> {
+  mediaContainer.scrollIntoView({ block: "center", inline: "nearest" });
+  await sleep(randomInt(180, 420));
+
+  const scrollSteps = randomInt(1, 3);
+  for (let index = 0; index < scrollSteps; index += 1) {
+    const direction = Math.random() > 0.5 ? 1 : -1;
+    window.scrollBy({
+      top: direction * randomInt(40, 180),
+      behavior: "smooth",
+    });
+    await sleep(randomInt(220, 520));
+  }
+
+  mediaContainer.scrollIntoView({ block: "center", inline: "nearest" });
+  await sleep(randomInt(160, 320));
+
+  const hoverCandidates = getHoverCandidates(mediaContainer);
+  const hoverCount = Math.min(hoverCandidates.length, randomInt(1, 3));
+  for (let index = 0; index < hoverCount; index += 1) {
+    const candidate = hoverCandidates[index];
+    candidate.focus?.();
+    dispatchHoverEvents(candidate);
+    await sleep(randomInt(450, 1100));
+  }
+
+  await sleep(randomInt(2000, 4000));
+}
+
 async function debuggerClickAtPoint(
   x: number,
   y: number,
@@ -321,6 +405,87 @@ async function openContextMenuAtContainerCenter(
   }
 
   return true;
+}
+
+function resolveLabsMediaUrl(url: string): string | null {
+  const trimmed = String(url || "").trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  try {
+    return new URL(trimmed, "https://labs.google").toString();
+  } catch {
+    return null;
+  }
+}
+
+function getDirectVideoDownloadUrl(mediaContainer: HTMLElement): string | null {
+  const video = mediaContainer.querySelector(
+    "video",
+  ) as HTMLVideoElement | null;
+  if (!video) {
+    return null;
+  }
+
+  return resolveLabsMediaUrl(
+    video.currentSrc || video.getAttribute("src") || "",
+  );
+}
+
+function sanitizeDownloadBaseName(name: string): string {
+  return String(name || "")
+    .trim()
+    .replace(/\.mp4$/i, "")
+    .replace(/[<>:"/\\|?*\u0000-\u001f]/g, "_")
+    .replace(/\s+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function buildVideoDownloadFilename(renameTo: string): string {
+  const baseName = sanitizeDownloadBaseName(renameTo) || "video";
+
+  const now = new Date();
+  const format = (date) => {
+    const o = new Intl.DateTimeFormat("en", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false, // Use 24-hour format
+    }).formatToParts(date);
+
+    // Extract parts and join them
+    return (
+      `${o.find((p) => p.type === "year").value}` +
+      `${o.find((p) => p.type === "month").value}` +
+      `${o.find((p) => p.type === "day").value}` +
+      `_` +
+      `${o.find((p) => p.type === "hour").value}` +
+      `-` +
+      `${o.find((p) => p.type === "minute").value}`
+    );
+  };
+
+  console.log(format(now)); // Outputs: 202605141141
+  return `${baseName}_${format(now)}.mp4`;
+}
+
+async function requestDirectDownload(
+  url: string,
+  filename?: string,
+): Promise<boolean> {
+  const response = await chrome.runtime
+    .sendMessage({
+      type: "DOWNLOAD_URL",
+      url,
+      filename,
+    })
+    .catch(() => null);
+
+  return !!response?.ok;
 }
 
 export async function clickAndWaitForMenu(
@@ -883,8 +1048,6 @@ export async function renameMediaItem(
     await sleep(250);
 
     let renameButton = findButtonByText(["doi ten", "rename", "Đổi tên"]);
-    console.log("🚀 ~ renameMediaItem ~ renameButton:", renameButton);
-
     renameButton.focus();
 
     await safeClick(renameButton);
@@ -943,58 +1106,21 @@ export async function renameMediaItem(
 
 export async function downloadMediaItem(
   mediaContainer: HTMLElement,
+  renameTo = "video",
 ): Promise<boolean> {
   return withPageInteractionLock(async () => {
-    const contextMenuOpened =
-      await openContextMenuAtContainerCenter(mediaContainer);
-    if (!contextMenuOpened) {
-      console.log(
-        "🚀 ~ downloadMediaItem ~ can't open context menu:",
-        contextMenuOpened,
+    const videoUrl = getDirectVideoDownloadUrl(mediaContainer);
+    if (videoUrl) {
+      await simulateHumanPresenceBeforeDownload(mediaContainer);
+
+      const filename = buildVideoDownloadFilename(renameTo);
+      await appendAutomationLog(
+        `Downloading video directly from ${videoUrl} as ${filename}`,
       );
-
-      return false;
+      return requestDirectDownload(videoUrl, filename);
     }
 
-    const item = mediaContainer.querySelectorAll(
-      "img, video",
-    )[0] as HTMLElement | null;
-
-    if (!item) {
-      return false;
-    }
-
-    await sleep(300);
-
-    const downloadButton = findButtonByText([
-      "tải xuống",
-      "download",
-      "Tải xuống",
-    ]);
-    if (!downloadButton) {
-      return false;
-    }
-
-    await safeClick(downloadButton);
-    await sleep(300);
-
-    const qualityButton = findButtonByText([
-      "kích thước gốc",
-      "original size",
-      "Kích thước gốc",
-      "1K",
-    ]);
-
-    if (!qualityButton) {
-      return false;
-    }
-
-    await sleep(300);
-    await safeClick(qualityButton);
-    await waitForTransientUiToClose(3000);
-    await sleep(300);
-
-    return true;
+    return false;
   });
 }
 

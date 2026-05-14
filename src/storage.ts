@@ -1,6 +1,7 @@
 import {
   LOG_STORAGE_KEY,
   AUTOMATION_STATE_KEY,
+  STATUS_STORAGE_KEY,
   MAX_LOG_ITEMS,
 } from "./constants";
 import type { AutomationStatePayload, LogEntry } from "./types";
@@ -37,12 +38,32 @@ export async function clearAutomationState(): Promise<void> {
   }
 }
 
+export async function loadAutomationStatus(): Promise<string> {
+  try {
+    const data = await chrome.storage.local.get(STATUS_STORAGE_KEY);
+    return typeof data[STATUS_STORAGE_KEY] === "string"
+      ? (data[STATUS_STORAGE_KEY] as string)
+      : "Ready.";
+  } catch {
+    return "Ready.";
+  }
+}
+
+export async function setAutomationStatus(message: string): Promise<void> {
+  try {
+    await chrome.storage.local.set({
+      [STATUS_STORAGE_KEY]: String(message || "Ready."),
+    });
+  } catch {
+    // no-op
+  }
+}
+
 export async function appendAutomationLog(message: string): Promise<void> {
   const entry: LogEntry = {
     timestamp: Date.now(),
     message: String(message || ""),
   };
-  console.log("🚀 ~ appendAutomationLog ~ : ", entry.message);
 
   try {
     const data = await chrome.storage.local.get(LOG_STORAGE_KEY);

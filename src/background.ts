@@ -7,6 +7,10 @@ type PendingDownload = {
   mediaType: string;
 };
 
+type PendingDirectDownload = {
+  filename: string;
+};
+
 type DebuggerTarget = {
   tabId: number;
 };
@@ -22,6 +26,7 @@ type DebuggerClickMessage = {
 };
 
 const pendingDownloads: PendingDownload[] = [];
+const pendingDirectDownloads: PendingDirectDownload[] = [];
 const attachedDebuggerTabs = new Set<number>();
 
 chrome.debugger.onDetach.addListener((source) => {
@@ -37,6 +42,39 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       .catch((error: Error) =>
         sendResponse({ ok: false, error: error.message }),
       );
+    return true;
+  }
+
+  if (message?.type === "DOWNLOAD_URL") {
+    const filename =
+      typeof message.filename === "string" && message.filename.trim()
+        ? message.filename.trim()
+        : undefined;
+
+    const pendingDirectDownload = filename ? { filename } : null;
+    if (pendingDirectDownload) {
+      pendingDirectDownloads.push(pendingDirectDownload);
+    }
+
+    void chrome.downloads
+      .download({
+        url: message.url,
+        filename,
+        conflictAction: "uniquify",
+      })
+      .then((downloadId) => sendResponse({ ok: true, downloadId }))
+      .catch((error: Error) => {
+        if (pendingDirectDownload) {
+          const pendingIndex = pendingDirectDownloads.indexOf(
+            pendingDirectDownload,
+          );
+          if (pendingIndex >= 0) {
+            pendingDirectDownloads.splice(pendingIndex, 1);
+          }
+        }
+
+        sendResponse({ ok: false, error: error.message });
+      });
     return true;
   }
 
@@ -185,6 +223,15 @@ async function focusSenderTab(
 }
 
 chrome.downloads.onDeterminingFilename.addListener((item, suggest) => {
+  const pendingDirectDownload = pendingDirectDownloads.shift();
+  if (pendingDirectDownload) {
+    suggest({
+      filename: pendingDirectDownload.filename,
+      conflictAction: "uniquify",
+    });
+    return;
+  }
+
   if (!pendingDownloads.length) {
     suggest();
     return;

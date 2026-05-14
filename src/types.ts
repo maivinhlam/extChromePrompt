@@ -13,6 +13,8 @@ export type AutomationStatePayload = {
 export type AutomationState = {
   running: boolean;
   stopRequested: boolean;
+  pauseRequested?: boolean;
+  promptIndex: number;
   prompts: string[];
   mode: PromptMode;
   intervalMs: number;
