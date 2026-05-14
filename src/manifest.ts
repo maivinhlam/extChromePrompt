@@ -42,7 +42,7 @@ const manifest = {
   ],
   web_accessible_resources: [
     {
-      resources: ["popup.html", "popup.css"],
+      resources: ["popup.html", "popup.css", "content.html"],
       matches: ["https://labs.google/*", "https://*.labs.google/*"],
     },
   ],

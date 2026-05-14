@@ -1,6 +1,19 @@
 export type PromptStatus = "pending" | "in_progress" | "done";
 export type PromptMode = "image" | "video";
 
+export type AutomationFeatures = {
+  enableReferenceImages: boolean;
+  enableAutoDownload: boolean;
+};
+
+export type AutomationConfig = {
+  prompts?: string[];
+  mode?: PromptMode;
+  intervalMs?: number;
+  enableReferenceImages?: boolean;
+  enableAutoDownload?: boolean;
+};
+
 export type AutomationStatePayload = {
   running: boolean;
   mode: PromptMode;
@@ -18,6 +31,8 @@ export type AutomationState = {
   prompts: string[];
   mode: PromptMode;
   intervalMs: number;
+  enableReferenceImages: boolean;
+  enableAutoDownload: boolean;
 };
 
 export type SceneNumbers = {

@@ -1,0 +1,436 @@
+<style>
+  #wrapper {
+    position: fixed;
+    top: 72px;
+    right: 16px;
+    z-index: 2147483647;
+    display: flex;
+    flex-direction: column;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+    background: #fff8f0;
+    width: 420px;
+    max-width: calc(100vw - 24px);
+  }
+
+  #drag-handle {
+    background: #be5d2d;
+    color: #fff;
+    padding: 7px 12px;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    user-select: none;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    flex-shrink: 0;
+  }
+
+  #drag-handle:active {
+    cursor: grabbing;
+  }
+
+  #drag-title {
+    flex: 1;
+  }
+
+  #collapse-btn,
+  #close-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 4px;
+    opacity: 0.85;
+  }
+
+  #collapse-btn:hover,
+  #close-btn:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  #panel-wrap {
+    display: block;
+    overflow: hidden;
+    transition: height 0.2s ease;
+    background: #fff8f0;
+  }
+
+  #panel-wrap.collapsed {
+    height: 0 !important;
+  }
+
+  #compact-status {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px 12px;
+    background: #fff8f0;
+    border-top: 1px solid rgba(190, 93, 45, 0.14);
+    font-family: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
+  }
+
+  #panel-wrap.collapsed+#compact-status {
+    display: flex;
+  }
+
+  .compact-status-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #7f7468;
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  #compact-status-text {
+    margin: 0;
+    font-size: 12px;
+    color: #2f594a;
+    min-height: 1em;
+    flex: 1;
+  }
+
+  .panel {
+    margin: 0;
+    padding: 14px;
+    min-height: 560px;
+    display: flex;
+    flex-direction: column;
+    color: #2c2a28;
+    font-family: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
+  }
+
+  .mode-group {
+    margin: 0 0 8px;
+    border: 1px solid #d7c7b8;
+    border-radius: 10px;
+    padding: 8px 10px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .mode-group legend {
+    padding: 0 6px;
+    font-size: 12px;
+    color: #6d665f;
+    font-weight: 600;
+  }
+
+  .mode-item {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .field-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 10px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  #prompts {
+    width: 100%;
+    resize: vertical;
+    min-height: 280px;
+    line-height: 1.35;
+    border: 1px solid #d7c7b8;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 13px;
+    background: #fff;
+  }
+
+  .status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 10px;
+  }
+
+  #status {
+    margin: 0;
+    font-size: 12px;
+    color: #2f594a;
+    min-height: 1em;
+  }
+
+  .clear-prompts-btn {
+    border: 0;
+    border-radius: 10px;
+    padding: 6px 10px;
+    line-height: 1;
+    font-size: 12px;
+    white-space: nowrap;
+    cursor: pointer;
+    color: #fff;
+    background: #7f7468;
+    font-weight: 700;
+  }
+
+  .clear-prompts-btn:hover {
+    background: #5f564d;
+  }
+
+  .bottom-bar {
+    display: grid;
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+
+  .interval-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .interval-label {
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  #intervalSeconds {
+    width: 50px;
+    border: 1px solid #d7c7b8;
+    outline: none;
+    background: transparent;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: #2c2a28;
+  }
+
+  .interval-suffix {
+    font-size: 13px;
+    color: #6d665f;
+    font-weight: 600;
+  }
+
+  .feature-list {
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid #d7c7b8;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.52);
+    display: flex;
+  }
+
+  .feature-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .feature-item input {
+    margin: 0;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .actions button {
+    border: 0;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    color: #fff;
+    background: #be5d2d;
+  }
+
+  .actions button:hover {
+    background: #93431f;
+  }
+
+  .actions button[hidden] {
+    display: none;
+  }
+
+  #stopBtn {
+    background: #991f1f;
+  }
+
+  #stopBtn:hover {
+    background: #cc0000;
+  }
+
+  /* Hover effect only when enabled */
+  #stopBtn:hover:not(:disabled) {
+    background-color: #cc0000;
+    /* Darker red */
+  }
+
+  /* Active (click) effect only when enabled */
+  #stopBtn:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  /* 2. Disabled State */
+  #stopBtn:disabled {
+    background-color: #cccccc;
+    /* Grey background */
+    color: #666666;
+    /* Faded text */
+    cursor: not-allowed;
+    /* Shows the "block" icon */
+    opacity: 0.7;
+    border: 1px solid #999999;
+  }
+
+  #resumeBtn {
+    background: #2f594a;
+  }
+
+  #resumeBtn:hover {
+    background: #234538;
+  }
+
+  #reopen-btn {
+    position: fixed;
+    top: 72px;
+    right: 16px;
+    z-index: 2147483647;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #be5d2d;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 22px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  #reopen-btn:hover {
+    background: #93431f;
+  }
+
+  #reopen-btn.visible {
+    display: flex;
+  }
+
+  .import-btn-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  #importBtn {
+    flex: 1;
+    border: 0;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    color: #fff;
+    background: #be5d2d;
+    font-size: 13px;
+  }
+
+  #importBtn:hover {
+    background: #93431f;
+  }
+</style>
+
+<div id="wrapper">
+  <div id="drag-handle">
+    <span id="drag-title">⚡ Flow Prompt Runner</span>
+    <button id="collapse-btn" title="Collapse">−</button>
+    <button id="close-btn" title="Close">✕</button>
+  </div>
+
+  <div id="panel-wrap">
+    <main class="panel">
+      <fieldset class="mode-group">
+        <legend>Mode</legend>
+        <label class="mode-item">
+          <input id="modeImage" type="radio" name="runMode" value="image" checked />
+          <span>Create image</span>
+        </label>
+        <label class="mode-item">
+          <input id="modeVideo" type="radio" name="runMode" value="video" />
+          <span>Create video</span>
+        </label>
+      </fieldset>
+
+      <label for="prompts" class="field-header">
+        <span>Prompts (one line each)</span>
+        <span>Total: <span id="totalPrompts">0</span></span>
+      </label>
+
+      <textarea id="prompts" placeholder="SCENE 1: A cinematic shot of a forest at sunrise"></textarea>
+
+      <div class="status-row">
+        <p id="status">Ready.</p>
+      </div>
+
+      <div class="import-btn-row">
+        <button id="importBtn" type="button">Import Prompt</button>
+        <button id="clearPromptsBtn" type="button" class="clear-prompts-btn">Clear Prompt</button>
+      </div>
+
+      <div class="bottom-bar">
+        <div class="feature-list">
+          <label class="feature-item" style="align-items: baseline;">
+            <span>Delay</span>
+            <input id="intervalSeconds" type="number" min="1" max="500" value="15" />
+          </label>
+          <label class="feature-item">
+            <input id="enableReferenceImages" type="checkbox" checked />
+            <span>Reference image</span>
+          </label>
+          <label class="feature-item">
+            <input id="enableAutoDownload" type="checkbox" checked />
+            <span>Auto-download videos</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="startBtn" type="button">⚡ Start</button>
+        <button id="pauseBtn" type="button" hidden>Pause</button>
+        <button id="resumeBtn" type="button" hidden>Resume</button>
+        <button id="stopBtn" type="button" disabled>Stop</button>
+      </div>
+    </main>
+  </div>
+
+  <div id="compact-status" aria-live="polite">
+    <span class="compact-status-label">Status</span>
+    <p id="compact-status-text">Ready.</p>
+  </div>
+</div>
+
+<button id="reopen-btn" title="Open Flow Prompt Runner">⚡</button>

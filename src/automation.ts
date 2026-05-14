@@ -1,5 +1,5 @@
 import { state, TEST_MODE, MAX_PENDING_TASKS } from "./constants";
-import type { PromptMode, PromptStatus } from "./types";
+import type { AutomationConfig, PromptMode, PromptStatus } from "./types";
 import {
   loadAutomationState,
   saveAutomationState,
@@ -56,7 +56,7 @@ async function waitWhilePaused(): Promise<boolean> {
 
 async function waitForNextPromptCountdown(
   intervalMs: number,
-  nextPrompt?: string,
+  currentPrompt?: string,
 ): Promise<void> {
   const totalSeconds = Math.max(1, Math.ceil(intervalMs / 1000));
 
@@ -72,7 +72,7 @@ async function waitForNextPromptCountdown(
     }
 
     await setAutomationStatus(
-      `Start next prompt (${nextPrompt || "N/A"}) in ${secondsLeft} second${secondsLeft === 1 ? "" : "s"}...`,
+      `Current prompt: ${currentPrompt || "N/A"} | Start next prompt in ${secondsLeft} second${secondsLeft === 1 ? "" : "s"}...`,
     );
 
     const sleepMs =
@@ -81,11 +81,7 @@ async function waitForNextPromptCountdown(
   }
 }
 
-export async function startAutomation(config: {
-  prompts?: string[];
-  mode?: PromptMode;
-  intervalMs?: number;
-}): Promise<void> {
+export async function startAutomation(config: AutomationConfig): Promise<void> {
   if (state.running) {
     throw new Error("Automation is already running.");
   }
@@ -100,6 +96,8 @@ export async function startAutomation(config: {
   state.prompts = config.prompts;
   state.mode = config.mode === "video" ? "video" : "image";
   state.intervalMs = Math.max(1000, Number(config.intervalMs || 15000));
+  state.enableReferenceImages = config.enableReferenceImages !== false;
+  state.enableAutoDownload = config.enableAutoDownload !== false;
 
   let promptStatuses = createInitialPromptStatuses(state.prompts.length);
   let startIndex = 0;
@@ -259,8 +257,12 @@ export async function startAutomation(config: {
 
       // if (state.mode === "video")
       const imageNames = extractImageNamesFromPrompt(prompt);
-      if (imageNames.length > 0) {
+      if (state.enableReferenceImages && imageNames.length > 0) {
         await selectReferenceImage(imageNames);
+      } else if (!state.enableReferenceImages && imageNames.length > 0) {
+        await appendAutomationLog(
+          `Reference image selection disabled for SCENE ${numbers.scene}.`,
+        );
       }
 
       promptStatuses[i] = "done";
@@ -330,7 +332,7 @@ export async function startAutomation(config: {
           return;
         }
 
-        if (state.mode === "video") {
+        if (state.mode === "video" && state.enableAutoDownload) {
           await appendAutomationLog(`Downloading '${sceneName}'...`);
           const downloaded = await downloadMediaItem(completedTile, sceneName);
           if (downloaded) {
@@ -342,6 +344,10 @@ export async function startAutomation(config: {
               `Download skipped for '${sceneName}': API request or menu flow failed.`,
             );
           }
+        } else if (state.mode === "video") {
+          await appendAutomationLog(
+            `Auto-download disabled for '${sceneName}'.`,
+          );
         }
       })().catch(async (error: unknown) => {
         await appendAutomationLog(
@@ -356,7 +362,7 @@ export async function startAutomation(config: {
         await waitForPendingTasks();
       }
 
-      if (i < state.prompts.length && !state.stopRequested) {
+      if (i > 0 && i < state.prompts.length && !state.stopRequested) {
         await waitForNextPromptCountdown(state.intervalMs, sceneName);
       }
     }

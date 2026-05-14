@@ -17,4 +17,6 @@ export const state: AutomationState = {
   prompts: [],
   mode: "image",
   intervalMs: 15000,
+  enableReferenceImages: true,
+  enableAutoDownload: true,
 };

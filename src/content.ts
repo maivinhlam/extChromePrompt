@@ -3,6 +3,7 @@ export {};
 import { setupMessageListener } from "./listeners";
 import { startAutomation } from "./automation";
 import { LOG_STORAGE_KEY, STATUS_STORAGE_KEY, state } from "./constants";
+import type { AutomationFeatures } from "./types";
 import {
   appendAutomationLog,
   loadAutomationStatus,
@@ -15,16 +16,19 @@ type RunnerSettings = {
   intervalSeconds?: number;
   mode?: PromptMode;
   promptsText?: string;
+  enableReferenceImages?: boolean;
+  enableAutoDownload?: boolean;
 };
 type LogEntry = { timestamp?: number; message?: string };
 
 const STORAGE_KEY = "flowPromptRunnerSettings";
 const DEFAULT_PROMPTS_TEXT = "SCENE 1: A cinematic shot of a forest at sunrise";
+const CONTENT_PANEL_HTML_URL = chrome.runtime.getURL("content.html");
 
 setupMessageListener();
-injectPanel();
+void injectPanel();
 
-function injectPanel(): void {
+async function injectPanel(): Promise<void> {
   if (document.getElementById("flow-prompt-runner-host")) {
     return;
   }
@@ -34,303 +38,33 @@ function injectPanel(): void {
 
   const shadow = host.attachShadow({ mode: "open" });
 
-  const style = document.createElement("style");
-  style.textContent = `
-    #wrapper {
-      position: fixed;
-      top: 72px;
-      right: 16px;
-      z-index: 2147483647;
-      display: flex;
-      flex-direction: column;
-      border-radius: 14px;
-      overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.28);
-      background: #fff8f0;
-      width: 420px;
-      max-width: calc(100vw - 24px);
+  try {
+    const response = await fetch(CONTENT_PANEL_HTML_URL);
+    if (!response.ok) {
+      throw new Error(`Failed to load content panel HTML: ${response.status}`);
     }
-    #drag-handle {
-      background: #be5d2d;
-      color: #fff;
-      padding: 7px 12px;
-      cursor: grab;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      user-select: none;
-      font-family: "Segoe UI", sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.2px;
-      flex-shrink: 0;
-    }
-    #drag-handle:active { cursor: grabbing; }
-    #drag-title { flex: 1; }
-    #collapse-btn, #close-btn {
-      background: none;
-      border: none;
-      color: #fff;
-      cursor: pointer;
-      font-size: 16px;
-      line-height: 1;
-      padding: 2px 4px;
-      border-radius: 4px;
-      opacity: 0.85;
-    }
-    #collapse-btn:hover, #close-btn:hover { opacity: 1; background: rgba(255,255,255,0.18); }
-    #panel-wrap {
-      display: block;
-      overflow: hidden;
-      transition: height 0.2s ease;
-      background: #fff8f0;
-    }
-    #panel-wrap.collapsed { height: 0 !important; }
-    .panel {
-      margin: 0;
-      padding: 14px;
-      min-height: 560px;
-      display: flex;
-      flex-direction: column;
-      color: #2c2a28;
-      font-family: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
-    }
-    .panel h1 {
-      margin: 0 0 12px;
-      font-size: 20px;
-      letter-spacing: 0.2px;
-    }
-    .mode-group {
-      margin: 0 0 8px;
-      border: 1px solid #d7c7b8;
-      border-radius: 10px;
-      padding: 8px 10px;
-      display: flex;
-      gap: 14px;
-      align-items: center;
-    }
-    .mode-group legend {
-      padding: 0 6px;
-      font-size: 12px;
-      color: #6d665f;
-      font-weight: 600;
-    }
-    .mode-item {
-      margin: 0;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      font-weight: 600;
-    }
-    .field-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-top: 10px;
-      margin-bottom: 6px;
-      font-size: 13px;
-      font-weight: 600;
-    }
-    #prompts {
-      width: 100%;
-      resize: vertical;
-      min-height: 180px;
-      line-height: 1.35;
-      border: 1px solid #d7c7b8;
-      border-radius: 10px;
-      padding: 10px;
-      font-size: 13px;
-      background: #fff;
-    }
-    .status-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-top: 10px;
-    }
-    #status {
-      margin: 0;
-      font-size: 12px;
-      color: #2f594a;
-      min-height: 1em;
-    }
-    .clear-prompts-btn {
-      border: 0;
-      border-radius: 10px;
-      padding: 6px 10px;
-      line-height: 1;
-      font-size: 12px;
-      white-space: nowrap;
-      cursor: pointer;
-      color: #fff;
-      background: #7f7468;
-      font-weight: 700;
-    }
-    .clear-prompts-btn:hover { background: #5f564d; }
-    .bottom-bar {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-top: 12px;
-      padding-top: 12px;
-      flex-wrap: nowrap;
-    }
-    .interval-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      white-space: nowrap;
-      margin: 0;
-    }
-    #intervalSeconds {
-      width: 58px;
-      padding: 6px 8px;
-      border-radius: 8px;
-      border: 1px solid #d7c7b8;
-      font-size: 13px;
-      background: #fff;
-    }
-    .actions {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
-      margin-top: 12px;
-    }
-    .actions button {
-      border: 0;
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-weight: 700;
-      letter-spacing: 0.2px;
-      cursor: pointer;
-      color: #fff;
-      background: #be5d2d;
-    }
-    .actions button:hover { background: #93431f; }
-    #stopBtn {
-      background: #7f7468;
-    }
-    #stopBtn:hover { background: #5f564d; }
 
-    #reopen-btn {
-      position: fixed;
-      top: 72px;
-      right: 16px;
-      z-index: 2147483647;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: #be5d2d;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      font-size: 22px;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.30);
-    }
-    #reopen-btn:hover { background: #93431f; }
-    #reopen-btn.visible { display: flex; }
-    .import-btn-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 8px;
-    }
-    #importBtn {
-      flex: 1;
-      border: 0;
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-weight: 700;
-      letter-spacing: 0.2px;
-      cursor: pointer;
-      color: #fff;
-      background: #be5d2d;
-      font-size: 13px;
-    }
-    #importBtn:hover { background: #93431f; }
-  `;
+    shadow.innerHTML = await response.text();
+  } catch (error) {
+    console.error("Failed to inject Flow Prompt Runner panel.", error);
+    return;
+  }
 
-  const wrapper = document.createElement("div");
-  wrapper.id = "wrapper";
+  const wrapper = shadow.getElementById("wrapper") as HTMLDivElement | null;
+  const dragHandle = shadow.getElementById(
+    "drag-handle",
+  ) as HTMLDivElement | null;
+  const panelWrap = shadow.getElementById(
+    "panel-wrap",
+  ) as HTMLDivElement | null;
+  const reopenBtn = shadow.getElementById(
+    "reopen-btn",
+  ) as HTMLButtonElement | null;
 
-  const dragHandle = document.createElement("div");
-  dragHandle.id = "drag-handle";
-  dragHandle.innerHTML = `
-    <span id="drag-title">⚡ Flow Prompt Runner</span>
-    <button id="collapse-btn" title="Collapse">−</button>
-    <button id="close-btn" title="Close">✕</button>
-  `;
-
-  const panelWrap = document.createElement("div");
-  panelWrap.id = "panel-wrap";
-  panelWrap.innerHTML = `
-    <main class="panel">
-      <h1>Flow Prompt Runner</h1>
-
-      <fieldset class="mode-group">
-        <legend>Mode</legend>
-        <label class="mode-item">
-          <input id="modeImage" type="radio" name="runMode" value="image" checked />
-          <span>Create image</span>
-        </label>
-        <label class="mode-item">
-          <input id="modeVideo" type="radio" name="runMode" value="video" />
-          <span>Create video</span>
-        </label>
-      </fieldset>
-
-      <label for="prompts" class="field-header">
-        <span>Prompts (one line each)</span>
-        <span>Total: <span id="totalPrompts">0</span></span>
-      </label>
-
-      <textarea id="prompts" placeholder="SCENE 1: A cinematic shot of a forest at sunrise"></textarea>
-
-      <div class="status-row">
-        <p id="status">Ready.</p>
-      </div>
-
-      <div class="import-btn-row">
-        <button id="importBtn" type="button">Import Prompt</button>
-        <button id="clearPromptsBtn" type="button" class="clear-prompts-btn">Clear Prompt</button>
-      </div>
-      <div class="bottom-bar">
-        <label class="interval-item">
-          <span>Time between two prompt</span>
-           <input type="number" id="intervalSeconds" name="intervalSeconds" min="1" max="500">
-           <button id="incrementBtn" type="button">+</button>
-           <button id="decrementBtn" type="button">−</button>
-          <span>seconds</span>
-        </label>
-      </div>
-
-      <div class="actions">
-        <button id="startBtn" type="button">Start</button>
-        <button id="pauseBtn" type="button">Pause</button>
-        <button id="stopBtn" type="button">Stop</button>
-      </div>
-    </main>
-  `;
-
-  wrapper.appendChild(dragHandle);
-  wrapper.appendChild(panelWrap);
-
-  const reopenBtn = document.createElement("button");
-  reopenBtn.id = "reopen-btn";
-  reopenBtn.title = "Open Flow Prompt Runner";
-  reopenBtn.textContent = "⚡";
-
-  shadow.appendChild(style);
-  shadow.appendChild(wrapper);
-  shadow.appendChild(reopenBtn);
+  if (!wrapper || !dragHandle || !panelWrap || !reopenBtn) {
+    console.error("Content panel HTML is missing required elements.");
+    return;
+  }
 
   document.body.appendChild(host);
 
@@ -376,21 +110,30 @@ function injectPanel(): void {
   const collapseBtn = shadow.getElementById(
     "collapse-btn",
   ) as HTMLButtonElement;
+  const compactStatusEl = shadow.getElementById(
+    "compact-status-text",
+  ) as HTMLElement | null;
 
   let collapsed = false;
-  panelWrap.style.height = "560px";
+  panelWrap.style.height = "660px";
 
-  collapseBtn.addEventListener("click", () => {
-    collapsed = !collapsed;
+  const setCollapsedState = (nextCollapsed: boolean): void => {
+    collapsed = nextCollapsed;
+
     if (collapsed) {
       panelWrap.classList.add("collapsed");
       collapseBtn.textContent = "+";
       collapseBtn.title = "Expand";
-    } else {
-      panelWrap.classList.remove("collapsed");
-      collapseBtn.textContent = "−";
-      collapseBtn.title = "Collapse";
+      return;
     }
+
+    panelWrap.classList.remove("collapsed");
+    collapseBtn.textContent = "−";
+    collapseBtn.title = "Collapse";
+  };
+
+  collapseBtn.addEventListener("click", () => {
+    setCollapsedState(!collapsed);
   });
 
   // ── Close / Reopen ────────────────────────────────────
@@ -413,6 +156,12 @@ function injectPanel(): void {
   ) as HTMLInputElement;
   const modeImageInput = shadow.getElementById("modeImage") as HTMLInputElement;
   const modeVideoInput = shadow.getElementById("modeVideo") as HTMLInputElement;
+  const enableReferenceImagesInput = shadow.getElementById(
+    "enableReferenceImages",
+  ) as HTMLInputElement;
+  const enableAutoDownloadInput = shadow.getElementById(
+    "enableAutoDownload",
+  ) as HTMLInputElement;
   const promptsInput = shadow.getElementById("prompts") as HTMLTextAreaElement;
   const totalPromptsEl = shadow.getElementById("totalPrompts") as HTMLElement;
   const statusEl = shadow.getElementById("status") as HTMLElement;
@@ -423,13 +172,8 @@ function injectPanel(): void {
   const importBtn = shadow.getElementById("importBtn") as HTMLButtonElement;
   const startBtn = shadow.getElementById("startBtn") as HTMLButtonElement;
   const pauseBtn = shadow.getElementById("pauseBtn") as HTMLButtonElement;
+  const resumeBtn = shadow.getElementById("resumeBtn") as HTMLButtonElement;
   const stopBtn = shadow.getElementById("stopBtn") as HTMLButtonElement;
-  const incrementBtn = shadow.getElementById(
-    "incrementBtn",
-  ) as HTMLButtonElement;
-  const decrementBtn = shadow.getElementById(
-    "decrementBtn",
-  ) as HTMLButtonElement;
 
   const getPromptLines = (): string[] =>
     promptsInput.value
@@ -441,13 +185,24 @@ function injectPanel(): void {
     totalPromptsEl.textContent = String(getPromptLines().length);
   };
 
-  const updatePauseButton = (): void => {
-    pauseBtn.textContent = state.pauseRequested ? "Resume" : "Pause";
+  const updateActionButtons = (): void => {
+    const isRunning = !!state.running;
+    const isPaused = !!state.pauseRequested;
+
+    startBtn.hidden = isRunning;
+    pauseBtn.hidden = !isRunning || isPaused;
+    resumeBtn.hidden = !isRunning || !isPaused;
+
+    stopBtn.disabled = !isRunning;
   };
 
   const setStatus = (text: string, isError = false): void => {
     statusEl.textContent = text;
     statusEl.style.color = isError ? "#8a1d1d" : "#2f594a";
+    if (compactStatusEl) {
+      compactStatusEl.textContent = text;
+      compactStatusEl.style.color = isError ? "#8a1d1d" : "#2f594a";
+    }
   };
 
   const setLog = (text: string): void => {
@@ -459,10 +214,6 @@ function injectPanel(): void {
     const parsed = Number(digitsOnly);
 
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 15;
-  };
-
-  const normalizeIntervalInput = (): void => {
-    intervalInput.value = String(getIntervalSeconds());
   };
 
   const formatLogTime = (timestamp?: number): string => {
@@ -482,6 +233,11 @@ function injectPanel(): void {
       .replaceAll("<", "&lt;")
       .replaceAll(">", "&gt;");
 
+  const getFeatureSettings = (): AutomationFeatures => ({
+    enableReferenceImages: enableReferenceImagesInput.checked,
+    enableAutoDownload: enableAutoDownloadInput.checked,
+  });
+
   const persistSettings = async (): Promise<void> => {
     const existing = ((await chrome.storage.local.get(STORAGE_KEY))[
       STORAGE_KEY
@@ -491,6 +247,7 @@ function injectPanel(): void {
       intervalSeconds: getIntervalSeconds(),
       mode: modeVideoInput.checked ? "video" : "image",
       promptsText: promptsInput.value,
+      ...getFeatureSettings(),
     };
     await chrome.storage.local.set({ [STORAGE_KEY]: updated });
   };
@@ -504,6 +261,9 @@ function injectPanel(): void {
     const mode: PromptMode = settings.mode === "video" ? "video" : "image";
     modeImageInput.checked = mode === "image";
     modeVideoInput.checked = mode === "video";
+    enableReferenceImagesInput.checked =
+      settings.enableReferenceImages !== false;
+    enableAutoDownloadInput.checked = settings.enableAutoDownload !== false;
     promptsInput.value = settings.promptsText || "";
     updatePromptCount();
   };
@@ -514,6 +274,7 @@ function injectPanel(): void {
   const onStart = async (): Promise<void> => {
     if (state.running) {
       setStatus("Automation is already running.", true);
+      updateActionButtons();
       return;
     }
 
@@ -529,15 +290,20 @@ function injectPanel(): void {
     await persistSettings();
 
     setStatus(`Started. Total prompts: ${prompts.length}`);
-    updatePauseButton();
-
-    void startAutomation({
+    setCollapsedState(true);
+    const automationRun = startAutomation({
       prompts,
       mode: modeVideoInput.checked ? "video" : "image",
       intervalMs: getIntervalSeconds() * 1000,
-    }).catch((error: Error) => {
+      ...getFeatureSettings(),
+    });
+
+    updateActionButtons();
+
+    void automationRun.catch((error: Error) => {
+      state.running = false;
       state.pauseRequested = false;
-      updatePauseButton();
+      updateActionButtons();
       setStatus(error.message || "Could not start automation.", true);
     });
   };
@@ -545,18 +311,27 @@ function injectPanel(): void {
   const onPause = async (): Promise<void> => {
     if (!state.running) {
       setStatus("Automation is not running.", true);
+      updateActionButtons();
       return;
     }
 
-    state.pauseRequested = !state.pauseRequested;
-    updatePauseButton();
+    state.pauseRequested = true;
+    updateActionButtons();
 
-    if (state.pauseRequested) {
-      await appendAutomationLog("Pause requested from embedded panel.");
-      await setAutomationStatus("Pause requested.");
-      setStatus("Pause requested.");
+    await appendAutomationLog("Pause requested from embedded panel.");
+    await setAutomationStatus("Pause requested.");
+    setStatus("Pause requested.");
+  };
+
+  const onResume = async (): Promise<void> => {
+    if (!state.running) {
+      setStatus("Automation is not running.", true);
+      updateActionButtons();
       return;
     }
+
+    state.pauseRequested = false;
+    updateActionButtons();
 
     await appendAutomationLog("Resume requested from embedded panel.");
     await setAutomationStatus("Resume requested.");
@@ -568,7 +343,7 @@ function injectPanel(): void {
     state.pauseRequested = false;
     await appendAutomationLog("Stop requested from embedded panel.");
     await setAutomationStatus("Stop requested.");
-    updatePauseButton();
+    updateActionButtons();
     setStatus("Stop requested.");
   };
 
@@ -638,23 +413,24 @@ function injectPanel(): void {
         nextStatus === "Stop requested." ||
         nextStatus.startsWith("Automation error")
       ) {
+        state.running = false;
         state.pauseRequested = false;
-        updatePauseButton();
+        updateActionButtons();
       }
 
       setStatus(nextStatus);
     }
   };
-
-  intervalInput.addEventListener("input", () => {
-    intervalInput.value = intervalInput.value.replace(/\D+/g, "");
-    void persistSettings();
-  });
-  intervalInput.addEventListener("blur", normalizeIntervalInput);
   modeImageInput.addEventListener("change", () => {
     void persistSettings();
   });
   modeVideoInput.addEventListener("change", () => {
+    void persistSettings();
+  });
+  enableReferenceImagesInput.addEventListener("change", () => {
+    void persistSettings();
+  });
+  enableAutoDownloadInput.addEventListener("change", () => {
     void persistSettings();
   });
   promptsInput.addEventListener("input", () => {
@@ -662,20 +438,43 @@ function injectPanel(): void {
     void persistSettings();
   });
 
+  const startIntervalChange = (direction: 1 | -1): (() => void) => {
+    const step = (): void => {
+      if (direction === 1) {
+        onIncrementInterval();
+        return;
+      }
+
+      onDecrementInterval();
+    };
+
+    step();
+    let intervalId: number | null = null;
+    const timeoutId = window.setTimeout(() => {
+      intervalId = window.setInterval(step, 120);
+    }, 350);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      if (intervalId !== null) {
+        window.clearInterval(intervalId);
+      }
+    };
+  };
+
+  let activePressCleanup: (() => void) | null = null;
+
   startBtn.addEventListener("click", () => {
     void onStart();
   });
   pauseBtn.addEventListener("click", () => {
     void onPause();
   });
+  resumeBtn.addEventListener("click", () => {
+    void onResume();
+  });
   stopBtn.addEventListener("click", () => {
     void onStop();
-  });
-  incrementBtn.addEventListener("click", () => {
-    onIncrementInterval();
-  });
-  decrementBtn.addEventListener("click", () => {
-    onDecrementInterval();
   });
   clearPromptsBtn.addEventListener("click", () => {
     void onClearPrompts();
@@ -687,7 +486,7 @@ function injectPanel(): void {
 
   chrome.storage.onChanged.addListener(onStorageChanged);
 
-  updatePauseButton();
+  updateActionButtons();
 
   void Promise.all([
     loadSettings(),

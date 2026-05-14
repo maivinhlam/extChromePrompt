@@ -454,6 +454,7 @@ function buildVideoDownloadFilename(renameTo: string): string {
       day: "2-digit",
       hour: "2-digit",
       minute: "2-digit",
+      second: "2-digit",
       hour12: false, // Use 24-hour format
     }).formatToParts(date);
 
@@ -464,12 +465,11 @@ function buildVideoDownloadFilename(renameTo: string): string {
       `${o.find((p) => p.type === "day").value}` +
       `_` +
       `${o.find((p) => p.type === "hour").value}` +
-      `-` +
-      `${o.find((p) => p.type === "minute").value}`
+      `${o.find((p) => p.type === "minute").value}` +
+      `${o.find((p) => p.type === "second").value}`
     );
   };
 
-  console.log(format(now)); // Outputs: 202605141141
   return `${baseName}_${format(now)}.mp4`;
 }
 

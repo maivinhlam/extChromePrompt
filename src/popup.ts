@@ -9,6 +9,8 @@ type RunnerSettings = {
   intervalSeconds?: number;
   mode?: PromptMode;
   promptsText?: string;
+  enableReferenceImages?: boolean;
+  enableAutoDownload?: boolean;
 };
 
 type LogEntry = {
@@ -21,6 +23,12 @@ const intervalInput = document.getElementById(
 ) as HTMLInputElement;
 const modeImageInput = document.getElementById("modeImage") as HTMLInputElement;
 const modeVideoInput = document.getElementById("modeVideo") as HTMLInputElement;
+const enableReferenceImagesInput = document.getElementById(
+  "enableReferenceImages",
+) as HTMLInputElement;
+const enableAutoDownloadInput = document.getElementById(
+  "enableAutoDownload",
+) as HTMLInputElement;
 const promptsInput = document.getElementById("prompts") as HTMLTextAreaElement;
 const totalPromptsEl = document.getElementById("totalPrompts") as HTMLElement;
 const statusEl = document.getElementById("status") as HTMLElement;
@@ -42,6 +50,8 @@ async function init() {
   intervalInput.addEventListener("input", persistSettings);
   modeImageInput.addEventListener("change", persistSettings);
   modeVideoInput.addEventListener("change", persistSettings);
+  enableReferenceImagesInput.addEventListener("change", persistSettings);
+  enableAutoDownloadInput.addEventListener("change", persistSettings);
   promptsInput.addEventListener("input", persistSettings);
   promptsInput.addEventListener("input", updatePromptCount);
 
@@ -65,6 +75,8 @@ async function loadSettings() {
   const mode: PromptMode = settings.mode === "video" ? "video" : "image";
   modeImageInput.checked = mode === "image";
   modeVideoInput.checked = mode === "video";
+  enableReferenceImagesInput.checked = settings.enableReferenceImages !== false;
+  enableAutoDownloadInput.checked = settings.enableAutoDownload !== false;
   promptsInput.value = settings.promptsText || "";
   updatePromptCount();
 }
@@ -78,6 +90,8 @@ async function persistSettings() {
     intervalSeconds: Number(intervalInput.value || 15),
     mode: modeVideoInput.checked ? "video" : "image",
     promptsText: promptsInput.value,
+    enableReferenceImages: enableReferenceImagesInput.checked,
+    enableAutoDownload: enableAutoDownloadInput.checked,
   };
   await chrome.storage.local.set({ [STORAGE_KEY]: updated });
 }
@@ -119,6 +133,8 @@ async function onStart() {
       prompts,
       mode: modeVideoInput.checked ? "video" : "image",
       intervalMs: Math.max(1, Number(intervalInput.value || 15)) * 1000,
+      enableReferenceImages: enableReferenceImagesInput.checked,
+      enableAutoDownload: enableAutoDownloadInput.checked,
     },
   };
 
