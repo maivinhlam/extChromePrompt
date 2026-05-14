@@ -1145,9 +1145,31 @@ export async function waitForMediaIncrease(
   await appendAutomationLog("No new media detected before timeout.");
 }
 
-async function clickOutsideTile(mediaContainer: HTMLElement): Promise<void> {
-  const rect = mediaContainer.getBoundingClientRect();
-  const x = rect.left - 10;
-  const y = rect.top - 10;
-  await debuggerClickAtPoint(x, y, "left");
+export async function waitBlurForActiveTile(
+  mediaContainer: HTMLElement,
+  waitMs: number,
+): Promise<boolean> {
+  // Find the opacity layer which indicates the tile is active
+  const opacityLayer = mediaContainer.querySelector(
+    "div[style*='--blur-amount']",
+  ) as HTMLElement | null;
+  if (!opacityLayer) {
+    await sleep(waitMs);
+    return true;
+  }
+
+  // Wait for the opacity layer to disappear, indicating the tile is no longer active
+  const start = Date.now();
+  while (opacityLayer.style.getPropertyValue("--blur-amount") === "0px") {
+    console.log(
+      `🚀 ~ waitBlurForActiveTile ~ opacityLayer.style.getPropertyValue("--blur-amount"):`,
+      opacityLayer.style.getPropertyValue("--blur-amount"),
+    );
+    if (Date.now() - start > waitMs) {
+      return true;
+    }
+    await sleep(100);
+  }
+  await sleep(100);
+  return true;
 }

@@ -1,5 +1,5 @@
 import { state, TEST_MODE, MAX_PENDING_TASKS } from "./constants";
-import type { AutomationConfig, PromptMode, PromptStatus } from "./types";
+import type { AutomationConfig, PromptStatus } from "./types";
 import {
   loadAutomationState,
   saveAutomationState,
@@ -15,6 +15,7 @@ import {
   waitForNewTopRowTileId,
   waitForTileDoneById,
   downloadMediaItem,
+  waitBlurForActiveTile,
 } from "./interactions";
 import {
   parseSceneNumbers,
@@ -255,7 +256,6 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
 
       await fillPromptInput(prompt);
 
-      // if (state.mode === "video")
       const imageNames = extractImageNamesFromPrompt(prompt);
       if (state.enableReferenceImages && imageNames.length > 0) {
         await selectReferenceImage(imageNames);
@@ -326,7 +326,9 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
 
         const completedTile = tileResult.tile;
 
-        await sleep(10000);
+        if (!(await waitBlurForActiveTile(completedTile, 20000))) {
+          return;
+        }
 
         if (!(await waitWhilePaused())) {
           return;
