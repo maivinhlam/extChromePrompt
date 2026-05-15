@@ -157,7 +157,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message?.type === "PATCH_FLOW_WORKFLOW_DISPLAY_NAME") {
-    console.log("🚀 ~ message:", message);
     void patchFlowWorkflowDisplayName(
       sender,
       message as FlowWorkflowRenameMessage,
@@ -419,7 +418,6 @@ async function patchFlowWorkflowDisplayName(
     },
   ).catch(() => null);
 
-  console.log("🚀 ~ patchFlowWorkflowDisplayName ~ response:", response);
   return !!response?.ok;
 }
 

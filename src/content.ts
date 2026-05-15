@@ -239,7 +239,16 @@ async function injectPanel(): Promise<void> {
       deleteBtn.setAttribute("aria-label", "Delete prompt");
       deleteBtn.textContent = "✕";
 
-      actions.append(rerunBtn, deleteBtn);
+      const copyBtn = document.createElement("button");
+      copyBtn.type = "button";
+      copyBtn.className = "prompt-item-btn prompt-copy-btn";
+      copyBtn.dataset.action = "copy";
+      copyBtn.dataset.index = String(index);
+      copyBtn.title = "Copy prompt";
+      copyBtn.setAttribute("aria-label", "Copy prompt");
+      copyBtn.textContent = "📋";
+
+      actions.append(rerunBtn, deleteBtn, copyBtn);
       item.append(text, actions);
       fragment.appendChild(item);
     });
@@ -558,6 +567,12 @@ async function injectPanel(): Promise<void> {
     if (actionBtn.dataset.action === "rerun") {
       syncPromptLines([...prompts, selectedPrompt]);
       setStatus(`Queued prompt ${index + 1} to run again.`);
+    }
+
+    if (actionBtn.dataset.action === "copy") {
+      navigator.clipboard.writeText(selectedPrompt).then(() => {
+        setStatus(`Copied prompt ${index + 1} to clipboard.`);
+      });
     }
   });
 

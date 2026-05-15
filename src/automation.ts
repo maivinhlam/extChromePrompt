@@ -370,19 +370,9 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
         if (state.mode === "image") {
           const matchImageName =
             await getImageNameFromMediaContainer(completedTile);
-          console.log(
-            "🚀 ~ startAutomation ~ matchImageName:",
-            matchImageName,
-            " - imageName: ",
-            imageName,
-          );
           if (matchImageName) {
             state.matchedImageNames[imageName] = matchImageName;
             await saveMatchedImageNames(state.matchedImageNames);
-            console.log(
-              "🚀 ~ startAutomation ~ state.matchedImageNames:",
-              state.matchedImageNames,
-            );
             await appendAutomationLog(
               `Stored image name match: ${imageName} -> ${matchImageName}`,
             );

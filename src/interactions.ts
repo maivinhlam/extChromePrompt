@@ -657,10 +657,11 @@ export async function selectReferenceImage(
 
     for (let i = 0; i < expectedNames.length; i++) {
       await sleep(randomInt(300, 400));
-      await openButton.focus();
-      await sleep(randomInt(300, 400));
-      await openButton.click();
 
+      await openButton.focus();
+      await sleep(randomInt(100, 200));
+
+      await openButton.click();
       await sleep(randomInt(400, 600));
 
       const dialogAfter = await waitForDialog(500);
@@ -671,13 +672,13 @@ export async function selectReferenceImage(
 
         const item = findImgItemByAlt(matchImageName, dialogAfter);
         if (item) {
-          await simulateHumanPresenceBeforeDownload(item);
+          // await simulateHumanPresenceBeforeDownload(item);
         } else {
           await appendAutomationLog(
             `Could not find reference image with name "${matchImageName}".`,
           );
         }
-        await sleep(950);
+        await sleep(randomInt(200, 300));
 
         // Tell the background script to start typing
         const response = await chrome.runtime.sendMessage({
@@ -1174,7 +1175,6 @@ export async function waitBlurForActiveTile(
   mediaContainer: HTMLElement,
   waitMs: number,
 ): Promise<boolean> {
-  console.log("🚀 ~ waitBlurForActiveTile ~ waitMs:", waitMs);
   // Find the opacity layer which indicates the tile is active
   const opacityLayer = mediaContainer.querySelector(
     "div[style*='--blur-amount']",
@@ -1187,10 +1187,6 @@ export async function waitBlurForActiveTile(
   // Wait for the opacity layer to disappear, indicating the tile is no longer active
   const start = Date.now();
   while (opacityLayer.style.getPropertyValue("--blur-amount") === "0px") {
-    console.log(
-      `🚀 ~ waitBlurForActiveTile ~ opacityLayer.style.getPropertyValue("--blur-amount"):`,
-      opacityLayer.style.getPropertyValue("--blur-amount"),
-    );
     if (Date.now() - start > waitMs) {
       return true;
     }
