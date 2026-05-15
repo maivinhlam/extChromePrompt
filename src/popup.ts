@@ -11,6 +11,7 @@ type RunnerSettings = {
   promptsText?: string;
   enableReferenceImages?: boolean;
   enableAutoDownload?: boolean;
+  matchedImageNames?: Record<string, string>;
 };
 
 type LogEntry = {

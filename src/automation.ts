@@ -6,6 +6,7 @@ import {
   clearAutomationState,
   appendAutomationLog,
   setAutomationStatus,
+  saveMatchedImageNames,
 } from "./storage";
 import {
   fillPromptInput,
@@ -15,7 +16,10 @@ import {
   waitForNewTopRowTileId,
   waitForTileDoneById,
   downloadMediaItem,
+  renameMediaItem,
   waitBlurForActiveTile,
+  getImageNameFromMediaContainer,
+  randomInt,
 } from "./interactions";
 import {
   parseSceneNumbers,
@@ -99,6 +103,11 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
   state.intervalMs = Math.max(1000, Number(config.intervalMs || 15000));
   state.enableReferenceImages = config.enableReferenceImages !== false;
   state.enableAutoDownload = config.enableAutoDownload !== false;
+
+  // Initialize matchedImageNames for this session
+  if (state.mode === "image") {
+    state.matchedImageNames = {};
+  }
 
   let promptStatuses = createInitialPromptStatuses(state.prompts.length);
   let startIndex = 0;
@@ -243,27 +252,22 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
         break;
       }
 
-      await pauseBeforeStep(
-        "Fill prompt input.",
-        () => state.stopRequested,
-        appendAutomationLog,
-      );
-
       // 2. Tell the background script to start typing
       if (!(await waitWhilePaused())) {
         break;
       }
 
-      await fillPromptInput(prompt);
-
       const imageNames = extractImageNamesFromPrompt(prompt);
       if (state.enableReferenceImages && imageNames.length > 0) {
         await selectReferenceImage(imageNames);
+        await sleep(randomInt(2000, 3000));
       } else if (!state.enableReferenceImages && imageNames.length > 0) {
         await appendAutomationLog(
           `Reference image selection disabled for SCENE ${numbers.scene}.`,
         );
       }
+
+      await fillPromptInput(prompt);
 
       promptStatuses[i] = "done";
       await saveAutomationState({
@@ -279,9 +283,14 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
         formatSceneName(numbers.scene, ""),
       );
 
+      const imageName = extractPromptPrefixName(
+        prompt,
+        formatSceneName(numbers.scene, ""),
+      );
+
       let waitingTime = 60000;
       if (state.mode === "video") {
-        waitingTime = 180000;
+        waitingTime = await randomInt(150000, 180000);
       }
 
       const pendingTask = (async (): Promise<void> => {
@@ -330,9 +339,15 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
           return;
         }
 
-        if (!(await waitWhilePaused())) {
-          return;
+        if (state.mode === "image") {
+          await sleep(5000);
+        } else if (state.mode === "video") {
+          await sleep(10000);
         }
+
+        // if (!(await waitWhilePaused())) {
+        //   return;
+        // }
 
         if (state.mode === "video" && state.enableAutoDownload) {
           await appendAutomationLog(`Downloading '${sceneName}'...`);
@@ -350,6 +365,28 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
           await appendAutomationLog(
             `Auto-download disabled for '${sceneName}'.`,
           );
+        }
+
+        if (state.mode === "image") {
+          const matchImageName =
+            await getImageNameFromMediaContainer(completedTile);
+          console.log(
+            "🚀 ~ startAutomation ~ matchImageName:",
+            matchImageName,
+            " - imageName: ",
+            imageName,
+          );
+          if (matchImageName) {
+            state.matchedImageNames[imageName] = matchImageName;
+            await saveMatchedImageNames(state.matchedImageNames);
+            console.log(
+              "🚀 ~ startAutomation ~ state.matchedImageNames:",
+              state.matchedImageNames,
+            );
+            await appendAutomationLog(
+              `Stored image name match: ${imageName} -> ${matchImageName}`,
+            );
+          }
         }
       })().catch(async (error: unknown) => {
         await appendAutomationLog(
@@ -371,6 +408,7 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
 
     await waitForPendingTasks();
 
+    await sleep(11000);
     await clearAutomationState();
     await appendAutomationLog("Automation completed.");
     await setAutomationStatus("Automation completed.");

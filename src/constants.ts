@@ -15,6 +15,7 @@ export const state: AutomationState = {
   pauseRequested: false,
   promptIndex: 0,
   prompts: [],
+  matchedImageNames: {},
   mode: "image",
   intervalMs: 15000,
   enableReferenceImages: true,

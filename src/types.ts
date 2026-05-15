@@ -29,6 +29,7 @@ export type AutomationState = {
   pauseRequested?: boolean;
   promptIndex: number;
   prompts: string[];
+  matchedImageNames: Record<string, string>;
   mode: PromptMode;
   intervalMs: number;
   enableReferenceImages: boolean;

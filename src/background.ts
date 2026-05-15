@@ -25,9 +25,51 @@ type DebuggerClickMessage = {
   clickCount?: number;
 };
 
+type FlowWorkflowRenameMessage = {
+  type: "PATCH_FLOW_WORKFLOW_DISPLAY_NAME";
+  workflowId: string;
+  projectId: string;
+  displayName: string;
+};
+
+type CapturedRequestHeaders = Record<string, string>;
+
 const pendingDownloads: PendingDownload[] = [];
 const pendingDirectDownloads: PendingDirectDownload[] = [];
 const attachedDebuggerTabs = new Set<number>();
+const latestFlowApiHeadersByTab = new Map<number, CapturedRequestHeaders>();
+
+const FLOW_WORKFLOWS_API_URL_PATTERN =
+  "https://aisandbox-pa.googleapis.com/v1/flowWorkflows/*";
+const FLOW_RENAME_API_BASE_URL =
+  "https://aisandbox-pa.googleapis.com/v1/flowWorkflows";
+const FORWARDED_FLOW_HEADER_NAMES = new Set([
+  "accept",
+  "authorization",
+  "content-type",
+  "x-browser-channel",
+  "x-browser-copyright",
+  "x-browser-validation",
+  "x-browser-year",
+  "x-client-data",
+]);
+
+chrome.webRequest.onBeforeSendHeaders.addListener(
+  (details) => {
+    if (typeof details.tabId !== "number" || details.tabId < 0) {
+      return;
+    }
+
+    const headers = normalizeCapturedFlowHeaders(details.requestHeaders);
+    if (!Object.keys(headers).length) {
+      return;
+    }
+
+    latestFlowApiHeadersByTab.set(details.tabId, headers);
+  },
+  { urls: [FLOW_WORKFLOWS_API_URL_PATTERN] },
+  ["requestHeaders", "extraHeaders"],
+);
 
 chrome.debugger.onDetach.addListener((source) => {
   if (typeof source.tabId === "number") {
@@ -96,6 +138,31 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type === "DEBUGGER_CLICK") {
     void dispatchDebuggerClick(sender, message as DebuggerClickMessage)
       .then(() => sendResponse({ ok: true }))
+      .catch((error: Error) =>
+        sendResponse({ ok: false, error: error.message }),
+      );
+    return true;
+  }
+
+  if (message?.type === "GET_FLOW_REQUEST_HEADERS") {
+    const tabId = sender.tab?.id;
+    const headers =
+      typeof tabId === "number" ? latestFlowApiHeadersByTab.get(tabId) : null;
+
+    sendResponse({
+      ok: !!headers,
+      headers: headers || null,
+    });
+    return;
+  }
+
+  if (message?.type === "PATCH_FLOW_WORKFLOW_DISPLAY_NAME") {
+    console.log("🚀 ~ message:", message);
+    void patchFlowWorkflowDisplayName(
+      sender,
+      message as FlowWorkflowRenameMessage,
+    )
+      .then((renamed) => sendResponse({ ok: renamed }))
       .catch((error: Error) =>
         sendResponse({ ok: false, error: error.message }),
       );
@@ -281,6 +348,79 @@ function detectFileExtension(item: chrome.downloads.DownloadItem) {
   }
 
   return "bin";
+}
+
+function normalizeCapturedFlowHeaders(
+  requestHeaders?: chrome.webRequest.HttpHeader[],
+): CapturedRequestHeaders {
+  if (!Array.isArray(requestHeaders)) {
+    return {};
+  }
+
+  const headers: CapturedRequestHeaders = {};
+
+  for (const header of requestHeaders) {
+    const name = String(header?.name || "")
+      .trim()
+      .toLowerCase();
+    const value = String(header?.value || "").trim();
+
+    if (!name || !value || !FORWARDED_FLOW_HEADER_NAMES.has(name)) {
+      continue;
+    }
+
+    headers[name] = value;
+  }
+
+  return headers;
+}
+
+async function patchFlowWorkflowDisplayName(
+  sender: chrome.runtime.MessageSender,
+  message: FlowWorkflowRenameMessage,
+): Promise<boolean> {
+  const tabId = sender.tab?.id;
+  if (typeof tabId !== "number") {
+    return false;
+  }
+
+  const workflowId = String(message.workflowId || "").trim();
+  const projectId = String(message.projectId || "").trim();
+  const displayName = String(message.displayName || "").trim();
+  if (!workflowId || !projectId || !displayName) {
+    return false;
+  }
+
+  const capturedHeaders = latestFlowApiHeadersByTab.get(tabId);
+  if (!capturedHeaders) {
+    return false;
+  }
+
+  const response = await fetch(
+    `${FLOW_RENAME_API_BASE_URL}/${encodeURIComponent(workflowId)}`,
+    {
+      method: "PATCH",
+      headers: {
+        accept: "*/*",
+        "content-type": "text/plain;charset=UTF-8",
+        ...capturedHeaders,
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        workflow: {
+          name: workflowId,
+          projectId,
+          metadata: {
+            displayName,
+          },
+        },
+        updateMask: "metadata.displayName",
+      }),
+    },
+  ).catch(() => null);
+
+  console.log("🚀 ~ patchFlowWorkflowDisplayName ~ response:", response);
+  return !!response?.ok;
 }
 
 /**

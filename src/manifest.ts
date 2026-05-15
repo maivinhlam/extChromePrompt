@@ -11,8 +11,13 @@ const manifest = {
     "tabs",
     "clipboardRead",
     "debugger",
+    "webRequest",
   ],
-  host_permissions: ["https://labs.google/*", "https://*.labs.google/*"],
+  host_permissions: [
+    "https://labs.google/*",
+    "https://*.labs.google/*",
+    "https://aisandbox-pa.googleapis.com/*",
+  ],
   background: {
     service_worker: "src/background.ts",
     type: "module",

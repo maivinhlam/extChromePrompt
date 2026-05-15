@@ -18,6 +18,7 @@ type RunnerSettings = {
   promptsText?: string;
   enableReferenceImages?: boolean;
   enableAutoDownload?: boolean;
+  matchedImageNames?: Record<string, string>;
 };
 type LogEntry = { timestamp?: number; message?: string };
 
@@ -335,6 +336,7 @@ async function injectPanel(): Promise<void> {
       settings.enableReferenceImages !== false;
     enableAutoDownloadInput.checked = settings.enableAutoDownload !== false;
     promptsInput.value = settings.promptsText || "";
+    state.matchedImageNames = { ...(settings.matchedImageNames || {}) };
     updatePromptCount();
     renderPromptList();
   };

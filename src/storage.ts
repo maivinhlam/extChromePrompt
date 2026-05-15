@@ -6,6 +6,8 @@ import {
 } from "./constants";
 import type { AutomationStatePayload, LogEntry } from "./types";
 
+const RUNNER_SETTINGS_KEY = "flowPromptRunnerSettings";
+
 export async function loadAutomationState(): Promise<AutomationStatePayload | null> {
   try {
     const data = await chrome.storage.local.get(AUTOMATION_STATE_KEY);
@@ -77,6 +79,25 @@ export async function appendAutomationLog(message: string): Promise<void> {
     }
 
     await chrome.storage.local.set({ [LOG_STORAGE_KEY]: logs });
+  } catch {
+    // no-op
+  }
+}
+
+export async function saveMatchedImageNames(
+  matchedImageNames: Record<string, string>,
+): Promise<void> {
+  try {
+    const data = await chrome.storage.local.get(RUNNER_SETTINGS_KEY);
+    const existing =
+      (data[RUNNER_SETTINGS_KEY] as Record<string, unknown> | undefined) || {};
+
+    await chrome.storage.local.set({
+      [RUNNER_SETTINGS_KEY]: {
+        ...existing,
+        matchedImageNames: { ...matchedImageNames },
+      },
+    });
   } catch {
     // no-op
   }

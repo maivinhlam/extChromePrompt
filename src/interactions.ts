@@ -1,4 +1,4 @@
-import { sleep, isVisible } from "./utils";
+import { sleep, isVisible, pauseBeforeStep } from "./utils";
 import { appendAutomationLog } from "./storage";
 import {
   findPromptInput,
@@ -155,7 +155,7 @@ function getElementClickPoint(element: HTMLElement): { x: number; y: number } {
   };
 }
 
-function randomInt(min: number, max: number): number {
+export function randomInt(min: number, max: number): number {
   const lower = Math.ceil(Math.min(min, max));
   const upper = Math.floor(Math.max(min, max));
   return Math.floor(Math.random() * (upper - lower + 1)) + lower;
@@ -420,6 +420,60 @@ function resolveLabsMediaUrl(url: string): string | null {
   }
 }
 
+type FlowWorkflowIdentity = {
+  workflowId: string;
+  projectId: string;
+};
+
+function extractFlowWorkflowIdentity(
+  mediaContainer: HTMLElement,
+): FlowWorkflowIdentity | null {
+  const workflowLink = mediaContainer.querySelector(
+    "a[href*='/fx/'][href*='/tools/flow/project/'][href*='/edit/']",
+  ) as HTMLAnchorElement | null;
+
+  const href = workflowLink?.getAttribute("href") || workflowLink?.href || "";
+  if (!href) {
+    return null;
+  }
+
+  try {
+    const parsedUrl = new URL(href, window.location.origin);
+    const match = parsedUrl.pathname.match(
+      /\/project\/([^/]+)\/edit\/([^/]+)/i,
+    );
+
+    if (!match) {
+      return null;
+    }
+
+    const [, projectId, workflowId] = match;
+    if (!projectId || !workflowId) {
+      return null;
+    }
+
+    return { projectId, workflowId };
+  } catch {
+    return null;
+  }
+}
+
+async function patchFlowWorkflowDisplayName(
+  identity: FlowWorkflowIdentity,
+  displayName: string,
+): Promise<boolean> {
+  const response = await chrome.runtime
+    .sendMessage({
+      type: "PATCH_FLOW_WORKFLOW_DISPLAY_NAME",
+      workflowId: identity.workflowId,
+      projectId: identity.projectId,
+      displayName,
+    })
+    .catch(() => null);
+
+  return !!response?.ok;
+}
+
 function getDirectVideoDownloadUrl(mediaContainer: HTMLElement): string | null {
   const video = mediaContainer.querySelector(
     "video",
@@ -602,34 +656,43 @@ export async function selectReferenceImage(
     }
 
     for (let i = 0; i < expectedNames.length; i++) {
-      await sleep(300);
-      await safeClick(openButton);
-      await sleep(500);
+      await sleep(randomInt(300, 400));
+      await openButton.focus();
+      await sleep(randomInt(300, 400));
+      await openButton.click();
+
+      await sleep(randomInt(400, 600));
 
       const dialogAfter = await waitForDialog(500);
       if (dialogAfter) {
         const imageName = expectedNames[i];
-        const searchInput = findReferenceImageSearchInput(dialogAfter);
+        const matchImageName =
+          state.matchedImageNames[imageName]?.trim() || imageName;
 
-        if (searchInput) {
-          await typeTextIntoField(searchInput, imageName);
-          await sleep(350);
-        }
-
-        const item = findImgItemByAlt(imageName, dialogAfter);
+        const item = findImgItemByAlt(matchImageName, dialogAfter);
         if (item) {
-          await sleep(300);
-          await safeClick(item);
-          await appendAutomationLog(`Selected reference image: ${imageName}`);
-          await waitForTransientUiToClose(300);
+          await simulateHumanPresenceBeforeDownload(item);
+        } else {
+          await appendAutomationLog(
+            `Could not find reference image with name "${matchImageName}".`,
+          );
         }
+        await sleep(950);
+
+        // Tell the background script to start typing
+        const response = await chrome.runtime.sendMessage({
+          action: "PERFORM_TYPE",
+          text: matchImageName,
+        });
+        if (response?.status === "completed") {
+          console.log("This specific typing to matchImageName task is DONE!");
+        }
+        await waitForTransientUiToClose(300);
       } else {
         await appendAutomationLog(
           `Reference image dialog did not appear after clicking open button.`,
         );
       }
-
-      await safeClick(openButton);
     }
 
     await sleep(300);
@@ -1038,69 +1101,18 @@ export async function renameMediaItem(
   newName: string,
 ): Promise<boolean> {
   return withPageInteractionLock(async () => {
+    await simulateHumanPresenceBeforeDownload(mediaContainer);
+
     const trimmed = String(newName || "").trim();
     if (!trimmed) {
       return false;
     }
-    await sleep(1000);
-    await openContextMenuAtContainerCenter(mediaContainer);
-
-    await sleep(250);
-
-    let renameButton = findButtonByText(["doi ten", "rename", "Đổi tên"]);
-    renameButton.focus();
-
-    await safeClick(renameButton);
-    await sleep(250);
-
-    const input =
-      (document.querySelector(
-        "[role='dialog'] input[type='text']",
-      ) as HTMLInputElement | null) ||
-      (document.querySelector(
-        "[role='dialog'] textarea",
-      ) as HTMLTextAreaElement | null) ||
-      (document.querySelector("input[type='text']") as HTMLInputElement | null);
-
-    if (!input) {
+    const identity = extractFlowWorkflowIdentity(mediaContainer);
+    if (!identity) {
       return false;
     }
 
-    await typeTextIntoField(input, trimmed);
-
-    await sleep(520);
-
-    input.form?.requestSubmit();
-
-    input.dispatchEvent(
-      new KeyboardEvent("keydown", {
-        bubbles: true,
-        cancelable: true,
-        composed: true,
-        key: "Enter",
-        code: "Enter",
-      }),
-    );
-    input.dispatchEvent(
-      new KeyboardEvent("keypress", {
-        bubbles: true,
-        cancelable: true,
-        composed: true,
-        key: "Enter",
-        code: "Enter",
-      }),
-    );
-    input.dispatchEvent(
-      new KeyboardEvent("keyup", {
-        bubbles: true,
-        cancelable: true,
-        composed: true,
-        key: "Enter",
-        code: "Enter",
-      }),
-    );
-
-    return true;
+    return patchFlowWorkflowDisplayName(identity, trimmed);
   });
 }
 
@@ -1124,6 +1136,19 @@ export async function downloadMediaItem(
   });
 }
 
+export async function getImageNameFromMediaContainer(
+  mediaContainer: HTMLElement,
+): Promise<string | null> {
+  await simulateHumanPresenceBeforeDownload(mediaContainer);
+  const text = mediaContainer.textContent || "";
+  // get the text after the text "image"  const match = text.match(/image\s*[:\-]?\s*(.+)/i);
+  const match = text.match(/IMAGE\s*[:\-]?\s*(.+)/i);
+  if (match && match[1]) {
+    const name = match[1].trim();
+    return name || null;
+  }
+  return null;
+}
 export async function waitForMediaIncrease(
   beforeCount: number,
   waitMs: number,
@@ -1149,6 +1174,7 @@ export async function waitBlurForActiveTile(
   mediaContainer: HTMLElement,
   waitMs: number,
 ): Promise<boolean> {
+  console.log("🚀 ~ waitBlurForActiveTile ~ waitMs:", waitMs);
   // Find the opacity layer which indicates the tile is active
   const opacityLayer = mediaContainer.querySelector(
     "div[style*='--blur-amount']",
