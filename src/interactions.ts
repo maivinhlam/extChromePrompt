@@ -1,5 +1,5 @@
 import { sleep, isVisible, pauseBeforeStep } from "./utils";
-import { appendAutomationLog } from "./storage";
+import { appendAutomationLog, saveMatchedImageNames } from "./storage";
 import {
   findPromptInput,
   findSendButton,
@@ -228,7 +228,8 @@ async function simulateHumanPresenceBeforeDownload(
   await sleep(randomInt(160, 320));
 
   const hoverCandidates = getHoverCandidates(mediaContainer);
-  const hoverCount = Math.min(hoverCandidates.length, randomInt(1, 3));
+  const hoverCount = Math.min(hoverCandidates.length, randomInt(2, 4));
+
   for (let index = 0; index < hoverCount; index += 1) {
     const candidate = hoverCandidates[index];
     candidate.focus?.();
@@ -236,7 +237,7 @@ async function simulateHumanPresenceBeforeDownload(
     await sleep(randomInt(450, 1100));
   }
 
-  await sleep(randomInt(2000, 4000));
+  await sleep(randomInt(450, 1100));
 }
 
 async function debuggerClickAtPoint(
@@ -1139,17 +1140,39 @@ export async function downloadMediaItem(
 
 export async function getImageNameFromMediaContainer(
   mediaContainer: HTMLElement,
-): Promise<string | null> {
-  await simulateHumanPresenceBeforeDownload(mediaContainer);
-  const text = mediaContainer.textContent || "";
-  // get the text after the text "image"  const match = text.match(/image\s*[:\-]?\s*(.+)/i);
-  const match = text.match(/IMAGE\s*[:\-]?\s*(.+)/i);
-  if (match && match[1]) {
-    const name = match[1].trim();
-    return name || null;
-  }
-  return null;
+  imageName: string,
+): Promise<boolean> {
+  return withPageInteractionLock(async () => {
+    if (mediaContainer) {
+      await sleep(500);
+      await simulateHumanPresenceBeforeDownload(mediaContainer);
+      await sleep(500);
+
+      const text = mediaContainer.textContent || "";
+      // get the text after the text "image"  const match = text.match(/image\s*[:\-]?\s*(.+)/i);
+      const match = text.match(/IMAGE\s*[:\-]?\s*(.+)/i);
+      let name = "";
+      if (match && match[1]) {
+        name = match[1].trim();
+      }
+      if (name) {
+        state.matchedImageNames[imageName] = name;
+        await saveMatchedImageNames(state.matchedImageNames);
+        await appendAutomationLog(
+          `Stored image name match: ${imageName} -> ${name}`,
+        );
+        return true;
+      } else {
+        await appendAutomationLog(
+          `Could not extract image name for ${imageName} from media container.`,
+        );
+      }
+
+      return false;
+    }
+  });
 }
+
 export async function waitForMediaIncrease(
   beforeCount: number,
   waitMs: number,

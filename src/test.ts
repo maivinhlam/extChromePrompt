@@ -37,10 +37,6 @@ export async function test(pendingRenameTasks: Promise<void>[]) {
       return;
     }
 
-    await appendAutomationLog(
-      `Detected new tile for '${renameTo}' (${newTileId}). Waiting for 100%.`,
-    );
-
     const tileResult = await waitForTileDoneById(
       newTileId,
       Math.max(waitingTime, state.intervalMs * 6),

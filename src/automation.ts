@@ -107,6 +107,7 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
   // Initialize matchedImageNames for this session
   if (state.mode === "image") {
     state.matchedImageNames = {};
+    await saveMatchedImageNames(state.matchedImageNames);
   }
 
   let promptStatuses = createInitialPromptStatuses(state.prompts.length);
@@ -269,7 +270,6 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
 
       await fillPromptInput(prompt);
 
-      promptStatuses[i] = "done";
       await saveAutomationState({
         running: true,
         mode: state.mode,
@@ -311,10 +311,6 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
           return;
         }
 
-        await appendAutomationLog(
-          `Detected new tile for '${sceneName}' (${newTileId}). Waiting for 100%.`,
-        );
-
         const tileResult = await waitForTileDoneById(
           newTileId,
           waitingTime,
@@ -340,7 +336,7 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
         }
 
         if (state.mode === "image") {
-          await sleep(5000);
+          await sleep(6000);
         } else if (state.mode === "video") {
           await sleep(10000);
         }
@@ -356,26 +352,36 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
             await appendAutomationLog(
               `Downloaded '${sceneName}' successfully.`,
             );
+            promptStatuses[i] = "done";
           } else {
             await appendAutomationLog(
               `Download skipped for '${sceneName}': API request or menu flow failed.`,
             );
+            promptStatuses[i] = "failed";
           }
         } else if (state.mode === "video") {
           await appendAutomationLog(
             `Auto-download disabled for '${sceneName}'.`,
           );
+          promptStatuses[i] = "done";
         }
 
         if (state.mode === "image") {
-          const matchImageName =
-            await getImageNameFromMediaContainer(completedTile);
+          const matchImageName = await getImageNameFromMediaContainer(
+            completedTile,
+            imageName,
+          );
+
           if (matchImageName) {
-            state.matchedImageNames[imageName] = matchImageName;
-            await saveMatchedImageNames(state.matchedImageNames);
             await appendAutomationLog(
-              `Stored image name match: ${imageName} -> ${matchImageName}`,
+              `Downloaded '${sceneName}' successfully.`,
             );
+            promptStatuses[i] = "done";
+          } else {
+            await appendAutomationLog(
+              `Download skipped for '${sceneName}': API request or menu flow failed.`,
+            );
+            promptStatuses[i] = "failed";
           }
         }
       })().catch(async (error: unknown) => {

@@ -1,4 +1,4 @@
-export type PromptStatus = "pending" | "in_progress" | "done";
+export type PromptStatus = "pending" | "in_progress" | "done" | "failed";
 export type PromptMode = "image" | "video";
 
 export type AutomationFeatures = {
