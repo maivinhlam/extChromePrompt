@@ -657,8 +657,6 @@ export async function selectReferenceImage(
     }
 
     for (let i = 0; i < expectedNames.length; i++) {
-      await sleep(randomInt(300, 400));
-
       await openButton.focus();
       await sleep(randomInt(100, 200));
 
@@ -699,20 +697,6 @@ export async function selectReferenceImage(
 
     await sleep(300);
   });
-}
-
-function getFirstRowPrimaryTileContainer(): HTMLElement | null {
-  const rowPrimary = document.querySelector(
-    "div[data-index='0'][data-item-index='0']",
-  ) as HTMLElement | null;
-  if (!rowPrimary) {
-    return null;
-  }
-
-  const withTileId = rowPrimary.querySelector(
-    "[data-tile-id]",
-  ) as HTMLElement | null;
-  return withTileId || rowPrimary;
 }
 
 function isTileGenerationComplete(root: HTMLElement): boolean {
@@ -909,7 +893,10 @@ export async function waitForTileDoneById(
       return { status: "failed" };
     }
 
-    if (text.includes("không thành công") && !hasProgressPercentage(text)) {
+    if (
+      (text.includes("không thành công") && !hasProgressPercentage(text)) ||
+      text.includes("Không tạo được âm thanh")
+    ) {
       return { status: "failed" };
     }
 
@@ -988,113 +975,6 @@ export async function waitForTileDoneById(
 
     pollTimer = window.setInterval(checkNow, 1000);
     checkNow();
-  });
-}
-
-export async function waitForFirstRowItemDone(
-  waitMs: number,
-  shouldStop: () => boolean,
-): Promise<HTMLElement | null> {
-  const started = Date.now();
-
-  const getCompletedTile = (): HTMLElement | null => {
-    const tile = getFirstRowPrimaryTileContainer();
-    if (!tile) {
-      return null;
-    }
-
-    return isTileGenerationComplete(tile) ? tile : null;
-  };
-
-  const immediate = getCompletedTile();
-  if (immediate) {
-    return immediate;
-  }
-
-  return new Promise<HTMLElement | null>((resolve) => {
-    const observerRoot = document.body;
-
-    if (!observerRoot) {
-      resolve(null);
-      return;
-    }
-
-    let done = false;
-    let pollTimer = 0;
-    let checkInFlight = false;
-
-    const finalize = (result: HTMLElement | null): void => {
-      if (done) {
-        return;
-      }
-      done = true;
-      observer.disconnect();
-      window.clearInterval(pollTimer);
-      resolve(result);
-    };
-
-    const checkNow = async (): Promise<void> => {
-      if (done || checkInFlight) {
-        return;
-      }
-
-      checkInFlight = true;
-
-      try {
-        if (shouldStop()) {
-          finalize(null);
-          return;
-        }
-
-        const elapsed = Date.now() - started;
-        if (elapsed >= waitMs) {
-          finalize(null);
-          return;
-        }
-
-        const tile = getCompletedTile();
-        if (tile) {
-          finalize(tile);
-          return;
-        }
-
-        const firstRowTile = getFirstRowPrimaryTileContainer();
-        if (!firstRowTile) {
-          return;
-        }
-
-        const text = (firstRowTile.textContent || "").toLowerCase();
-        if (
-          text.includes("flow đang có lượng truy cập cao") ||
-          text.includes("we noticed some unusual activity")
-        ) {
-          finalize(null);
-        }
-
-        if (text.includes("không thành công") && !hasProgressPercentage(text)) {
-          finalize(null);
-        }
-      } finally {
-        checkInFlight = false;
-      }
-    };
-
-    const observer = new MutationObserver(() => {
-      void checkNow();
-    });
-
-    observer.observe(observerRoot, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-      attributes: true,
-      attributeFilter: ["style", "class", "data-state", "data-index"],
-    });
-
-    pollTimer = window.setInterval(() => {
-      void checkNow();
-    }, 1000);
-    void checkNow();
   });
 }
 

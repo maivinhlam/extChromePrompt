@@ -11,7 +11,6 @@ This framework is designed to create AI Video scripts with high technical accura
 
 - In the visual description
 - In the action description
-- In the voice-over (VO)
 - In the background description
 
 ---
@@ -21,12 +20,12 @@ This framework is designed to create AI Video scripts with high technical accura
 Each scene must follow this standard structure so AI can deeply understand context and technical details.  
 **Note:** one scene per line, 75 scenes = 75 lines. Each part is separated by `" | "`, with component names in uppercase (for example `VO abc | VOCAL TONE: xyz`):
 
-1. **SCENE X:** Scene number (separated from the rest by a colon). format: 01-99 (false: 1, true: 01) 
+1. **SCENE X:** Scene number (separated from the rest by a colon). format: 01-99 (false: 1, true: 01)
 2. **Visual Prompt:** General context description (Style: realistic high‑tech agricultural / agri‑tech, Lighting: sunrise or golden hour, Subject: mature fruit).
 3. **Action Title:** Short action name (for example _Extreme macro growth montage_).
 4. **Visual Logic:** **[IMPORTANT]** Detailed physical constraints — **see Section 3 Visual Logic & Object Physics Library** for full rules and object-specific constraints. Reference relevant tech terms where applicable (e.g., _edge AI scanner_, _UAV sprayer_, _fertigation controller_). if have many object, please add rules for all.
 5. **SOUND:** Detailed environmental sound (Foley) (for example soft breeze, distant birds, mechanical hum).
-6. **VO:** Voice-over content, random in 2-4 scene have one VO, the top 5 are always have VO. If VO is empty, please type: VO: NO
+6. **VO:** Voice-over content.
 7. **Vocal Tone:** Voice-over characteristics (for example deep American male, middle-aged, calm, precise). Leave blank if VO is empty. If Vocal Tone is empty, please type: VO: NO
 8. **CAMERA:** Professional cinematography terms (for example locked macro push-in, vertical rise to top-down master).
 9. **IMAGES:** Reference images list (max 3). Use from pre-generated list.
@@ -41,7 +40,7 @@ Each scene must follow this standard structure so AI can deeply understand conte
 
 ### How to use this section
 
-- When writing a scene, **cite the relevant subsection** (e.g., `VISUAL LOGIC: VISUAL LOGIC:  Drones and Aerial Systems; Propeller Effects: Propellers show motion blur, downdraft bends vegetation and lifts dust proportionally to rotor size and altitude.; Flight Path: Trajectories are smooth and physically plausible, avoid teleportation or canopy penetration.; `).
+- When writing a scene, **cite the relevant subsection** (e.g., `VISUAL LOGIC: Drones and Aerial Systems - Propeller Effects: Propellers show motion blur, downdraft bends vegetation and lifts dust proportionally to rotor size and altitude; Flight Path: Trajectories are smooth and physically plausible, avoid teleportation or canopy penetration. `).
 - Keep each scene’s Visual Logic focused and specific; reference the library rather than restating long rules.
 - Use the library as a checklist to prevent common AI generation errors (clipping, floating objects, inconsistent shadows, impossible motion).
 
@@ -183,23 +182,36 @@ Use stable AI Video camera terms:
 
 **f. planting trees**
 
+- Before planting a tree, we need create a scene, in scene, we create a hole to put it.
 - When create image prompt, we will generate an image with Giant Agricultural Machines
+
+**g. Machinery Large (Tractors, Plows, Cannons, Mowers)**
+
+- Machinery Large only allowed to walk between two rows of trees and must not run over any tree
+
+**h. VO**
+
+- The top 5 are always have VO.
+- Random in 2-4 scene have one VO,
+- In a SCENE, If VO is empty, please type: VO: NO
+- The VO may be blank in some scenes, but it should be present at the beginning of a series of similar scenes.
 
 ---
 
 ## 6. Reference Images
 
-Before writing 75 scenes, generate a list of reference images and prompts to ensure visual consistency.
+After writing 75 scenes, generate a list of reference images and prompts to ensure visual consistency.
 
 - Each scene should select images from this list.
 - Format: `Image 1: xxx`
 - One image can be reused across multiple scenes (for example man, leaf, branch, flower, ripe fruit, green fruit, young tree, seeds).
 - some scene can wrong if have no images: young tree, seeds, leaf, flower. make sure them are added.
+
 ---
 
 ## Quick Implementation Notes
 
-- **When filling Scene Visual Logic:** always reference the specific subsection in **Section 3 Visual Logic & Object Physics Library** (for example `VISUAL LOGIC:  Drones and Aerial Systems; Propeller Effects: Propellers show motion blur, downdraft bends vegetation and lifts dust proportionally to rotor size and altitude.; Flight Path: Trajectories are smooth and physically plausible, avoid teleportation or canopy penetration.; `).
+- **When filling Scene Visual Logic:** always reference the specific subsection in **Section 3 Visual Logic & Object Physics Library** (for example `VISUAL LOGIC:  Drones and Aerial Systems - Propeller Effects: Propellers show motion blur, downdraft bends vegetation and lifts dust proportionally to rotor size and altitude; Flight Path: Trajectories are smooth and physically plausible, avoid teleportation or canopy penetration.; `).
 - **Checklist before finalizing each scene:** Identity Locking; Single Action Focus; Visual Logic compliance; Multiplicity numbers; Contact Points present; Shadow and reflection consistency.
 - **Error Prevention:** add a short “scene QA” step: verify no clipping, no floating objects, consistent shadows, correct contact points, and realistic sensor/telemetry UI behavior.
 

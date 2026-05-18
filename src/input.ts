@@ -139,7 +139,7 @@ export async function nativeType(tabId: number, text: string): Promise<void> {
       text,
     });
 
-    await sleep(randomInt(2000, 3000)); // Wait for the text to be processed before sending Enter
+    await sleep(randomInt(600, 1000)); // Wait for the text to be processed before sending Enter
     await sendEnterKey(target);
     if (attachedHere) {
       await chrome.debugger.detach(target);

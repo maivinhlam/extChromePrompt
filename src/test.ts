@@ -10,7 +10,7 @@ import {
 import { appendAutomationLog } from "./storage";
 import { sleep } from "./utils";
 
-export async function test(pendingRenameTasks: Promise<void>[]) {
+export async function test(pendingRenameTasks: Set<Promise<void>>) {
   const knownTopRowTileIds = new Set(getTopRowTileIds());
   let renameTo = extractPromptPrefixName(
     "Scene 1 - Image 1",
@@ -74,12 +74,12 @@ export async function test(pendingRenameTasks: Promise<void>[]) {
     );
   });
 
-  pendingRenameTasks.push(renameTask);
+  pendingRenameTasks.add(renameTask);
 
-  if (pendingRenameTasks.length) {
+  if (pendingRenameTasks.size) {
     await appendAutomationLog(
-      `Waiting for ${pendingRenameTasks.length} rename task(s) to finish.`,
+      `Waiting for ${pendingRenameTasks.size} rename task(s) to finish.`,
     );
-    await Promise.allSettled(pendingRenameTasks);
+    await Promise.allSettled([...pendingRenameTasks]);
   }
 }

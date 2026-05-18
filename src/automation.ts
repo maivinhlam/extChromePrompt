@@ -113,7 +113,7 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
   let promptStatuses = createInitialPromptStatuses(state.prompts.length);
   let startIndex = 0;
   let activePromptIndex = 0;
-  const pendingTasks: Promise<void>[] = [];
+  const pendingTasks = new Set<Promise<void>>();
 
   const savedState = await loadAutomationState();
   if (
@@ -141,12 +141,26 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
   }
 
   try {
-    const waitForPendingTasks = async (): Promise<void> => {
-      if (!pendingTasks.length) {
+    const waitForAvailableTaskSlot = async (): Promise<void> => {
+      if (pendingTasks.size < MAX_PENDING_TASKS) {
         return;
       }
 
-      const tasksToWait = pendingTasks.splice(0, pendingTasks.length);
+      await appendAutomationLog(
+        `Reached max pending tasks (${pendingTasks.size}/${MAX_PENDING_TASKS}). Waiting for one task to finish.`,
+      );
+      await setAutomationStatus(
+        `Reached max pending tasks (${pendingTasks.size}/${MAX_PENDING_TASKS}). Waiting for one task to finish.`,
+      );
+      await Promise.race(pendingTasks);
+    };
+
+    const waitForPendingTasks = async (): Promise<void> => {
+      if (!pendingTasks.size) {
+        return;
+      }
+
+      const tasksToWait = [...pendingTasks];
       await appendAutomationLog(
         `Waiting for ${tasksToWait.length} task(s) to finish.`,
       );
@@ -390,11 +404,14 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
         );
       });
 
-      pendingTasks.push(pendingTask);
+      pendingTasks.add(pendingTask);
+      void pendingTask.finally(() => {
+        pendingTasks.delete(pendingTask);
+      });
       i += 1;
 
-      if (pendingTasks.length >= MAX_PENDING_TASKS) {
-        await waitForPendingTasks();
+      if (pendingTasks.size >= MAX_PENDING_TASKS) {
+        await waitForAvailableTaskSlot();
       }
 
       if (i > 0 && i < state.prompts.length && !state.stopRequested) {
