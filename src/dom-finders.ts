@@ -1,4 +1,4 @@
-import { isVisible, sleep } from "./utils";
+import { isVisible, sleepMilliseconds } from "./utils";
 
 export function findPromptInput(): HTMLElement | null {
   const preferredSlateEditors = Array.from(
@@ -171,7 +171,7 @@ export async function waitForDialog(
     if (dialog && isVisible(dialog)) {
       return dialog;
     }
-    await new Promise((resolve) => setTimeout(resolve, 120));
+    await sleepMilliseconds(120);
   }
   return null;
 }

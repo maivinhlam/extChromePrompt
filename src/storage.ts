@@ -5,6 +5,7 @@ import {
   MAX_LOG_ITEMS,
 } from "./constants";
 import type { AutomationStatePayload, LogEntry } from "./types";
+import { formatTimestamp } from "./utils";
 
 const RUNNER_SETTINGS_KEY = "flowPromptRunnerSettings";
 
@@ -63,10 +64,10 @@ export async function setAutomationStatus(message: string): Promise<void> {
 
 export async function appendAutomationLog(message: string): Promise<void> {
   const entry: LogEntry = {
-    timestamp: Date.now(),
+    timestamp: formatTimestamp(Date.now()),
     message: String(message || ""),
   };
-
+  await setAutomationStatus(entry.message);
   try {
     const data = await chrome.storage.local.get(LOG_STORAGE_KEY);
     const logs = Array.isArray(data[LOG_STORAGE_KEY])

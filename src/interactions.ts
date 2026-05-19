@@ -1,4 +1,4 @@
-import { sleep, isVisible, pauseBeforeStep } from "./utils";
+import { sleepMilliseconds, isVisible, pauseBeforeStep } from "./utils";
 import { appendAutomationLog, saveMatchedImageNames } from "./storage";
 import {
   findPromptInput,
@@ -96,7 +96,7 @@ async function typeTextIntoField(
         key: character,
       }),
     );
-    await sleep(getTypingDelay(character));
+    await sleepMilliseconds(getTypingDelay(character));
   }
 
   field.dispatchEvent(new Event("change", { bubbles: true }));
@@ -116,7 +116,7 @@ async function waitForTransientUiToClose(timeoutMs: number): Promise<boolean> {
       return true;
     }
 
-    await sleep(120);
+    await sleepMilliseconds(120);
   }
 
   return false;
@@ -141,7 +141,7 @@ async function ensurePageCanOpenNativeUi(timeoutMs = 2000): Promise<boolean> {
       return true;
     }
 
-    await sleep(50);
+    await sleepMilliseconds(50);
   }
 
   return !document.hidden;
@@ -212,7 +212,7 @@ async function simulateHumanPresenceBeforeDownload(
   mediaContainer: HTMLElement,
 ): Promise<void> {
   mediaContainer.scrollIntoView({ block: "center", inline: "nearest" });
-  await sleep(randomInt(180, 420));
+  await sleepMilliseconds(randomInt(180, 420));
 
   const scrollSteps = randomInt(1, 3);
   for (let index = 0; index < scrollSteps; index += 1) {
@@ -221,11 +221,11 @@ async function simulateHumanPresenceBeforeDownload(
       top: direction * randomInt(40, 180),
       behavior: "smooth",
     });
-    await sleep(randomInt(220, 520));
+    await sleepMilliseconds(randomInt(220, 520));
   }
 
   mediaContainer.scrollIntoView({ block: "center", inline: "nearest" });
-  await sleep(randomInt(160, 320));
+  await sleepMilliseconds(randomInt(160, 320));
 
   const hoverCandidates = getHoverCandidates(mediaContainer);
   const hoverCount = Math.min(hoverCandidates.length, randomInt(2, 4));
@@ -234,10 +234,10 @@ async function simulateHumanPresenceBeforeDownload(
     const candidate = hoverCandidates[index];
     candidate.focus?.();
     dispatchHoverEvents(candidate);
-    await sleep(randomInt(450, 1100));
+    await sleepMilliseconds(randomInt(450, 1100));
   }
 
-  await sleep(randomInt(450, 1100));
+  await sleepMilliseconds(randomInt(450, 1100));
 }
 
 async function debuggerClickAtPoint(
@@ -267,7 +267,7 @@ async function debuggerClickElement(
 
   element.scrollIntoView({ block: "center", inline: "nearest" });
   element.focus();
-  await sleep(80);
+  await sleepMilliseconds(80);
 
   const { x, y } = getElementClickPoint(element);
   return debuggerClickAtPoint(x, y, button);
@@ -347,18 +347,6 @@ export async function fillPromptInput(prompt: string): Promise<boolean> {
   });
 }
 
-export async function clickCreateButton(): Promise<void> {
-  const sendButton = findSendButton();
-
-  if (!sendButton) {
-    await appendAutomationLog("Could not find send button.");
-    throw new Error("Could not find send button.");
-  }
-  await appendAutomationLog("Found send button.");
-  await safeClick(sendButton);
-  await appendAutomationLog("Prompt sent. Moving to next prompt immediately.");
-}
-
 export async function safeClick(element: HTMLElement | null): Promise<boolean> {
   if (!element || !isVisible(element)) {
     return false;
@@ -369,7 +357,7 @@ export async function safeClick(element: HTMLElement | null): Promise<boolean> {
     return false;
   }
 
-  await sleep(80);
+  await sleepMilliseconds(80);
   return true;
 }
 
@@ -386,7 +374,7 @@ async function openContextMenuAtContainerCenter(
   }
 
   mediaContainer.scrollIntoView({ block: "center", inline: "nearest" });
-  await sleep(80);
+  await sleepMilliseconds(80);
 
   const rect = mediaContainer.getBoundingClientRect();
   const clientX = rect.left + rect.width / 2;
@@ -549,12 +537,12 @@ export async function clickAndWaitForMenu(
   timeoutPerTryMs: number,
 ): Promise<boolean> {
   for (let attempt = 0; attempt < maxRetries; attempt += 1) {
-    await safeClick(button);
+    await button.click();
     const menuShown = await waitForMenu(timeoutPerTryMs);
     if (menuShown) {
       return true;
     }
-    await sleep(160);
+    await sleepMilliseconds(160);
   }
 
   return false;
@@ -586,20 +574,20 @@ export async function selectModelAndModeTab(
     if (mode === "video") {
       const videoOption = findButtonByText(["video"], menuShown);
       if (videoOption) {
-        await safeClick(videoOption);
+        await videoOption.click();
         await appendAutomationLog("Selected Video option from model menu.");
       } else {
         await appendAutomationLog("Video option not found in model menu.");
       }
 
       await configureVideoModeModel();
-      await sleep(300);
-      await safeClick(videoOption);
+      await sleepMilliseconds(300);
+      await videoOption.click();
     } else {
       const imageOption = findButtonByText(["Hình ảnh"], menuShown);
       if (imageOption) {
-        await safeClick(imageOption);
-        await sleep(200);
+        await imageOption.click();
+        await sleepMilliseconds(200);
         await appendAutomationLog("Selected Hinh anh option from model menu.");
       } else {
         await appendAutomationLog("Hinh anh option not found in model menu.");
@@ -612,8 +600,8 @@ export async function configureVideoModeModel(): Promise<void> {
   await appendAutomationLog("Click Thanh phan tab.");
   const referencesTab = findVideoReferencesTab();
   if (referencesTab) {
-    await safeClick(referencesTab);
-    await sleep(250);
+    await referencesTab.click();
+    await sleepMilliseconds(250);
     await appendAutomationLog(`"Thanh phan" tab selected.`);
   } else {
     await appendAutomationLog("Thanh phan tab not found.");
@@ -627,8 +615,8 @@ export async function configureVideoModeModel(): Promise<void> {
     return;
   }
 
-  await safeClick(modelDropdown);
-  await sleep(220);
+  await modelDropdown.click();
+  await sleepMilliseconds(220);
 
   await appendAutomationLog("Choose Veo 3.1 - Lite [Lower Priority].");
   const veoLiteOption = findButtonByText([
@@ -636,8 +624,8 @@ export async function configureVideoModeModel(): Promise<void> {
     "veo 3.1 - lite",
   ]);
   if (veoLiteOption) {
-    await safeClick(veoLiteOption);
-    await sleep(240);
+    await veoLiteOption.click();
+    await sleepMilliseconds(240);
     await appendAutomationLog(
       "Video model set to Veo 3.1 - Lite [Lower Priority].",
     );
@@ -658,10 +646,10 @@ export async function selectReferenceImage(
 
     for (let i = 0; i < expectedNames.length; i++) {
       await openButton.focus();
-      await sleep(randomInt(100, 200));
+      await sleepMilliseconds(randomInt(100, 200));
 
       await openButton.click();
-      await sleep(randomInt(400, 600));
+      await sleepMilliseconds(randomInt(400, 600));
 
       const dialogAfter = await waitForDialog(500);
       if (dialogAfter) {
@@ -677,7 +665,7 @@ export async function selectReferenceImage(
             `Could not find reference image with name "${matchImageName}".`,
           );
         }
-        await sleep(randomInt(200, 300));
+        await sleepMilliseconds(randomInt(200, 300));
 
         // Tell the background script to start typing
         const response = await chrome.runtime.sendMessage({
@@ -695,7 +683,7 @@ export async function selectReferenceImage(
       }
     }
 
-    await sleep(300);
+    await sleepMilliseconds(300);
   });
 }
 
@@ -868,7 +856,7 @@ export async function waitForTileDoneById(
   | { status: "timeout" }
   | { status: "stopped" }
 > {
-  await sleep(2000);
+  await sleepMilliseconds(2000);
 
   const started = Date.now();
 
@@ -1024,9 +1012,9 @@ export async function getImageNameFromMediaContainer(
 ): Promise<boolean> {
   return withPageInteractionLock(async () => {
     if (mediaContainer) {
-      await sleep(500);
+      await sleepMilliseconds(500);
       await simulateHumanPresenceBeforeDownload(mediaContainer);
-      await sleep(500);
+      await sleepMilliseconds(500);
 
       const text = mediaContainer.textContent || "";
       // get the text after the text "image"  const match = text.match(/image\s*[:\-]?\s*(.+)/i);
@@ -1068,7 +1056,7 @@ export async function waitForMediaIncrease(
       return;
     }
 
-    await sleep(1200);
+    await sleepMilliseconds(1200);
   }
 
   await appendAutomationLog("No new media detected before timeout.");
@@ -1083,7 +1071,7 @@ export async function waitBlurForActiveTile(
     "div[style*='--blur-amount']",
   ) as HTMLElement | null;
   if (!opacityLayer) {
-    await sleep(waitMs);
+    await sleepMilliseconds(waitMs);
     return true;
   }
 
@@ -1093,8 +1081,8 @@ export async function waitBlurForActiveTile(
     if (Date.now() - start > waitMs) {
       return true;
     }
-    await sleep(100);
+    await sleepMilliseconds(100);
   }
-  await sleep(100);
+  await sleepMilliseconds(100);
   return true;
 }

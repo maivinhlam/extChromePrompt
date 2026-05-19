@@ -1,5 +1,5 @@
 import { randomInt } from "./interactions";
-import { sleep } from "./utils";
+import { sleepMilliseconds } from "./utils";
 
 /**
  * Sends a native Enter key event to the target tab.
@@ -139,7 +139,7 @@ export async function nativeType(tabId: number, text: string): Promise<void> {
       text,
     });
 
-    await sleep(randomInt(600, 1000)); // Wait for the text to be processed before sending Enter
+    await sleepMilliseconds(randomInt(600, 1000)); // Wait for the text to be processed before sending Enter
     await sendEnterKey(target);
     if (attachedHere) {
       await chrome.debugger.detach(target);

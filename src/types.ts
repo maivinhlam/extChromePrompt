@@ -42,6 +42,6 @@ export type SceneNumbers = {
 };
 
 export type LogEntry = {
-  timestamp: number;
+  timestamp: string;
   message: string;
 };

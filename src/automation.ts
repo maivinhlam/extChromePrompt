@@ -26,7 +26,7 @@ import {
   formatSceneName,
   extractPromptPrefixName,
 } from "./formatting";
-import { pauseBeforeStep, sleep } from "./utils";
+import { pauseBeforeStep, sleepMilliseconds } from "./utils";
 import { test } from "./test";
 
 function createInitialPromptStatuses(length: number): PromptStatus[] {
@@ -38,22 +38,20 @@ async function waitWhilePaused(): Promise<boolean> {
 
   while (state.pauseRequested) {
     if (state.stopRequested) {
-      await setAutomationStatus("Stop requested.");
+      await appendAutomationLog("Stop requested.");
       return false;
     }
 
     if (!loggedPause) {
-      await appendAutomationLog("Automation paused.");
-      await setAutomationStatus("Paused. Click Resume to continue.");
+      await appendAutomationLog("Paused. Click Resume to continue.");
       loggedPause = true;
     }
 
-    await sleep(200);
+    await sleepMilliseconds(200);
   }
 
   if (loggedPause) {
     await appendAutomationLog("Automation resumed.");
-    await setAutomationStatus("Automation resumed.");
   }
 
   return !state.stopRequested;
@@ -72,7 +70,7 @@ async function waitForNextPromptCountdown(
     }
 
     if (state.stopRequested) {
-      await setAutomationStatus("Stop requested.");
+      await appendAutomationLog("Stop requested.");
       return;
     }
 
@@ -82,7 +80,7 @@ async function waitForNextPromptCountdown(
 
     const sleepMs =
       secondsLeft === 1 ? intervalMs - (totalSeconds - 1) * 1000 : 1000;
-    await sleep(Math.max(1, sleepMs));
+    await sleepMilliseconds(Math.max(1, sleepMs));
   }
 }
 
@@ -149,9 +147,6 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
       await appendAutomationLog(
         `Reached max pending tasks (${pendingTasks.size}/${MAX_PENDING_TASKS}). Waiting for one task to finish.`,
       );
-      await setAutomationStatus(
-        `Reached max pending tasks (${pendingTasks.size}/${MAX_PENDING_TASKS}). Waiting for one task to finish.`,
-      );
       await Promise.race(pendingTasks);
     };
 
@@ -164,23 +159,19 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
       await appendAutomationLog(
         `Waiting for ${tasksToWait.length} task(s) to finish.`,
       );
-      await setAutomationStatus(
-        `Waiting for ${tasksToWait.length} task(s) to finish.`,
-      );
       await Promise.allSettled(tasksToWait);
     };
 
     const queuePromptForRetry = async (
       promptToRetry: string,
+      name: string,
     ): Promise<void> => {
       state.prompts.push(promptToRetry);
       promptStatuses.push("pending");
+      endIndex++;
 
       await appendAutomationLog(
-        `Generation failed. Re-queued prompt at the end (${state.prompts.length}/${state.prompts.length}).`,
-      );
-      await setAutomationStatus(
-        `Generation failed. Re-queued prompt at the end (${state.prompts.length}/${state.prompts.length}).`,
+        `Generation failed for ${name}. Re-queued prompt at the end (${state.prompts.length}/${state.prompts.length}).`,
       );
 
       await saveAutomationState({
@@ -194,9 +185,6 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
 
     await appendAutomationLog(
       `Automation started. Mode: ${state.mode}. Total prompts: ${state.prompts.length}.`,
-    );
-    await setAutomationStatus(
-      `Started. Total prompts: ${state.prompts.length}`,
     );
 
     if (startIndex > 0) {
@@ -217,35 +205,29 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
       appendAutomationLog,
     );
 
-    if (!TEST_MODE) {
-      // await selectModelAndModeTab(state.mode);
-    }
-
-    if (TEST_MODE) {
-      test(pendingTasks).catch(async (error: unknown) => {
-        await appendAutomationLog(
-          `Test function error: ${(error as Error).message}`,
-        );
-      });
-      return;
-    }
-
-    for (let i = startIndex; i < state.prompts.length; ) {
+    let i = startIndex;
+    let endIndex = state.prompts.length;
+    while (i < endIndex) {
       const canContinue = await waitWhilePaused();
       if (!canContinue) {
         break;
       }
 
       activePromptIndex = i;
-      const prompt = state.prompts[i];
-      const numbers = parseSceneNumbers(prompt, i + 1);
-
+      const promptIndex = activePromptIndex;
+      const prompt = state.prompts[promptIndex];
+      const sceneNumbers = parseSceneNumbers(prompt, promptIndex + 1);
+      const promptName = extractPromptPrefixName(
+        prompt,
+        formatSceneName(sceneNumbers.scene, ""),
+      );
       promptStatuses[i] = "in_progress";
+
       await saveAutomationState({
         running: true,
         mode: state.mode,
         promptCount: state.prompts.length,
-        currentIndex: i,
+        currentIndex: promptIndex,
         promptStatuses,
       });
 
@@ -253,19 +235,14 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
         await appendAutomationLog(
           "Stop requested. Exiting before next prompt.",
         );
-        await setAutomationStatus("Stop requested.");
         break;
       }
 
       await appendAutomationLog(
-        `Prompt ${i + 1}/${state.prompts.length}: SCENE ${numbers.scene}.`,
+        `Prompt ${promptIndex + 1}/${state.prompts.length}: SCENE ${sceneNumbers.scene}.`,
       );
 
       const knownTopRowTileIds = new Set(getTopRowTileIds());
-
-      if (!(await waitWhilePaused())) {
-        break;
-      }
 
       // 2. Tell the background script to start typing
       if (!(await waitWhilePaused())) {
@@ -275,10 +252,10 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
       const imageNames = extractImageNamesFromPrompt(prompt);
       if (state.enableReferenceImages && imageNames.length > 0) {
         await selectReferenceImage(imageNames);
-        await sleep(randomInt(2000, 3000));
+        await sleepMilliseconds(randomInt(2000, 3000));
       } else if (!state.enableReferenceImages && imageNames.length > 0) {
         await appendAutomationLog(
-          `Reference image selection disabled for SCENE ${numbers.scene}.`,
+          `Reference image selection disabled for SCENE ${sceneNumbers.scene}.`,
         );
       }
 
@@ -288,19 +265,9 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
         running: true,
         mode: state.mode,
         promptCount: state.prompts.length,
-        currentIndex: Math.min(i + 1, state.prompts.length - 1),
+        currentIndex: Math.min(promptIndex + 1, state.prompts.length - 1),
         promptStatuses,
       });
-
-      const sceneName = extractPromptPrefixName(
-        prompt,
-        formatSceneName(numbers.scene, ""),
-      );
-
-      const imageName = extractPromptPrefixName(
-        prompt,
-        formatSceneName(numbers.scene, ""),
-      );
 
       let waitingTime = 60000;
       if (state.mode === "video") {
@@ -320,7 +287,7 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
 
         if (!newTileId) {
           await appendAutomationLog(
-            `Task skipped for '${sceneName}': no new tile detected in time.`,
+            `Task skipped for '${promptName}': no new tile detected in time.`,
           );
           return;
         }
@@ -332,13 +299,14 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
         );
 
         if (tileResult.status === "failed") {
-          await queuePromptForRetry(prompt);
+          await queuePromptForRetry(prompt, promptName);
+          endIndex++;
           return;
         }
 
         if (tileResult.status !== "completed") {
           await appendAutomationLog(
-            `Task skipped for '${sceneName}': tile did not reach 100% in time.`,
+            `Task skipped for '${promptName}': tile did not reach 100% in time.`,
           );
           return;
         }
@@ -350,57 +318,56 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
         }
 
         if (state.mode === "image") {
-          await sleep(6000);
+          await sleepMilliseconds(6000);
         } else if (state.mode === "video") {
-          await sleep(10000);
+          await sleepMilliseconds(10000);
         }
 
-        // if (!(await waitWhilePaused())) {
-        //   return;
-        // }
-
         if (state.mode === "video" && state.enableAutoDownload) {
-          await appendAutomationLog(`Downloading '${sceneName}'...`);
-          const downloaded = await downloadMediaItem(completedTile, sceneName);
+          await appendAutomationLog(`Downloading '${promptName}'...`);
+          const downloaded = await downloadMediaItem(completedTile, promptName);
           if (downloaded) {
             await appendAutomationLog(
-              `Downloaded '${sceneName}' successfully.`,
+              `Downloaded '${promptName}' successfully.`,
             );
-            promptStatuses[i] = "done";
+            promptStatuses[promptIndex] = "done";
           } else {
             await appendAutomationLog(
-              `Download skipped for '${sceneName}': API request or menu flow failed.`,
+              `Download skipped for '${promptName}': API request or menu flow failed.`,
             );
-            promptStatuses[i] = "failed";
+            promptStatuses[promptIndex] = "failed";
           }
         } else if (state.mode === "video") {
           await appendAutomationLog(
-            `Auto-download disabled for '${sceneName}'.`,
+            `Auto-download disabled for '${promptName}'.`,
           );
-          promptStatuses[i] = "done";
+          promptStatuses[promptIndex] = "done";
         }
 
         if (state.mode === "image") {
           const matchImageName = await getImageNameFromMediaContainer(
             completedTile,
-            imageName,
+            promptName,
           );
 
           if (matchImageName) {
             await appendAutomationLog(
-              `Downloaded '${sceneName}' successfully.`,
+              `Get the name of '${promptName}' successfully.`,
             );
-            promptStatuses[i] = "done";
+            promptStatuses[promptIndex] = "done";
           } else {
             await appendAutomationLog(
-              `Download skipped for '${sceneName}': API request or menu flow failed.`,
+              `Get the name of '${promptName}' failed: API request or menu flow failed.`,
             );
-            promptStatuses[i] = "failed";
+            promptStatuses[promptIndex] = "failed";
+            await queuePromptForRetry(prompt, promptName);
+            endIndex++;
+            return;
           }
         }
       })().catch(async (error: unknown) => {
         await appendAutomationLog(
-          `Task failed for '${sceneName}': ${(error as Error).message}`,
+          `Task failed for '${promptName}': ${(error as Error).message}`,
         );
       });
 
@@ -408,27 +375,27 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
       void pendingTask.finally(() => {
         pendingTasks.delete(pendingTask);
       });
-      i += 1;
 
       if (pendingTasks.size >= MAX_PENDING_TASKS) {
         await waitForAvailableTaskSlot();
       }
 
       if (i > 0 && i < state.prompts.length && !state.stopRequested) {
-        await waitForNextPromptCountdown(state.intervalMs, sceneName);
+        await waitForNextPromptCountdown(state.intervalMs, promptName);
       }
+
+      await sleepMilliseconds(1000);
+      i += 1;
     }
 
     await waitForPendingTasks();
 
-    await sleep(11000);
+    await sleepMilliseconds(11000);
     await clearAutomationState();
     await appendAutomationLog("Automation completed.");
-    await setAutomationStatus("Automation completed.");
     window.alert("Automation completed.");
   } catch (error) {
     await appendAutomationLog(`Automation error: ${(error as Error).message}`);
-    await setAutomationStatus((error as Error).message || "Automation error.");
     throw error;
   } finally {
     state.pauseRequested = false;
