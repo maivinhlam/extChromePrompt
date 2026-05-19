@@ -1,13 +1,8 @@
-import {
-  LOG_STORAGE_KEY,
-  AUTOMATION_STATE_KEY,
-  STATUS_STORAGE_KEY,
-  MAX_LOG_ITEMS,
-} from "./constants";
-import type { AutomationStatePayload, LogEntry } from "./types";
-import { formatTimestamp } from "./utils";
+import { LOG_STORAGE_KEY, AUTOMATION_STATE_KEY, STATUS_STORAGE_KEY, MAX_LOG_ITEMS } from './constants';
+import type { AutomationStatePayload, LogEntry } from './types';
+import { formatTimestamp } from './utils';
 
-const RUNNER_SETTINGS_KEY = "flowPromptRunnerSettings";
+const RUNNER_SETTINGS_KEY = 'flowPromptRunnerSettings';
 
 export async function loadAutomationState(): Promise<AutomationStatePayload | null> {
   try {
@@ -18,9 +13,7 @@ export async function loadAutomationState(): Promise<AutomationStatePayload | nu
   }
 }
 
-export async function saveAutomationState(
-  payload: AutomationStatePayload,
-): Promise<void> {
+export async function saveAutomationState(payload: AutomationStatePayload): Promise<void> {
   try {
     await chrome.storage.local.set({
       [AUTOMATION_STATE_KEY]: {
@@ -44,18 +37,16 @@ export async function clearAutomationState(): Promise<void> {
 export async function loadAutomationStatus(): Promise<string> {
   try {
     const data = await chrome.storage.local.get(STATUS_STORAGE_KEY);
-    return typeof data[STATUS_STORAGE_KEY] === "string"
-      ? (data[STATUS_STORAGE_KEY] as string)
-      : "Ready.";
+    return typeof data[STATUS_STORAGE_KEY] === 'string' ? (data[STATUS_STORAGE_KEY] as string) : 'Ready.';
   } catch {
-    return "Ready.";
+    return 'Ready.';
   }
 }
 
 export async function setAutomationStatus(message: string): Promise<void> {
   try {
     await chrome.storage.local.set({
-      [STATUS_STORAGE_KEY]: String(message || "Ready."),
+      [STATUS_STORAGE_KEY]: String(message || 'Ready.'),
     });
   } catch {
     // no-op
@@ -65,14 +56,12 @@ export async function setAutomationStatus(message: string): Promise<void> {
 export async function appendAutomationLog(message: string): Promise<void> {
   const entry: LogEntry = {
     timestamp: formatTimestamp(Date.now()),
-    message: String(message || ""),
+    message: String(message || ''),
   };
   await setAutomationStatus(entry.message);
   try {
     const data = await chrome.storage.local.get(LOG_STORAGE_KEY);
-    const logs = Array.isArray(data[LOG_STORAGE_KEY])
-      ? (data[LOG_STORAGE_KEY] as LogEntry[])
-      : [];
+    const logs = Array.isArray(data[LOG_STORAGE_KEY]) ? (data[LOG_STORAGE_KEY] as LogEntry[]) : [];
     logs.push(entry);
 
     if (logs.length > MAX_LOG_ITEMS) {
@@ -85,13 +74,10 @@ export async function appendAutomationLog(message: string): Promise<void> {
   }
 }
 
-export async function saveMatchedImageNames(
-  matchedImageNames: Record<string, string>,
-): Promise<void> {
+export async function saveMatchedImageNames(matchedImageNames: Record<string, string>): Promise<void> {
   try {
     const data = await chrome.storage.local.get(RUNNER_SETTINGS_KEY);
-    const existing =
-      (data[RUNNER_SETTINGS_KEY] as Record<string, unknown> | undefined) || {};
+    const existing = (data[RUNNER_SETTINGS_KEY] as Record<string, unknown> | undefined) || {};
 
     await chrome.storage.local.set({
       [RUNNER_SETTINGS_KEY]: {

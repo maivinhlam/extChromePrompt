@@ -1,4 +1,4 @@
-import { isVisible } from "./utils";
+import { isVisible } from './utils';
 
 export function countMainMediaItems(): number {
   return getMainMediaContainers().length;
@@ -10,9 +10,7 @@ export function getLatestMainMediaContainer(): HTMLElement | null {
 }
 
 export function getMainMediaContainers(): HTMLElement[] {
-  const mediaNodes = Array.from(
-    document.querySelectorAll("img, video"),
-  ) as HTMLElement[];
+  const mediaNodes = Array.from(document.querySelectorAll('img, video')) as HTMLElement[];
   const containers: HTMLElement[] = [];
   const seen = new Set<HTMLElement>();
 
@@ -45,11 +43,11 @@ function isMainMediaCandidate(media: HTMLElement): boolean {
   }
 
   const rect = media.getBoundingClientRect();
-  if (media.tagName.toLowerCase() === "img") {
+  if (media.tagName.toLowerCase() === 'img') {
     return rect.width >= 96 && rect.height >= 96;
   }
 
-  if (media.tagName.toLowerCase() === "video") {
+  if (media.tagName.toLowerCase() === 'video') {
     return rect.width >= 120 && rect.height >= 80;
   }
 

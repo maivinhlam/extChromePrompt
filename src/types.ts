@@ -1,5 +1,5 @@
-export type PromptStatus = "pending" | "in_progress" | "done" | "failed";
-export type PromptMode = "image" | "video";
+export type PromptStatus = 'pending' | 'in_progress' | 'done' | 'failed';
+export type PromptMode = 'image' | 'video';
 
 export type AutomationFeatures = {
   enableReferenceImages: boolean;

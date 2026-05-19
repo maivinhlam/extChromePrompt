@@ -14,5 +14,12 @@
     "@types/chrome": "^0.0.306",
     "typescript": "^5.8.3",
     "vite": "^5.4.10"
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": true,
+    "printWidth": 120,
+    "tabWidth": 2,
+    "trailingComma": "es5"
   }
 }

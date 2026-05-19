@@ -1,24 +1,24 @@
-import { randomInt } from "./interactions";
-import { sleepMilliseconds } from "./utils";
+import { randomInt } from './interactions';
+import { sleepMilliseconds } from './utils';
 
 /**
  * Sends a native Enter key event to the target tab.
  */
 async function sendEnterKey(target: chrome.debugger.Debuggee): Promise<void> {
   const enterOptions = {
-    key: "Enter",
-    code: "Enter",
+    key: 'Enter',
+    code: 'Enter',
     windowsVirtualKeyCode: 13,
     nativeVirtualKeyCode: 13,
   };
 
-  await chrome.debugger.sendCommand(target, "Input.dispatchKeyEvent", {
-    type: "keyDown",
+  await chrome.debugger.sendCommand(target, 'Input.dispatchKeyEvent', {
+    type: 'keyDown',
     ...enterOptions,
   });
 
-  await chrome.debugger.sendCommand(target, "Input.dispatchKeyEvent", {
-    type: "keyUp",
+  await chrome.debugger.sendCommand(target, 'Input.dispatchKeyEvent', {
+    type: 'keyUp',
     ...enterOptions,
   });
 }
@@ -26,9 +26,7 @@ async function sendEnterKey(target: chrome.debugger.Debuggee): Promise<void> {
 /**
  * Clears the input field using a native Select All (Ctrl/Cmd + A) + Backspace sequence.
  */
-export async function nativeClear(
-  target: chrome.debugger.Debuggee,
-): Promise<void> {
+export async function nativeClear(target: chrome.debugger.Debuggee): Promise<void> {
   // Determine the modifier: 2 for Control (Windows/Linux), 4 for Command (Mac)
   const isMac = /Mac/.test(navigator.platform);
   const modifier = isMac ? 4 : 2;
@@ -36,35 +34,35 @@ export async function nativeClear(
   // 1. Select All (Mod + A)
   const aKeyOptions = {
     modifiers: modifier,
-    key: "a",
+    key: 'a',
     windowsVirtualKeyCode: 65,
     nativeVirtualKeyCode: 65,
   };
 
-  await chrome.debugger.sendCommand(target, "Input.dispatchKeyEvent", {
-    type: "keyDown",
+  await chrome.debugger.sendCommand(target, 'Input.dispatchKeyEvent', {
+    type: 'keyDown',
     ...aKeyOptions,
   });
 
-  await chrome.debugger.sendCommand(target, "Input.dispatchKeyEvent", {
-    type: "keyUp",
+  await chrome.debugger.sendCommand(target, 'Input.dispatchKeyEvent', {
+    type: 'keyUp',
     ...aKeyOptions,
   });
 
   // 2. Press Backspace to delete selection
   const backspaceOptions = {
-    key: "Backspace",
+    key: 'Backspace',
     windowsVirtualKeyCode: 8,
     nativeVirtualKeyCode: 8,
   };
 
-  await chrome.debugger.sendCommand(target, "Input.dispatchKeyEvent", {
-    type: "keyDown",
+  await chrome.debugger.sendCommand(target, 'Input.dispatchKeyEvent', {
+    type: 'keyDown',
     ...backspaceOptions,
   });
 
-  await chrome.debugger.sendCommand(target, "Input.dispatchKeyEvent", {
-    type: "keyUp",
+  await chrome.debugger.sendCommand(target, 'Input.dispatchKeyEvent', {
+    type: 'keyUp',
     ...backspaceOptions,
   });
 
@@ -76,7 +74,7 @@ export async function nativeClear(
  * Interface for the message sent to the background script.
  */
 interface TypingRequest {
-  action: "START_NATIVE_TYPING";
+  action: 'START_NATIVE_TYPING';
   text: string;
 }
 
@@ -86,10 +84,7 @@ interface TypingRequest {
  * @param promptText - The text string to be typed.
  */
 function startAutoFill(selector: string, promptText: string): void {
-  const inputField = document.querySelector(selector) as
-    | HTMLInputElement
-    | HTMLTextAreaElement
-    | null;
+  const inputField = document.querySelector(selector) as HTMLInputElement | HTMLTextAreaElement | null;
 
   if (!inputField) {
     console.error(`Automation Error: Element "${selector}" not found.`);
@@ -100,15 +95,15 @@ function startAutoFill(selector: string, promptText: string): void {
   inputField.focus();
 
   const message: TypingRequest = {
-    action: "START_NATIVE_TYPING",
+    action: 'START_NATIVE_TYPING',
     text: promptText,
   };
 
   chrome.runtime.sendMessage(message, (response) => {
     if (chrome.runtime.lastError) {
-      console.error("Message failed:", chrome.runtime.lastError.message);
+      console.error('Message failed:', chrome.runtime.lastError.message);
     } else {
-      console.log("Native typing sequence started.");
+      console.log('Native typing sequence started.');
     }
   });
 }
@@ -122,20 +117,17 @@ export async function nativeType(tabId: number, text: string): Promise<void> {
 
   try {
     try {
-      await chrome.debugger.attach(target, "1.3");
+      await chrome.debugger.attach(target, '1.3');
       attachedHere = true;
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : String(error || "Unknown error");
+      const message = error instanceof Error ? error.message : String(error || 'Unknown error');
 
-      if (!message.includes("Another debugger is already attached")) {
+      if (!message.includes('Another debugger is already attached')) {
         throw error;
       }
     }
 
-    await chrome.debugger.sendCommand(target, "Input.insertText", {
+    await chrome.debugger.sendCommand(target, 'Input.insertText', {
       text,
     });
 
@@ -145,7 +137,7 @@ export async function nativeType(tabId: number, text: string): Promise<void> {
       await chrome.debugger.detach(target);
     }
   } catch (err) {
-    console.error("Native typing failed:", err);
+    console.error('Native typing failed:', err);
     if (attachedHere) {
       chrome.debugger.detach(target).catch(() => {});
     }
@@ -155,15 +147,11 @@ export async function nativeType(tabId: number, text: string): Promise<void> {
 /**
  * Helper to dispatch a single key down/up sequence
  */
-async function sendKey(
-  target: chrome.debugger.Debuggee,
-  char: string,
-  keyCode?: number,
-): Promise<void> {
-  const isControlKey = char === "Backspace" || char === "Enter";
+async function sendKey(target: chrome.debugger.Debuggee, char: string, keyCode?: number): Promise<void> {
+  const isControlKey = char === 'Backspace' || char === 'Enter';
 
   const options: any = {
-    type: "keyDown",
+    type: 'keyDown',
     key: char,
     // Use 'text' only for actual printable characters
     text: isControlKey ? undefined : char,
@@ -175,10 +163,10 @@ async function sendKey(
     options.nativeVirtualKeyCode = keyCode;
   }
 
-  await chrome.debugger.sendCommand(target, "Input.dispatchKeyEvent", options);
-  await chrome.debugger.sendCommand(target, "Input.dispatchKeyEvent", {
+  await chrome.debugger.sendCommand(target, 'Input.dispatchKeyEvent', options);
+  await chrome.debugger.sendCommand(target, 'Input.dispatchKeyEvent', {
     ...options,
-    type: "keyUp",
+    type: 'keyUp',
   });
 }
 
