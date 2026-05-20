@@ -262,7 +262,7 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
 
         const completedTile = tileResult.tile;
         await waitBlurForActiveTile(completedTile, 20000);
-        await sleepMilliseconds(1000);
+        await sleepMilliseconds(3000);
 
         if (state.enableAutoDownload && state.mode === 'video') {
           await appendAutomationLog(`Downloading '${promptName}'...`);

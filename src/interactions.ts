@@ -1,4 +1,4 @@
-import { sleepMilliseconds, isVisible, pauseBeforeStep } from './utils';
+import { sleepMilliseconds, isVisible } from './utils';
 import { appendAutomationLog, saveMatchedImageNames } from './storage';
 import {
   findPromptInput,
@@ -7,15 +7,12 @@ import {
   findVideoReferencesTab,
   findVideoModelDropdownButton,
   findReferenceImageOpenButton,
-  findReferenceImageSearchInput,
   findButtonByText,
-  findImgItemByAlt,
   waitForDialog,
   waitForMenu,
 } from './dom-finders';
-import { countMainMediaItems, getLatestMainMediaContainer } from './media-utils';
-import { cleanPromptText, formatSceneName } from './formatting';
-import { state, TEST_MODE } from './constants';
+import { cleanPromptText } from './formatting';
+import { state } from './constants';
 
 let pageInteractionLock: Promise<void> = Promise.resolve();
 
@@ -585,12 +582,6 @@ export async function selectReferenceImage(expectedNames: string[]): Promise<voi
         const imageName = expectedNames[i];
         const matchImageName = state.matchedImageNames[imageName]?.trim() || imageName;
 
-        const item = findImgItemByAlt(matchImageName, dialogAfter);
-        if (item) {
-          // await simulateHumanPresenceBeforeDownload(item);
-        } else {
-          await appendAutomationLog(`Could not find reference image with name "${matchImageName}".`);
-        }
         await sleepMilliseconds(randomInt(200, 300));
 
         // Tell the background script to start typing
