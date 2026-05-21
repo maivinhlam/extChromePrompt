@@ -7,6 +7,7 @@ import {
   appendAutomationLog,
   setAutomationStatus,
   saveMatchedImageNames,
+  removePromptFromRunnerSettings,
 } from './storage';
 import {
   fillPromptInput,
@@ -159,6 +160,11 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
       });
     };
 
+    const markPromptDone = async (promptToComplete: string, promptIndex: number): Promise<void> => {
+      promptStatuses[promptIndex] = 'done';
+      await removePromptFromRunnerSettings(promptToComplete);
+    };
+
     await appendAutomationLog(`Automation started. Mode: ${state.mode}. Total prompts: ${state.prompts.length}.`);
 
     if (startIndex > 0) {
@@ -270,14 +276,14 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
           const downloaded = await downloadMediaItem(completedTile, promptName);
           if (downloaded) {
             await appendAutomationLog(`Downloaded '${promptName}' successfully.`);
-            promptStatuses[promptIndex] = 'done';
+            await markPromptDone(prompt, promptIndex);
           } else {
             await appendAutomationLog(`Download skipped for '${promptName}': API request or menu flow failed.`);
             promptStatuses[promptIndex] = 'failed';
           }
         } else if (state.mode === 'video') {
           await appendAutomationLog(`Auto-download disabled for '${promptName}'.`);
-          promptStatuses[promptIndex] = 'done';
+          await markPromptDone(prompt, promptIndex);
         }
 
         if (state.mode === 'image') {
@@ -285,7 +291,7 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
 
           if (matchImageName) {
             await appendAutomationLog(`Get the name of '${promptName}' successfully.`);
-            promptStatuses[promptIndex] = 'done';
+            await markPromptDone(prompt, promptIndex);
           } else {
             await appendAutomationLog(`Get the name of '${promptName}' failed: API request or menu flow failed.`);
             promptStatuses[promptIndex] = 'failed';
@@ -310,7 +316,7 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
         await waitForAvailableTaskSlot();
       }
 
-      if (i > 0 && i < state.prompts.length && !state.stopRequested) {
+      if (i >= 0 && i < state.prompts.length && !state.stopRequested) {
         await waitForNextPromptCountdown(state.intervalMs, promptName);
       }
 

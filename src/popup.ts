@@ -208,6 +208,12 @@ function onStorageChanged(changes: Record<string, chrome.storage.StorageChange>,
     return;
   }
 
+  if (changes[STORAGE_KEY]) {
+    const nextSettings = (changes[STORAGE_KEY].newValue || {}) as RunnerSettings;
+    promptsInput.value = nextSettings.promptsText || '';
+    updatePromptCount();
+  }
+
   if (changes[LOG_STORAGE_KEY]) {
     const nextLogs = Array.isArray(changes[LOG_STORAGE_KEY].newValue)
       ? (changes[LOG_STORAGE_KEY].newValue as LogEntry[])

@@ -1,17 +1,13 @@
 export {};
 
-import { setupMessageListener } from "./listeners";
-import { startAutomation } from "./automation";
-import { LOG_STORAGE_KEY, STATUS_STORAGE_KEY, state } from "./constants";
-import type { AutomationFeatures } from "./types";
-import {
-  appendAutomationLog,
-  loadAutomationStatus,
-  setAutomationStatus,
-} from "./storage";
+import { setupMessageListener } from './listeners';
+import { startAutomation } from './automation';
+import { LOG_STORAGE_KEY, STATUS_STORAGE_KEY, state } from './constants';
+import type { AutomationFeatures } from './types';
+import { appendAutomationLog, loadAutomationStatus, setAutomationStatus } from './storage';
 
 // ── Types ──────────────────────────────────────────────
-type PromptMode = "image" | "video";
+type PromptMode = 'image' | 'video';
 type RunnerSettings = {
   intervalSeconds?: number;
   mode?: PromptMode;
@@ -22,23 +18,23 @@ type RunnerSettings = {
 };
 type LogEntry = { timestamp?: number; message?: string };
 
-const STORAGE_KEY = "flowPromptRunnerSettings";
-const DEFAULT_PROMPTS_TEXT = "SCENE 1: A cinematic shot of a forest at sunrise";
-const CONTENT_PANEL_HTML_URL = chrome.runtime.getURL("content.html");
+const STORAGE_KEY = 'flowPromptRunnerSettings';
+const DEFAULT_PROMPTS_TEXT = 'SCENE 1: A cinematic shot of a forest at sunrise';
+const CONTENT_PANEL_HTML_URL = chrome.runtime.getURL('content.html');
 const PROMPT_PREVIEW_LENGTH = 220;
 
 setupMessageListener();
 void injectPanel();
 
 async function injectPanel(): Promise<void> {
-  if (document.getElementById("flow-prompt-runner-host")) {
+  if (document.getElementById('flow-prompt-runner-host')) {
     return;
   }
 
-  const host = document.createElement("div");
-  host.id = "flow-prompt-runner-host";
+  const host = document.createElement('div');
+  host.id = 'flow-prompt-runner-host';
 
-  const shadow = host.attachShadow({ mode: "open" });
+  const shadow = host.attachShadow({ mode: 'open' });
 
   try {
     const response = await fetch(CONTENT_PANEL_HTML_URL);
@@ -48,23 +44,17 @@ async function injectPanel(): Promise<void> {
 
     shadow.innerHTML = await response.text();
   } catch (error) {
-    console.error("Failed to inject Flow Prompt Runner panel.", error);
+    console.error('Failed to inject Flow Prompt Runner panel.', error);
     return;
   }
 
-  const wrapper = shadow.getElementById("wrapper") as HTMLDivElement | null;
-  const dragHandle = shadow.getElementById(
-    "drag-handle",
-  ) as HTMLDivElement | null;
-  const panelWrap = shadow.getElementById(
-    "panel-wrap",
-  ) as HTMLDivElement | null;
-  const reopenBtn = shadow.getElementById(
-    "reopen-btn",
-  ) as HTMLButtonElement | null;
+  const wrapper = shadow.getElementById('wrapper') as HTMLDivElement | null;
+  const dragHandle = shadow.getElementById('drag-handle') as HTMLDivElement | null;
+  const panelWrap = shadow.getElementById('panel-wrap') as HTMLDivElement | null;
+  const reopenBtn = shadow.getElementById('reopen-btn') as HTMLButtonElement | null;
 
   if (!wrapper || !dragHandle || !panelWrap || !reopenBtn) {
-    console.error("Content panel HTML is missing required elements.");
+    console.error('Content panel HTML is missing required elements.');
     return;
   }
 
@@ -77,9 +67,9 @@ async function injectPanel(): Promise<void> {
   let dragStartX = 0;
   let dragStartY = 0;
 
-  dragHandle.addEventListener("mousedown", (e: MouseEvent) => {
+  dragHandle.addEventListener('mousedown', (e: MouseEvent) => {
     const target = e.target as HTMLElement;
-    if (target.id === "collapse-btn" || target.id === "close-btn") {
+    if (target.id === 'collapse-btn' || target.id === 'close-btn') {
       return;
     }
     dragging = true;
@@ -88,7 +78,7 @@ async function injectPanel(): Promise<void> {
     e.preventDefault();
   });
 
-  document.addEventListener("mousemove", (e: MouseEvent) => {
+  document.addEventListener('mousemove', (e: MouseEvent) => {
     if (!dragging) {
       return;
     }
@@ -104,87 +94,73 @@ async function injectPanel(): Promise<void> {
     wrapper.style.right = `${posRight}px`;
   });
 
-  document.addEventListener("mouseup", () => {
+  document.addEventListener('mouseup', () => {
     dragging = false;
   });
 
   // ── Collapse / Expand ─────────────────────────────────
-  const collapseBtn = shadow.getElementById(
-    "collapse-btn",
-  ) as HTMLButtonElement;
-  const compactStatusEl = shadow.getElementById(
-    "compact-status-text",
-  ) as HTMLElement | null;
+  const collapseBtn = shadow.getElementById('collapse-btn') as HTMLButtonElement;
+  const compactStatusEl = shadow.getElementById('compact-status-text') as HTMLElement | null;
 
   let collapsed = false;
-  panelWrap.style.height = "660px";
+  panelWrap.style.height = '660px';
 
   const setCollapsedState = (nextCollapsed: boolean): void => {
     collapsed = nextCollapsed;
 
     if (collapsed) {
-      panelWrap.classList.add("collapsed");
-      collapseBtn.textContent = "+";
-      collapseBtn.title = "Expand";
+      panelWrap.classList.add('collapsed');
+      collapseBtn.textContent = '+';
+      collapseBtn.title = 'Expand';
       return;
     }
 
-    panelWrap.classList.remove("collapsed");
-    collapseBtn.textContent = "−";
-    collapseBtn.title = "Collapse";
+    panelWrap.classList.remove('collapsed');
+    collapseBtn.textContent = '−';
+    collapseBtn.title = 'Collapse';
   };
 
-  collapseBtn.addEventListener("click", () => {
+  collapseBtn.addEventListener('click', () => {
     setCollapsedState(!collapsed);
   });
 
   // ── Close / Reopen ────────────────────────────────────
-  const closeBtn = shadow.getElementById("close-btn") as HTMLButtonElement;
+  const closeBtn = shadow.getElementById('close-btn') as HTMLButtonElement;
 
-  closeBtn.addEventListener("click", () => {
-    wrapper.style.display = "none";
+  closeBtn.addEventListener('click', () => {
+    wrapper.style.display = 'none';
     reopenBtn.style.top = `${posTop}px`;
     reopenBtn.style.right = `${posRight}px`;
-    reopenBtn.classList.add("visible");
+    reopenBtn.classList.add('visible');
   });
 
-  reopenBtn.addEventListener("click", () => {
-    wrapper.style.display = "flex";
-    reopenBtn.classList.remove("visible");
+  reopenBtn.addEventListener('click', () => {
+    wrapper.style.display = 'flex';
+    reopenBtn.classList.remove('visible');
   });
 
-  const intervalInput = shadow.getElementById(
-    "intervalSeconds",
-  ) as HTMLInputElement;
-  const modeImageInput = shadow.getElementById("modeImage") as HTMLInputElement;
-  const modeVideoInput = shadow.getElementById("modeVideo") as HTMLInputElement;
-  const enableReferenceImagesInput = shadow.getElementById(
-    "enableReferenceImages",
-  ) as HTMLInputElement;
-  const enableAutoDownloadInput = shadow.getElementById(
-    "enableAutoDownload",
-  ) as HTMLInputElement;
-  const promptsInput = shadow.getElementById("prompts") as HTMLTextAreaElement;
-  const promptListEl = shadow.getElementById("promptList") as HTMLUListElement;
-  const promptListEmptyEl = shadow.getElementById(
-    "promptListEmpty",
-  ) as HTMLElement;
-  const totalPromptsEl = shadow.getElementById("totalPrompts") as HTMLElement;
-  const statusEl = shadow.getElementById("status") as HTMLElement;
-  const logEl = shadow.getElementById("log") as HTMLElement;
-  const clearPromptsBtn = shadow.getElementById(
-    "clearPromptsBtn",
-  ) as HTMLButtonElement;
-  const importBtn = shadow.getElementById("importBtn") as HTMLButtonElement;
-  const startBtn = shadow.getElementById("startBtn") as HTMLButtonElement;
-  const pauseBtn = shadow.getElementById("pauseBtn") as HTMLButtonElement;
-  const resumeBtn = shadow.getElementById("resumeBtn") as HTMLButtonElement;
-  const stopBtn = shadow.getElementById("stopBtn") as HTMLButtonElement;
+  const intervalInput = shadow.getElementById('intervalSeconds') as HTMLInputElement;
+  const modeImageInput = shadow.getElementById('modeImage') as HTMLInputElement;
+  const modeVideoInput = shadow.getElementById('modeVideo') as HTMLInputElement;
+  const enableReferenceImagesInput = shadow.getElementById('enableReferenceImages') as HTMLInputElement;
+  const enableAutoDownloadInput = shadow.getElementById('enableAutoDownload') as HTMLInputElement;
+  const promptsInput = shadow.getElementById('prompts') as HTMLTextAreaElement;
+  const promptListEl = shadow.getElementById('promptList') as HTMLUListElement;
+  const promptListEmptyEl = shadow.getElementById('promptListEmpty') as HTMLElement;
+  const totalPromptsEl = shadow.getElementById('totalPrompts') as HTMLElement;
+  const statusEl = shadow.getElementById('status') as HTMLElement;
+  const logEl = shadow.getElementById('log') as HTMLElement;
+  const clearPromptsBtn = shadow.getElementById('clearPromptsBtn') as HTMLButtonElement;
+  const importBtn = shadow.getElementById('importBtn') as HTMLButtonElement;
+  const startBtn = shadow.getElementById('startBtn') as HTMLButtonElement;
+  const pauseBtn = shadow.getElementById('pauseBtn') as HTMLButtonElement;
+  const resumeBtn = shadow.getElementById('resumeBtn') as HTMLButtonElement;
+  const stopBtn = shadow.getElementById('stopBtn') as HTMLButtonElement;
   let expandedPromptIndex: number | null = null;
 
   const getPromptLines = (): string[] =>
     promptsInput.value
-      .split("\n")
+      .split('\n')
       .map((line) => line.trim())
       .filter(Boolean);
 
@@ -198,55 +174,54 @@ async function injectPanel(): Promise<void> {
 
   const renderPromptList = (): void => {
     const prompts = getPromptLines();
-    promptListEl.textContent = "";
+    promptListEl.textContent = '';
     promptListEmptyEl.hidden = prompts.length > 0;
 
     const fragment = document.createDocumentFragment();
 
     prompts.forEach((prompt, index) => {
-      const item = document.createElement("li");
-      item.className = "prompt-item";
+      const item = document.createElement('li');
+      item.className = 'prompt-item';
       item.dataset.index = String(index);
-      item.setAttribute("aria-expanded", String(expandedPromptIndex === index));
+      item.setAttribute('aria-expanded', String(expandedPromptIndex === index));
       if (expandedPromptIndex === index) {
-        item.classList.add("is-expanded");
+        item.classList.add('is-expanded');
       }
 
-      const text = document.createElement("span");
-      text.className = "prompt-item-text";
-      text.textContent =
-        expandedPromptIndex === index ? prompt : truncatePrompt(prompt);
+      const text = document.createElement('span');
+      text.className = 'prompt-item-text';
+      text.textContent = expandedPromptIndex === index ? prompt : truncatePrompt(prompt);
       text.title = prompt;
 
-      const actions = document.createElement("div");
-      actions.className = "prompt-item-actions";
+      const actions = document.createElement('div');
+      actions.className = 'prompt-item-actions';
 
-      const rerunBtn = document.createElement("button");
-      rerunBtn.type = "button";
-      rerunBtn.className = "prompt-item-btn prompt-rerun-btn";
-      rerunBtn.dataset.action = "rerun";
+      const rerunBtn = document.createElement('button');
+      rerunBtn.type = 'button';
+      rerunBtn.className = 'prompt-item-btn prompt-rerun-btn';
+      rerunBtn.dataset.action = 'rerun';
       rerunBtn.dataset.index = String(index);
-      rerunBtn.title = "Rerun prompt";
-      rerunBtn.setAttribute("aria-label", "Rerun prompt");
-      rerunBtn.textContent = "↻";
+      rerunBtn.title = 'Rerun prompt';
+      rerunBtn.setAttribute('aria-label', 'Rerun prompt');
+      rerunBtn.textContent = '↻';
 
-      const deleteBtn = document.createElement("button");
-      deleteBtn.type = "button";
-      deleteBtn.className = "prompt-item-btn prompt-delete-btn";
-      deleteBtn.dataset.action = "delete";
+      const deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button';
+      deleteBtn.className = 'prompt-item-btn prompt-delete-btn';
+      deleteBtn.dataset.action = 'delete';
       deleteBtn.dataset.index = String(index);
-      deleteBtn.title = "Delete prompt";
-      deleteBtn.setAttribute("aria-label", "Delete prompt");
-      deleteBtn.textContent = "✕";
+      deleteBtn.title = 'Delete prompt';
+      deleteBtn.setAttribute('aria-label', 'Delete prompt');
+      deleteBtn.textContent = '✕';
 
-      const copyBtn = document.createElement("button");
-      copyBtn.type = "button";
-      copyBtn.className = "prompt-item-btn prompt-copy-btn";
-      copyBtn.dataset.action = "copy";
+      const copyBtn = document.createElement('button');
+      copyBtn.type = 'button';
+      copyBtn.className = 'prompt-item-btn prompt-copy-btn';
+      copyBtn.dataset.action = 'copy';
       copyBtn.dataset.index = String(index);
-      copyBtn.title = "Copy prompt";
-      copyBtn.setAttribute("aria-label", "Copy prompt");
-      copyBtn.textContent = "📋";
+      copyBtn.title = 'Copy prompt';
+      copyBtn.setAttribute('aria-label', 'Copy prompt');
+      copyBtn.textContent = '📋';
 
       actions.append(rerunBtn, deleteBtn, copyBtn);
       item.append(text, actions);
@@ -257,8 +232,8 @@ async function injectPanel(): Promise<void> {
   };
 
   const syncPromptLines = (prompts: string[]): void => {
-    promptsInput.value = prompts.join("\n");
-    promptsInput.dispatchEvent(new Event("input", { bubbles: true }));
+    promptsInput.value = prompts.join('\n');
+    promptsInput.dispatchEvent(new Event('input', { bubbles: true }));
   };
 
   const updatePromptCount = (): void => {
@@ -278,10 +253,10 @@ async function injectPanel(): Promise<void> {
 
   const setStatus = (text: string, isError = false): void => {
     statusEl.textContent = text;
-    statusEl.style.color = isError ? "#8a1d1d" : "#2f594a";
+    statusEl.style.color = isError ? '#8a1d1d' : '#2f594a';
     if (compactStatusEl) {
       compactStatusEl.textContent = text;
-      compactStatusEl.style.color = isError ? "#8a1d1d" : "#2f594a";
+      compactStatusEl.style.color = isError ? '#8a1d1d' : '#2f594a';
     }
   };
 
@@ -290,7 +265,7 @@ async function injectPanel(): Promise<void> {
   };
 
   const getIntervalSeconds = (): number => {
-    const digitsOnly = intervalInput.value.replace(/\D+/g, "");
+    const digitsOnly = intervalInput.value.replace(/\D+/g, '');
     const parsed = Number(digitsOnly);
 
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 15;
@@ -298,20 +273,17 @@ async function injectPanel(): Promise<void> {
 
   const formatLogTime = (timestamp?: number): string => {
     if (!timestamp) {
-      return "--:--:--";
+      return '--:--:--';
     }
     const date = new Date(timestamp);
     if (Number.isNaN(date.getTime())) {
-      return "--:--:--";
+      return '--:--:--';
     }
     return date.toLocaleTimeString();
   };
 
   const escapeHtml = (text: string): string =>
-    text
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;");
+    text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 
   const getFeatureSettings = (): AutomationFeatures => ({
     enableReferenceImages: enableReferenceImagesInput.checked,
@@ -319,13 +291,11 @@ async function injectPanel(): Promise<void> {
   });
 
   const persistSettings = async (): Promise<void> => {
-    const existing = ((await chrome.storage.local.get(STORAGE_KEY))[
-      STORAGE_KEY
-    ] || {}) as RunnerSettings;
+    const existing = ((await chrome.storage.local.get(STORAGE_KEY))[STORAGE_KEY] || {}) as RunnerSettings;
     const updated: RunnerSettings = {
       ...existing,
       intervalSeconds: getIntervalSeconds(),
-      mode: modeVideoInput.checked ? "video" : "image",
+      mode: modeVideoInput.checked ? 'video' : 'image',
       promptsText: promptsInput.value,
       ...getFeatureSettings(),
     };
@@ -338,13 +308,12 @@ async function injectPanel(): Promise<void> {
 
     intervalInput.value = String(settings.intervalSeconds || 15);
 
-    const mode: PromptMode = settings.mode === "video" ? "video" : "image";
-    modeImageInput.checked = mode === "image";
-    modeVideoInput.checked = mode === "video";
-    enableReferenceImagesInput.checked =
-      settings.enableReferenceImages !== false;
+    const mode: PromptMode = settings.mode === 'video' ? 'video' : 'image';
+    modeImageInput.checked = mode === 'image';
+    modeVideoInput.checked = mode === 'video';
+    enableReferenceImagesInput.checked = settings.enableReferenceImages !== false;
     enableAutoDownloadInput.checked = settings.enableAutoDownload !== false;
-    promptsInput.value = settings.promptsText || "";
+    promptsInput.value = settings.promptsText || '';
     state.matchedImageNames = { ...(settings.matchedImageNames || {}) };
     updatePromptCount();
     renderPromptList();
@@ -355,14 +324,14 @@ async function injectPanel(): Promise<void> {
 
   const onStart = async (): Promise<void> => {
     if (state.running) {
-      setStatus("Automation is already running.", true);
+      setStatus('Automation is already running.', true);
       updateActionButtons();
       return;
     }
 
     const prompts = getPromptLines();
     if (!prompts.length) {
-      setStatus("Please add at least one prompt line.", true);
+      setStatus('Please add at least one prompt line.', true);
       return;
     }
 
@@ -375,7 +344,7 @@ async function injectPanel(): Promise<void> {
     setCollapsedState(true);
     const automationRun = startAutomation({
       prompts,
-      mode: modeVideoInput.checked ? "video" : "image",
+      mode: modeVideoInput.checked ? 'video' : 'image',
       intervalMs: getIntervalSeconds() * 1000,
       ...getFeatureSettings(),
     });
@@ -386,13 +355,13 @@ async function injectPanel(): Promise<void> {
       state.running = false;
       state.pauseRequested = false;
       updateActionButtons();
-      setStatus(error.message || "Could not start automation.", true);
+      setStatus(error.message || 'Could not start automation.', true);
     });
   };
 
   const onPause = async (): Promise<void> => {
     if (!state.running) {
-      setStatus("Automation is not running.", true);
+      setStatus('Automation is not running.', true);
       updateActionButtons();
       return;
     }
@@ -400,14 +369,14 @@ async function injectPanel(): Promise<void> {
     state.pauseRequested = true;
     updateActionButtons();
 
-    await appendAutomationLog("Pause requested from embedded panel.");
-    await setAutomationStatus("Pause requested.");
-    setStatus("Pause requested.");
+    await appendAutomationLog('Pause requested from embedded panel.');
+    await setAutomationStatus('Pause requested.');
+    setStatus('Pause requested.');
   };
 
   const onResume = async (): Promise<void> => {
     if (!state.running) {
-      setStatus("Automation is not running.", true);
+      setStatus('Automation is not running.', true);
       updateActionButtons();
       return;
     }
@@ -415,18 +384,18 @@ async function injectPanel(): Promise<void> {
     state.pauseRequested = false;
     updateActionButtons();
 
-    await appendAutomationLog("Resume requested from embedded panel.");
-    await setAutomationStatus("Resume requested.");
-    setStatus("Resume requested.");
+    await appendAutomationLog('Resume requested from embedded panel.');
+    await setAutomationStatus('Resume requested.');
+    setStatus('Resume requested.');
   };
 
   const onStop = async (): Promise<void> => {
     state.stopRequested = true;
     state.pauseRequested = false;
-    await appendAutomationLog("Stop requested from embedded panel.");
-    await setAutomationStatus("Stop requested.");
+    await appendAutomationLog('Stop requested from embedded panel.');
+    await setAutomationStatus('Stop requested.');
     updateActionButtons();
-    setStatus("Stop requested.");
+    setStatus('Stop requested.');
   };
 
   const onIncrementInterval = (): void => {
@@ -443,41 +412,33 @@ async function injectPanel(): Promise<void> {
 
   const onClearPrompts = async (): Promise<void> => {
     syncPromptLines([]);
-    setStatus("Cleared all prompts.");
+    setStatus('Cleared all prompts.');
   };
 
   const onImportPrompts = async (): Promise<void> => {
-    const importedText = window.prompt(
-      "Please enter your prompt:",
-      promptsInput.value || DEFAULT_PROMPTS_TEXT,
-    );
+    const importedText = window.prompt('Please enter your prompt:', promptsInput.value || DEFAULT_PROMPTS_TEXT);
 
     if (importedText === null) {
-      setStatus("Import canceled.");
+      setStatus('Import canceled.');
       return;
     }
 
     const importedPrompts = importedText
-      .split("\n")
+      .split('\n')
       .map((line) => line.trim())
       .filter(Boolean);
 
     if (!importedPrompts.length) {
-      setStatus("Nothing to import.", true);
+      setStatus('Nothing to import.', true);
       return;
     }
 
     syncPromptLines([...getPromptLines(), ...importedPrompts]);
-    setStatus(
-      `Imported ${importedPrompts.length} prompt${importedPrompts.length === 1 ? "" : "s"}.`,
-    );
+    setStatus(`Imported ${importedPrompts.length} prompt${importedPrompts.length === 1 ? '' : 's'}.`);
   };
 
-  const onStorageChanged = (
-    changes: Record<string, chrome.storage.StorageChange>,
-    areaName: string,
-  ): void => {
-    if (areaName !== "local") {
+  const onStorageChanged = (changes: Record<string, chrome.storage.StorageChange>, areaName: string): void => {
+    if (areaName !== 'local') {
       return;
     }
 
@@ -489,14 +450,14 @@ async function injectPanel(): Promise<void> {
 
     if (changes[STATUS_STORAGE_KEY]) {
       const nextStatus =
-        typeof changes[STATUS_STORAGE_KEY].newValue === "string"
+        typeof changes[STATUS_STORAGE_KEY].newValue === 'string'
           ? (changes[STATUS_STORAGE_KEY].newValue as string)
-          : "Ready.";
+          : 'Ready.';
 
       if (
-        nextStatus === "Automation completed." ||
-        nextStatus === "Stop requested." ||
-        nextStatus.startsWith("Automation error")
+        nextStatus === 'Automation completed.' ||
+        nextStatus === 'Stop requested.' ||
+        nextStatus.startsWith('Automation error')
       ) {
         state.running = false;
         state.pauseRequested = false;
@@ -505,36 +466,42 @@ async function injectPanel(): Promise<void> {
 
       setStatus(nextStatus);
     }
+
+    if (changes[STORAGE_KEY]) {
+      const nextSettings = (changes[STORAGE_KEY].newValue as RunnerSettings | undefined) || {};
+      promptsInput.value = nextSettings.promptsText || '';
+      state.matchedImageNames = { ...(nextSettings.matchedImageNames || {}) };
+      updatePromptCount();
+      renderPromptList();
+    }
   };
-  modeImageInput.addEventListener("change", () => {
+  modeImageInput.addEventListener('change', () => {
     void persistSettings();
   });
-  modeVideoInput.addEventListener("change", () => {
+  modeVideoInput.addEventListener('change', () => {
     void persistSettings();
   });
-  enableReferenceImagesInput.addEventListener("change", () => {
+  enableReferenceImagesInput.addEventListener('change', () => {
     void persistSettings();
   });
-  enableAutoDownloadInput.addEventListener("change", () => {
+  enableAutoDownloadInput.addEventListener('change', () => {
     void persistSettings();
   });
-  promptsInput.addEventListener("input", () => {
+  promptsInput.addEventListener('input', () => {
     updatePromptCount();
     renderPromptList();
     void persistSettings();
   });
 
-  promptListEl.addEventListener("click", (event) => {
+  promptListEl.addEventListener('click', (event) => {
     const target = event.target as HTMLElement | null;
-    const actionBtn = target?.closest(
-      "button[data-action]",
-    ) as HTMLButtonElement | null;
+    const actionBtn = target?.closest('button[data-action]') as HTMLButtonElement | null;
 
     if (!target) {
       return;
     }
 
-    const itemEl = target.closest(".prompt-item") as HTMLLIElement | null;
+    const itemEl = target.closest('.prompt-item') as HTMLLIElement | null;
     const index = Number((actionBtn || itemEl)?.dataset.index);
     const prompts = getPromptLines();
     if (!Number.isInteger(index) || index < 0 || index >= prompts.length) {
@@ -548,7 +515,7 @@ async function injectPanel(): Promise<void> {
       return;
     }
 
-    if (actionBtn.dataset.action === "delete") {
+    if (actionBtn.dataset.action === 'delete') {
       prompts.splice(index, 1);
       if (expandedPromptIndex === index) {
         expandedPromptIndex = null;
@@ -556,20 +523,16 @@ async function injectPanel(): Promise<void> {
         expandedPromptIndex -= 1;
       }
       syncPromptLines(prompts);
-      setStatus(
-        prompts.length
-          ? `Deleted prompt ${index + 1}.`
-          : "Cleared all prompts.",
-      );
+      setStatus(prompts.length ? `Deleted prompt ${index + 1}.` : 'Cleared all prompts.');
       return;
     }
 
-    if (actionBtn.dataset.action === "rerun") {
+    if (actionBtn.dataset.action === 'rerun') {
       syncPromptLines([...prompts, selectedPrompt]);
       setStatus(`Queued prompt ${index + 1} to run again.`);
     }
 
-    if (actionBtn.dataset.action === "copy") {
+    if (actionBtn.dataset.action === 'copy') {
       navigator.clipboard.writeText(selectedPrompt).then(() => {
         setStatus(`Copied prompt ${index + 1} to clipboard.`);
       });
@@ -602,23 +565,23 @@ async function injectPanel(): Promise<void> {
 
   let activePressCleanup: (() => void) | null = null;
 
-  startBtn.addEventListener("click", () => {
+  startBtn.addEventListener('click', () => {
     void onStart();
   });
-  pauseBtn.addEventListener("click", () => {
+  pauseBtn.addEventListener('click', () => {
     void onPause();
   });
-  resumeBtn.addEventListener("click", () => {
+  resumeBtn.addEventListener('click', () => {
     void onResume();
   });
-  stopBtn.addEventListener("click", () => {
+  stopBtn.addEventListener('click', () => {
     void onStop();
   });
-  clearPromptsBtn.addEventListener("click", () => {
+  clearPromptsBtn.addEventListener('click', () => {
     void onClearPrompts();
   });
 
-  importBtn.addEventListener("click", () => {
+  importBtn.addEventListener('click', () => {
     void onImportPrompts();
   });
 

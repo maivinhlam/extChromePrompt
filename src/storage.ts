@@ -89,3 +89,38 @@ export async function saveMatchedImageNames(matchedImageNames: Record<string, st
     // no-op
   }
 }
+
+export async function removePromptFromRunnerSettings(prompt: string): Promise<boolean> {
+  const normalizedPrompt = String(prompt || '').trim();
+  if (!normalizedPrompt) {
+    return false;
+  }
+
+  try {
+    const data = await chrome.storage.local.get(RUNNER_SETTINGS_KEY);
+    const existing = (data[RUNNER_SETTINGS_KEY] as Record<string, unknown> | undefined) || {};
+    const promptsText = typeof existing.promptsText === 'string' ? existing.promptsText : '';
+    const promptLines = promptsText
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const promptIndex = promptLines.findIndex((line) => line === normalizedPrompt);
+
+    if (promptIndex < 0) {
+      return false;
+    }
+
+    promptLines.splice(promptIndex, 1);
+
+    await chrome.storage.local.set({
+      [RUNNER_SETTINGS_KEY]: {
+        ...existing,
+        promptsText: promptLines.join('\n'),
+      },
+    });
+
+    return true;
+  } catch {
+    return false;
+  }
+}
