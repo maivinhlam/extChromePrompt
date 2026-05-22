@@ -408,10 +408,11 @@
   }
 
   .actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
     gap: 8px;
     margin-top: 12px;
+    justify-content: space-around;
+
   }
 
   .actions button {
@@ -424,6 +425,7 @@
     color: var(--md-sys-color-on-primary);
     background: var(--md-sys-color-primary);
     box-shadow: var(--md-elevation-1);
+    width: 100%;
   }
 
   .actions button:hover {
@@ -580,7 +582,8 @@
         <button id="startBtn" type="button">⚡ Start</button>
         <button id="pauseBtn" type="button" hidden>Pause</button>
         <button id="resumeBtn" type="button" hidden>Resume</button>
-        <button id="stopBtn" type="button" disabled>⏹ Stop</button>
+        <button id="stopBtn" type="button" hidden>⏹ Stop</button>
+        <button id="startContinueBtn" type="button" hidden>Start Continue</button>
       </div>
     </main>
   </div>

@@ -202,6 +202,7 @@ async function injectPanel(): Promise<void> {
   const pauseBtn = shadow.getElementById('pauseBtn') as HTMLButtonElement;
   const resumeBtn = shadow.getElementById('resumeBtn') as HTMLButtonElement;
   const stopBtn = shadow.getElementById('stopBtn') as HTMLButtonElement;
+  const startContinueBtn = shadow.getElementById('startContinueBtn') as HTMLButtonElement;
   let expandedPromptIndex: number | null = null;
 
   const getPromptLines = (): string[] =>
@@ -294,7 +295,8 @@ async function injectPanel(): Promise<void> {
     pauseBtn.hidden = !isRunning || isPaused;
     resumeBtn.hidden = !isRunning || !isPaused;
 
-    stopBtn.disabled = !isRunning;
+    stopBtn.hidden = !isRunning;
+    startContinueBtn.hidden = isRunning;
   };
 
   const setStatus = (text: string, isError = false): void => {
@@ -391,6 +393,44 @@ async function injectPanel(): Promise<void> {
       mode: modeVideoInput.checked ? 'video' : 'image',
       intervalMs: getIntervalSeconds() * 1000,
       ...getFeatureSettings(),
+    });
+
+    updateActionButtons();
+
+    void automationRun.catch((error: Error) => {
+      state.running = false;
+      state.pauseRequested = false;
+      updateActionButtons();
+      setStatus(error.message || 'Could not start automation.', true);
+    });
+  };
+
+  const onStartContinue = async (): Promise<void> => {
+    if (state.running) {
+      setStatus('Automation is already running.', true);
+      updateActionButtons();
+      return;
+    }
+
+    const prompts = getPromptLines();
+    if (!prompts.length) {
+      setStatus('Please add at least one prompt line.', true);
+      return;
+    }
+
+    await clearLogs();
+    state.pauseRequested = false;
+    await setAutomationStatus(`Started. Total prompts: ${prompts.length}`);
+    await persistSettings();
+
+    setStatus(`Started. Total prompts: ${prompts.length}`);
+    setCollapsedState(true);
+    const automationRun = startAutomation({
+      prompts,
+      mode: modeVideoInput.checked ? 'video' : 'image',
+      intervalMs: getIntervalSeconds() * 1000,
+      ...getFeatureSettings(),
+      cleanupReferenceImages: false,
     });
 
     updateActionButtons();
@@ -617,6 +657,9 @@ async function injectPanel(): Promise<void> {
   });
   resumeBtn.addEventListener('click', () => {
     void onResume();
+  });
+  startContinueBtn.addEventListener('click', () => {
+    void onStartContinue();
   });
   stopBtn.addEventListener('click', () => {
     void onStop();

@@ -96,7 +96,8 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
   state.enableAutoDownload = config.enableAutoDownload !== false;
 
   // Initialize matchedImageNames for this session
-  if (state.mode === 'image') {
+  console.log('🚀 ~ startAutomation ~ config.cleanupReferenceImages:', config.cleanupReferenceImages);
+  if (state.mode === 'image' && config.cleanupReferenceImages) {
     state.matchedImageNames = {};
     await saveMatchedImageNames(state.matchedImageNames);
   }

@@ -12,6 +12,7 @@ export type AutomationConfig = {
   intervalMs?: number;
   enableReferenceImages?: boolean;
   enableAutoDownload?: boolean;
+  cleanupReferenceImages?: boolean;
 };
 
 export type RunnerSettings = {
