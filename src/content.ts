@@ -392,6 +392,7 @@ async function injectPanel(): Promise<void> {
       prompts,
       mode: modeVideoInput.checked ? 'video' : 'image',
       intervalMs: getIntervalSeconds() * 1000,
+      cleanupReferenceImages: true,
       ...getFeatureSettings(),
     });
 
