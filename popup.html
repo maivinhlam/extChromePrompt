@@ -5,10 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Flow Prompt Runner</title>
   <link rel="stylesheet" href="popup.css" />
+  <script type="module" src="/src/popup.ts"></script>
 </head>
 <body>
   <main class="panel">
     <h1>⚡ Flow Prompt Runner</h1>
+
+    <section class="toggle-card" aria-label="Panel visibility">
+      <div>
+        <p class="toggle-eyebrow">Overlay Panel</p>
+        <p class="toggle-title">Inject panel into Labs Flow</p>
+      </div>
+
+      <label class="toggle-switch" for="injectPanelToggle">
+        <input id="injectPanelToggle" class="toggle-checkbox" type="checkbox" role="switch" />
+        <span class="toggle-option">Enable</span>
+        <span class="toggle-option">Disable</span>
+      </label>
+    </section>
 
     <div class="steps-list">
       <p style="text-align: left; font-size: 16px; margin-top: 0;">

@@ -14,6 +14,16 @@ export type AutomationConfig = {
   enableAutoDownload?: boolean;
 };
 
+export type RunnerSettings = {
+  intervalSeconds?: number;
+  mode?: PromptMode;
+  promptsText?: string;
+  enableReferenceImages?: boolean;
+  enableAutoDownload?: boolean;
+  matchedImageNames?: Record<string, string>;
+  injectPanelEnabled?: boolean;
+};
+
 export type AutomationStatePayload = {
   running: boolean;
   mode: PromptMode;

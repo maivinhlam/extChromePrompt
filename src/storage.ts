@@ -1,5 +1,5 @@
 import { LOG_STORAGE_KEY, AUTOMATION_STATE_KEY, STATUS_STORAGE_KEY, MAX_LOG_ITEMS } from './constants';
-import type { AutomationStatePayload, LogEntry } from './types';
+import type { AutomationStatePayload, LogEntry, RunnerSettings } from './types';
 import { formatTimestamp } from './utils';
 
 const RUNNER_SETTINGS_KEY = 'flowPromptRunnerSettings';
@@ -74,16 +74,37 @@ export async function appendAutomationLog(message: string): Promise<void> {
   }
 }
 
-export async function saveMatchedImageNames(matchedImageNames: Record<string, string>): Promise<void> {
+export async function loadRunnerSettings(): Promise<RunnerSettings> {
   try {
     const data = await chrome.storage.local.get(RUNNER_SETTINGS_KEY);
-    const existing = (data[RUNNER_SETTINGS_KEY] as Record<string, unknown> | undefined) || {};
+    return ((data[RUNNER_SETTINGS_KEY] as RunnerSettings | undefined) || {}) as RunnerSettings;
+  } catch {
+    return {};
+  }
+}
 
+export async function updateRunnerSettings(partialSettings: Partial<RunnerSettings>): Promise<RunnerSettings> {
+  const existing = await loadRunnerSettings();
+  const nextSettings: RunnerSettings = {
+    ...existing,
+    ...partialSettings,
+  };
+
+  try {
     await chrome.storage.local.set({
-      [RUNNER_SETTINGS_KEY]: {
-        ...existing,
-        matchedImageNames: { ...matchedImageNames },
-      },
+      [RUNNER_SETTINGS_KEY]: nextSettings,
+    });
+  } catch {
+    // no-op
+  }
+
+  return nextSettings;
+}
+
+export async function saveMatchedImageNames(matchedImageNames: Record<string, string>): Promise<void> {
+  try {
+    await updateRunnerSettings({
+      matchedImageNames: { ...matchedImageNames },
     });
   } catch {
     // no-op
@@ -97,8 +118,7 @@ export async function removePromptFromRunnerSettings(prompt: string): Promise<bo
   }
 
   try {
-    const data = await chrome.storage.local.get(RUNNER_SETTINGS_KEY);
-    const existing = (data[RUNNER_SETTINGS_KEY] as Record<string, unknown> | undefined) || {};
+    const existing = await loadRunnerSettings();
     const promptsText = typeof existing.promptsText === 'string' ? existing.promptsText : '';
     const promptLines = promptsText
       .split('\n')
@@ -112,11 +132,8 @@ export async function removePromptFromRunnerSettings(prompt: string): Promise<bo
 
     promptLines.splice(promptIndex, 1);
 
-    await chrome.storage.local.set({
-      [RUNNER_SETTINGS_KEY]: {
-        ...existing,
-        promptsText: promptLines.join('\n'),
-      },
+    await updateRunnerSettings({
+      promptsText: promptLines.join('\n'),
     });
 
     return true;

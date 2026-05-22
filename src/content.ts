@@ -3,36 +3,82 @@ export {};
 import { setupMessageListener } from './listeners';
 import { startAutomation } from './automation';
 import { LOG_STORAGE_KEY, STATUS_STORAGE_KEY, state } from './constants';
-import type { AutomationFeatures } from './types';
-import { appendAutomationLog, loadAutomationStatus, setAutomationStatus } from './storage';
+import type { AutomationFeatures, PromptMode, RunnerSettings } from './types';
+import {
+  appendAutomationLog,
+  loadAutomationStatus,
+  loadRunnerSettings,
+  setAutomationStatus,
+  updateRunnerSettings,
+} from './storage';
 
 // ── Types ──────────────────────────────────────────────
-type PromptMode = 'image' | 'video';
-type RunnerSettings = {
-  intervalSeconds?: number;
-  mode?: PromptMode;
-  promptsText?: string;
-  enableReferenceImages?: boolean;
-  enableAutoDownload?: boolean;
-  matchedImageNames?: Record<string, string>;
-};
 type LogEntry = { timestamp?: number; message?: string };
 
 const STORAGE_KEY = 'flowPromptRunnerSettings';
 const DEFAULT_PROMPTS_TEXT = 'SCENE 1: A cinematic shot of a forest at sunrise';
 const CONTENT_PANEL_HTML_URL = chrome.runtime.getURL('content.html');
 const PROMPT_PREVIEW_LENGTH = 220;
+const PANEL_HOST_ID = 'flow-prompt-runner-host';
+
+let panelInjectionPromise: Promise<void> | null = null;
 
 setupMessageListener();
-void injectPanel();
+chrome.storage.onChanged.addListener(onRunnerSettingsChanged);
+void ensurePanelVisibility();
+
+function setPanelHostVisible(visible: boolean): void {
+  const host = document.getElementById(PANEL_HOST_ID) as HTMLDivElement | null;
+
+  if (host) {
+    host.style.display = visible ? '' : 'none';
+  }
+}
+
+async function ensurePanelVisibility(): Promise<void> {
+  const settings = await loadRunnerSettings();
+
+  if (settings.injectPanelEnabled === false) {
+    setPanelHostVisible(false);
+    return;
+  }
+
+  if (!document.getElementById(PANEL_HOST_ID)) {
+    if (!panelInjectionPromise) {
+      panelInjectionPromise = injectPanel().finally(() => {
+        panelInjectionPromise = null;
+      });
+    }
+
+    await panelInjectionPromise;
+  }
+
+  const latestSettings = await loadRunnerSettings();
+  setPanelHostVisible(latestSettings.injectPanelEnabled !== false);
+}
+
+function onRunnerSettingsChanged(changes: Record<string, chrome.storage.StorageChange>, areaName: string): void {
+  if (areaName !== 'local' || !changes[STORAGE_KEY]) {
+    return;
+  }
+
+  const nextSettings = (changes[STORAGE_KEY].newValue as RunnerSettings | undefined) || {};
+
+  if (nextSettings.injectPanelEnabled === false) {
+    setPanelHostVisible(false);
+    return;
+  }
+
+  void ensurePanelVisibility();
+}
 
 async function injectPanel(): Promise<void> {
-  if (document.getElementById('flow-prompt-runner-host')) {
+  if (document.getElementById(PANEL_HOST_ID)) {
     return;
   }
 
   const host = document.createElement('div');
-  host.id = 'flow-prompt-runner-host';
+  host.id = PANEL_HOST_ID;
 
   const shadow = host.attachShadow({ mode: 'open' });
 
@@ -291,20 +337,18 @@ async function injectPanel(): Promise<void> {
   });
 
   const persistSettings = async (): Promise<void> => {
-    const existing = ((await chrome.storage.local.get(STORAGE_KEY))[STORAGE_KEY] || {}) as RunnerSettings;
     const updated: RunnerSettings = {
-      ...existing,
       intervalSeconds: getIntervalSeconds(),
       mode: modeVideoInput.checked ? 'video' : 'image',
       promptsText: promptsInput.value,
       ...getFeatureSettings(),
     };
-    await chrome.storage.local.set({ [STORAGE_KEY]: updated });
+
+    await updateRunnerSettings(updated);
   };
 
   const loadSettings = async (): Promise<void> => {
-    const data = await chrome.storage.local.get(STORAGE_KEY);
-    const settings = (data[STORAGE_KEY] || {}) as RunnerSettings;
+    const settings = await loadRunnerSettings();
 
     intervalInput.value = String(settings.intervalSeconds || 15);
 

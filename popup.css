@@ -51,6 +51,168 @@ h1 {
   letter-spacing: 0.2px;
 }
 
+.toggle-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.toggle-eyebrow {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--hint);
+}
+
+.toggle-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.toggle-switch {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  width: 148px;
+  padding: 3px;
+  border: 1px solid rgba(94, 228, 255, 0.58);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0) 40%),
+    linear-gradient(135deg, #32f5ff 0%, #3ca7ff 20%, #ff4fd8 58%, #ff7f7f 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.42),
+    inset 0 -4px 10px rgba(104, 29, 132, 0.28),
+    0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 10px 22px rgba(255, 79, 216, 0.22),
+    0 0 18px rgba(50, 245, 255, 0.26);
+  cursor: pointer;
+  white-space: nowrap;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.toggle-switch::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: calc(50% - 3px);
+  height: calc(100% - 6px);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.55) 24%, rgba(255, 255, 255, 0.04) 26%),
+    linear-gradient(180deg, #fefeff 0%, #d8f8ff 38%, #ffc9f1 100%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.65) inset,
+    0 -4px 8px rgba(255, 79, 216, 0.18) inset,
+    0 8px 18px rgba(60, 167, 255, 0.22),
+    0 0 16px rgba(255, 79, 216, 0.18);
+  transition: transform 180ms ease;
+  z-index: 0;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: -30%;
+  left: -35%;
+  width: 42%;
+  height: 160%;
+  border-radius: 999px;
+  background: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.08) 30%,
+    rgba(255, 255, 255, 0.62) 50%,
+    rgba(255, 255, 255, 0.12) 68%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  opacity: 0;
+  transform: translateX(-165%) rotate(12deg);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.toggle-switch:hover::after {
+  animation: toggle-shimmer 650ms ease-out 1;
+}
+
+.toggle-checkbox {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.toggle-option {
+  position: relative;
+  z-index: 1;
+  padding: 8px 12px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fffbff;
+  letter-spacing: 0.2px;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.2), 0 1px 2px rgba(82, 13, 94, 0.46);
+  transition: color 180ms ease;
+}
+
+.toggle-checkbox + .toggle-option {
+  color: var(--ink);
+}
+
+.toggle-checkbox:checked ~ .toggle-option:first-of-type {
+  color: #fffaf4;
+}
+
+.toggle-checkbox:checked ~ .toggle-option:last-of-type {
+  color: var(--ink);
+}
+
+.toggle-checkbox:checked ~ .toggle-option + .toggle-option,
+.toggle-checkbox:not(:checked) ~ .toggle-option:first-of-type {
+  color: var(--ink);
+}
+
+.toggle-checkbox:not(:checked) ~ .toggle-option:last-of-type {
+  color: #fffaf4;
+}
+
+.toggle-switch:has(.toggle-checkbox:checked)::before {
+  transform: translateX(100%);
+}
+
+.toggle-switch:has(.toggle-checkbox:focus-visible) {
+  outline: 2px solid rgba(163, 100, 255, 0.55);
+  outline-offset: 3px;
+}
+
+@keyframes toggle-shimmer {
+  0% {
+    opacity: 0;
+    transform: translateX(-165%) rotate(12deg);
+  }
+  18% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(420%) rotate(12deg);
+  }
+}
+
 .steps-list {
   margin-top: 4px;
 }
