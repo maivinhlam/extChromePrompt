@@ -54,7 +54,7 @@ export function findSendButton(): HTMLElement | null {
   );
 }
 
-export function findModelButton(): HTMLElement | null {
+export function findModelButton(mode: 'image' | 'video'): HTMLElement | null {
   const buttons = Array.from(document.querySelectorAll("button[aria-haspopup='menu']")) as HTMLElement[];
 
   const primary = buttons.find((button) => {
@@ -63,7 +63,12 @@ export function findModelButton(): HTMLElement | null {
     }
 
     const text = (button.textContent || '').toLowerCase();
-    return text.includes('nano banana') || text.includes('video') || text.includes('crop_16_9');
+    if (mode === 'image') {
+      return text.includes('nano banana') || text.includes('crop_16_9');
+    } else if (mode === 'video') {
+      return text.includes('video');
+    }
+    return false;
   });
   if (primary) {
     return primary;
@@ -83,7 +88,7 @@ export function findVideoReferencesTab(): HTMLElement | null {
       const text = (tab.textContent || '').toLowerCase();
       const controls = (tab.getAttribute('aria-controls') || '').toLowerCase();
       const id = (tab.id || '').toLowerCase();
-      return text.includes('Thành phần') || controls.includes('video_references') || id.includes('video_references');
+      return text.includes('thành phần') || controls.includes('video_references') || id.includes('video_references');
     }) || null
   );
 }

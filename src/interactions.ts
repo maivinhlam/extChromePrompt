@@ -490,7 +490,7 @@ export async function clickAndWaitForMenu(
 export async function selectModelAndModeTab(mode: 'image' | 'video'): Promise<void> {
   await appendAutomationLog(`Selecting ${mode} tab.`);
 
-  const modelButton = findModelButton();
+  const modelButton = findModelButton(mode);
   if (modelButton) {
     const menuOpened = await clickAndWaitForMenu(modelButton, 3, 3000);
     if (!menuOpened) {
@@ -633,6 +633,13 @@ function hasProgressPercentage(text: string): boolean {
   return /\d{1,3}\s*%/.test(text);
 }
 
+function getTileProgressValues(root: HTMLElement): number[] {
+  const text = (root.textContent || '').toLowerCase();
+  const percentMatches = text.match(/\b(\d{1,3})\s*%\b/g) || [];
+
+  return percentMatches.map((entry) => Number(entry.replace(/[^0-9]/g, ''))).filter((value) => Number.isFinite(value));
+}
+
 function escapeSelectorValue(value: string): string {
   if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
     return CSS.escape(value);
@@ -761,10 +768,24 @@ export async function waitForTileDoneById(
   await sleepMilliseconds(2000);
 
   const started = Date.now();
+  let waitingForProgressToMovePast99 = false;
 
   const getTileResult = (): { status: 'completed'; tile: HTMLElement } | { status: 'failed' } | null => {
     const tile = getTileContainerById(tileId);
     if (!tile) {
+      return null;
+    }
+
+    const progressValues = getTileProgressValues(tile);
+    const hasExact99 = progressValues.some((value) => value === 99);
+
+    if (hasExact99) {
+      waitingForProgressToMovePast99 = true;
+    } else if (waitingForProgressToMovePast99 && progressValues.length > 0) {
+      waitingForProgressToMovePast99 = false;
+    }
+
+    if (waitingForProgressToMovePast99 && hasExact99) {
       return null;
     }
 

@@ -12,6 +12,7 @@ import {
   setAutomationStatus,
   updateRunnerSettings,
 } from './storage';
+import { findModelButton } from './dom-finders';
 
 // ── Types ──────────────────────────────────────────────
 type LogEntry = { timestamp?: number; message?: string };
@@ -158,13 +159,13 @@ async function injectPanel(): Promise<void> {
     if (collapsed) {
       panelWrap.classList.add('collapsed');
       collapseBtn.textContent = '+';
-      collapseBtn.title = 'Expand';
+      collapseBtn.title = 'Mở rộng';
       return;
     }
 
     panelWrap.classList.remove('collapsed');
     collapseBtn.textContent = '−';
-    collapseBtn.title = 'Collapse';
+    collapseBtn.title = 'Thu gọn';
   };
 
   collapseBtn.addEventListener('click', () => {
@@ -250,8 +251,8 @@ async function injectPanel(): Promise<void> {
       rerunBtn.className = 'prompt-item-btn prompt-rerun-btn';
       rerunBtn.dataset.action = 'rerun';
       rerunBtn.dataset.index = String(index);
-      rerunBtn.title = 'Rerun prompt';
-      rerunBtn.setAttribute('aria-label', 'Rerun prompt');
+      rerunBtn.title = 'Chạy lại prompt này';
+      rerunBtn.setAttribute('aria-label', 'Chạy lại prompt này');
       rerunBtn.textContent = '↻';
 
       const deleteBtn = document.createElement('button');
@@ -259,8 +260,8 @@ async function injectPanel(): Promise<void> {
       deleteBtn.className = 'prompt-item-btn prompt-delete-btn';
       deleteBtn.dataset.action = 'delete';
       deleteBtn.dataset.index = String(index);
-      deleteBtn.title = 'Delete prompt';
-      deleteBtn.setAttribute('aria-label', 'Delete prompt');
+      deleteBtn.title = 'Xóa prompt này';
+      deleteBtn.setAttribute('aria-label', 'Xóa prompt này');
       deleteBtn.textContent = '✕';
 
       const copyBtn = document.createElement('button');
@@ -268,8 +269,8 @@ async function injectPanel(): Promise<void> {
       copyBtn.className = 'prompt-item-btn prompt-copy-btn';
       copyBtn.dataset.action = 'copy';
       copyBtn.dataset.index = String(index);
-      copyBtn.title = 'Copy prompt';
-      copyBtn.setAttribute('aria-label', 'Copy prompt');
+      copyBtn.title = 'Sao chép prompt này';
+      copyBtn.setAttribute('aria-label', 'Sao chép prompt này');
       copyBtn.textContent = '📋';
 
       actions.append(rerunBtn, deleteBtn, copyBtn);
@@ -380,6 +381,14 @@ async function injectPanel(): Promise<void> {
     const prompts = getPromptLines();
     if (!prompts.length) {
       setStatus('Please add at least one prompt line.', true);
+      return;
+    }
+
+    const modelButton = findModelButton(state.mode);
+    if (modelButton) {
+      setStatus('Could not find model selection button on the page.', true);
+
+      window.alert('Vui lòng chọn đúng model (banana khi tạo ảnh và Video khi tạo video).');
       return;
     }
 
@@ -498,15 +507,24 @@ async function injectPanel(): Promise<void> {
   };
 
   const onClearPrompts = async (): Promise<void> => {
-    syncPromptLines([]);
-    setStatus('Cleared all prompts.');
+    let isDelete = confirm('Bạn có chắc chắn muốn xóa tất cả các prompt không?');
+    if (isDelete) {
+      syncPromptLines([]);
+      setStatus('Cleared all prompts.');
+    } else {
+      setStatus('Đã hủy thao tác.');
+    }
   };
 
   const onClearReferent = async (): Promise<void> => {
-    // Add logic to clear referent here
-    setStatus('Cleared referent.');
-    state.matchedImageNames = {};
-    updateRunnerSettings(state);
+    let isDelete = confirm('Bạn có chắc chắn muốn xóa tất cả các referent images không?');
+    if (isDelete) {
+      state.matchedImageNames = {};
+      updateRunnerSettings(state);
+      setStatus('Cleared all referent images.');
+    } else {
+      setStatus('Đã hủy thao tác.');
+    }
   };
 
   const onImportPrompts = async (): Promise<void> => {
