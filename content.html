@@ -347,6 +347,23 @@
     filter: brightness(0.98);
   }
 
+  .clear-referent-btn {
+    border: none;
+    border-radius: 999px;
+    padding: 8px 14px;
+    line-height: 1;
+    font-size: 12px;
+    white-space: nowrap;
+    cursor: pointer;
+    color: var(--md-sys-color-error);
+    background: var(--md-sys-color-error-container, #f9ded8);
+    font-weight: 600;
+  }
+
+  .clear-referent-btn:hover {
+    filter: brightness(0.98);
+  }
+
   .bottom-bar {
     display: grid;
     gap: 12px;
@@ -559,6 +576,7 @@
       <div class="import-btn-row">
         <button id="importBtn" type="button">Import Prompt</button>
         <button id="clearPromptsBtn" type="button" class="clear-prompts-btn">Clear Prompt</button>
+        <button id="clearReferentBtn" type="button" class="clear-referent-btn">Clear Referent</button>
       </div>
 
       <div class="bottom-bar">

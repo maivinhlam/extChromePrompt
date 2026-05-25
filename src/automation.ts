@@ -30,53 +30,6 @@ function createInitialPromptStatuses(length: number): PromptStatus[] {
   return Array.from({ length }, () => 'pending');
 }
 
-async function waitWhilePaused(): Promise<boolean> {
-  let loggedPause = false;
-
-  while (state.pauseRequested) {
-    if (state.stopRequested) {
-      await appendAutomationLog('Stop requested.');
-      return false;
-    }
-
-    if (!loggedPause) {
-      await appendAutomationLog('Paused. Click Resume to continue.');
-      loggedPause = true;
-    }
-
-    await sleepMilliseconds(200);
-  }
-
-  if (loggedPause) {
-    await appendAutomationLog('Automation resumed.');
-  }
-
-  return !state.stopRequested;
-}
-
-async function waitForNextPromptCountdown(intervalMs: number, currentPrompt?: string): Promise<void> {
-  const totalSeconds = Math.max(1, Math.ceil(intervalMs / 1000));
-
-  for (let secondsLeft = totalSeconds; secondsLeft >= 1; secondsLeft -= 1) {
-    const canContinue = await waitWhilePaused();
-    if (!canContinue) {
-      return;
-    }
-
-    if (state.stopRequested) {
-      await appendAutomationLog('Stop requested.');
-      return;
-    }
-
-    await setAutomationStatus(
-      `Current prompt: ${currentPrompt || 'N/A'} | Start next prompt in ${secondsLeft} second${secondsLeft === 1 ? '' : 's'}...`
-    );
-
-    const sleepMs = secondsLeft === 1 ? intervalMs - (totalSeconds - 1) * 1000 : 1000;
-    await sleepMilliseconds(Math.max(1, sleepMs));
-  }
-}
-
 export async function startAutomation(config: AutomationConfig): Promise<void> {
   if (state.running) {
     throw new Error('Automation is already running.');
@@ -94,13 +47,6 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
   state.intervalMs = Math.max(1000, Number(config.intervalMs || 15000));
   state.enableReferenceImages = config.enableReferenceImages !== false;
   state.enableAutoDownload = config.enableAutoDownload !== false;
-
-  // Initialize matchedImageNames for this session
-  console.log('🚀 ~ startAutomation ~ config.cleanupReferenceImages:', config.cleanupReferenceImages);
-  if (state.mode === 'image' && config.cleanupReferenceImages) {
-    state.matchedImageNames = {};
-    await saveMatchedImageNames(state.matchedImageNames);
-  }
 
   let promptStatuses = createInitialPromptStatuses(state.prompts.length);
   let startIndex = 0;
@@ -335,5 +281,52 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
   } finally {
     state.pauseRequested = false;
     state.running = false;
+  }
+}
+
+async function waitWhilePaused(): Promise<boolean> {
+  let loggedPause = false;
+
+  while (state.pauseRequested) {
+    if (state.stopRequested) {
+      await appendAutomationLog('Stop requested.');
+      return false;
+    }
+
+    if (!loggedPause) {
+      await appendAutomationLog('Paused. Click Resume to continue.');
+      loggedPause = true;
+    }
+
+    await sleepMilliseconds(200);
+  }
+
+  if (loggedPause) {
+    await appendAutomationLog('Automation resumed.');
+  }
+
+  return !state.stopRequested;
+}
+
+async function waitForNextPromptCountdown(intervalMs: number, currentPrompt?: string): Promise<void> {
+  const totalSeconds = Math.max(1, Math.ceil(intervalMs / 1000));
+
+  for (let secondsLeft = totalSeconds; secondsLeft >= 1; secondsLeft -= 1) {
+    const canContinue = await waitWhilePaused();
+    if (!canContinue) {
+      return;
+    }
+
+    if (state.stopRequested) {
+      await appendAutomationLog('Stop requested.');
+      return;
+    }
+
+    await setAutomationStatus(
+      `Current prompt: ${currentPrompt || 'N/A'} | Start next prompt in ${secondsLeft} second${secondsLeft === 1 ? '' : 's'}...`
+    );
+
+    const sleepMs = secondsLeft === 1 ? intervalMs - (totalSeconds - 1) * 1000 : 1000;
+    await sleepMilliseconds(Math.max(1, sleepMs));
   }
 }

@@ -8,6 +8,7 @@ import {
   appendAutomationLog,
   loadAutomationStatus,
   loadRunnerSettings,
+  saveAutomationState,
   setAutomationStatus,
   updateRunnerSettings,
 } from './storage';
@@ -197,6 +198,7 @@ async function injectPanel(): Promise<void> {
   const statusEl = shadow.getElementById('status') as HTMLElement;
   const logEl = shadow.getElementById('log') as HTMLElement;
   const clearPromptsBtn = shadow.getElementById('clearPromptsBtn') as HTMLButtonElement;
+  const clearReferentBtn = shadow.getElementById('clearReferentBtn') as HTMLButtonElement;
   const importBtn = shadow.getElementById('importBtn') as HTMLButtonElement;
   const startBtn = shadow.getElementById('startBtn') as HTMLButtonElement;
   const pauseBtn = shadow.getElementById('pauseBtn') as HTMLButtonElement;
@@ -500,6 +502,13 @@ async function injectPanel(): Promise<void> {
     setStatus('Cleared all prompts.');
   };
 
+  const onClearReferent = async (): Promise<void> => {
+    // Add logic to clear referent here
+    setStatus('Cleared referent.');
+    state.matchedImageNames = {};
+    updateRunnerSettings(state);
+  };
+
   const onImportPrompts = async (): Promise<void> => {
     const importedText = window.prompt('Please enter your prompt:', promptsInput.value || DEFAULT_PROMPTS_TEXT);
 
@@ -668,7 +677,9 @@ async function injectPanel(): Promise<void> {
   clearPromptsBtn.addEventListener('click', () => {
     void onClearPrompts();
   });
-
+  clearReferentBtn.addEventListener('click', () => {
+    void onClearReferent();
+  });
   importBtn.addEventListener('click', () => {
     void onImportPrompts();
   });
