@@ -13,6 +13,7 @@ import {
 } from './dom-finders';
 import { cleanPromptText } from './formatting';
 import { state } from './constants';
+import { CreateModeVideo, type CreateMode } from './enums/modeType';
 
 let pageInteractionLock: Promise<void> = Promise.resolve();
 
@@ -487,7 +488,7 @@ export async function clickAndWaitForMenu(
   return false;
 }
 
-export async function selectModelAndModeTab(mode: 'image' | 'video'): Promise<void> {
+export async function selectModelAndModeTab(mode: CreateMode): Promise<void> {
   await appendAutomationLog(`Selecting ${mode} tab.`);
 
   const modelButton = findModelButton(mode);
@@ -504,7 +505,7 @@ export async function selectModelAndModeTab(mode: 'image' | 'video'): Promise<vo
       return;
     }
 
-    if (mode === 'video') {
+    if (mode === CreateModeVideo) {
       const videoOption = findButtonByText(['video'], menuShown);
       if (videoOption) {
         await videoOption.click();
@@ -616,7 +617,7 @@ function isTileGenerationComplete(root: HTMLElement): boolean {
     return true;
   }
 
-  if (state.mode === 'video' && text.includes('play_circle') && !hasProgressPercentage(text)) {
+  if (state.mode === CreateModeVideo && text.includes('play_circle') && !hasProgressPercentage(text)) {
     return true;
   }
   const statusTerms = ['dang tao', 'dang xu ly', 'generating', 'processing'];

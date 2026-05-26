@@ -1,7 +1,6 @@
+import { RUNNER_SETTINGS_KEY } from './constants';
 import { loadRunnerSettings, updateRunnerSettings } from './storage';
 import type { RunnerSettings } from './types';
-
-const STORAGE_KEY = 'flowPromptRunnerSettings';
 
 const toggleInput = document.getElementById('injectPanelToggle') as HTMLInputElement | null;
 
@@ -36,11 +35,11 @@ async function initializePopup(): Promise<void> {
   });
 
   chrome.storage.onChanged.addListener((changes, areaName) => {
-    if (areaName !== 'local' || !changes[STORAGE_KEY]) {
+    if (areaName !== 'local' || !changes[RUNNER_SETTINGS_KEY]) {
       return;
     }
 
-    const nextSettings = (changes[STORAGE_KEY].newValue as RunnerSettings | undefined) || {};
+    const nextSettings = (changes[RUNNER_SETTINGS_KEY].newValue as RunnerSettings | undefined) || {};
     renderToggle(isPanelEnabled(nextSettings));
   });
 }

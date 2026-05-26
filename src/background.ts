@@ -407,7 +407,6 @@ async function handleTypingFlow(sender: chrome.runtime.MessageSender, text: stri
   try {
     await ensureDebuggerAttached(target);
     await nativeClear(target);
-
     await nativeType(tabId, text);
 
     console.log('Automation completed successfully.');

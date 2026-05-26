@@ -1,33 +1,228 @@
-import { state, TEST_MODE, MAX_PENDING_TASKS } from './constants';
-import type { AutomationConfig, PromptStatus } from './types';
+import { state, MAX_PENDING_TASKS, DEFAULT_INTERVAL_MS } from './constants';
+import { type AutomationConfig } from './types';
+import {
+  type PromptStatus,
+  PromptStatusPending,
+  PromptStatusDone,
+  PromptStatusFailed,
+  PromptStatusInProgress,
+} from './enums/promeStatusType';
+import { CreateModeVideo } from './enums/modeType';
 import {
   loadAutomationState,
   saveAutomationState,
   clearAutomationState,
   appendAutomationLog,
   setAutomationStatus,
-  saveMatchedImageNames,
   removePromptFromRunnerSettings,
 } from './storage';
 import {
   fillPromptInput,
-  selectModelAndModeTab,
   selectReferenceImage,
   getTopRowTileIds,
   waitForNewTopRowTileId,
   waitForTileDoneById,
   downloadMediaItem,
-  renameMediaItem,
   waitBlurForActiveTile,
   getImageNameFromMediaContainer,
   randomInt,
 } from './interactions';
 import { parseSceneNumbers, formatSceneName, extractPromptPrefixName } from './formatting';
 import { extractImageNamesFromPrompt, pauseBeforeStep, sleepMilliseconds } from './utils';
-import { test } from './test';
 
 function createInitialPromptStatuses(length: number): PromptStatus[] {
-  return Array.from({ length }, () => 'pending');
+  return Array.from({ length }, () => PromptStatusPending);
+}
+
+type TileCompletionResult = Awaited<ReturnType<typeof waitForTileDoneById>>;
+type CompletedTileResult = Extract<TileCompletionResult, { status: 'completed' }>;
+
+function restorePromptStatuses(length: number, savedStatuses?: PromptStatus[]): PromptStatus[] {
+  if (!Array.isArray(savedStatuses)) {
+    return createInitialPromptStatuses(length);
+  }
+
+  return savedStatuses.slice(0, length).concat(createInitialPromptStatuses(Math.max(0, length - savedStatuses.length)));
+}
+
+async function persistAutomationProgress(currentIndex: number, promptStatuses: PromptStatus[]): Promise<void> {
+  await saveAutomationState({
+    running: true,
+    mode: state.mode,
+    promptCount: state.prompts.length,
+    currentIndex,
+    promptStatuses,
+  });
+}
+
+async function waitForAvailableTaskSlot(pendingTasks: Set<Promise<void>>): Promise<void> {
+  if (pendingTasks.size < MAX_PENDING_TASKS) {
+    return;
+  }
+
+  await appendAutomationLog(
+    `Reached max pending tasks (${pendingTasks.size}/${MAX_PENDING_TASKS}). Waiting for one task to finish.`
+  );
+  await Promise.race(pendingTasks);
+}
+
+async function waitForPendingTasks(pendingTasks: Set<Promise<void>>): Promise<void> {
+  if (!pendingTasks.size) {
+    return;
+  }
+
+  const tasksToWait = [...pendingTasks];
+  await appendAutomationLog(`Waiting for ${tasksToWait.length} task(s) to finish.`);
+  await Promise.allSettled(tasksToWait);
+}
+
+async function queuePromptForRetry(
+  promptToRetry: string,
+  promptName: string,
+  currentIndex: number,
+  promptStatuses: PromptStatus[]
+): Promise<void> {
+  state.prompts.push(promptToRetry);
+  promptStatuses.push(PromptStatusPending);
+
+  await appendAutomationLog(
+    `Generation failed for ${promptName}. Re-queued prompt at the end (${state.prompts.length}/${state.prompts.length}).`
+  );
+
+  await persistAutomationProgress(Math.min(currentIndex, state.prompts.length - 1), promptStatuses);
+}
+
+async function markPromptDone(
+  promptToComplete: string,
+  promptIndex: number,
+  promptStatuses: PromptStatus[]
+): Promise<void> {
+  promptStatuses[promptIndex] = PromptStatusDone;
+  await removePromptFromRunnerSettings(promptToComplete);
+}
+
+async function maybeSelectReferenceImages(prompt: string): Promise<void> {
+  if (!state.enableReferenceImages) {
+    return;
+  }
+
+  const imageNames = extractImageNamesFromPrompt(prompt);
+  if (!imageNames.length) {
+    return;
+  }
+
+  await selectReferenceImage(imageNames);
+  await sleepMilliseconds(randomInt(1000, 2000));
+}
+
+function getPromptWaitTime(): number {
+  if (state.mode === CreateModeVideo) {
+    return randomInt(150000, 180000);
+  }
+
+  return 60000;
+}
+
+async function handleVideoPromptCompletion(
+  completedTile: HTMLElement,
+  prompt: string,
+  promptName: string,
+  promptIndex: number,
+  promptStatuses: PromptStatus[]
+): Promise<void> {
+  if (!state.enableAutoDownload) {
+    await appendAutomationLog(`Auto-download disabled for '${promptName}'.`);
+    await markPromptDone(prompt, promptIndex, promptStatuses);
+    return;
+  }
+
+  await appendAutomationLog(`Downloading '${promptName}'...`);
+
+  const downloaded = await downloadMediaItem(completedTile, promptName);
+  if (downloaded) {
+    await appendAutomationLog(`Downloaded '${promptName}' successfully.`);
+    await markPromptDone(prompt, promptIndex, promptStatuses);
+    return;
+  }
+
+  await appendAutomationLog(`Download skipped for '${promptName}': API request or menu flow failed.`);
+  promptStatuses[promptIndex] = PromptStatusFailed;
+}
+
+async function handleImagePromptCompletion(
+  completedTile: HTMLElement,
+  prompt: string,
+  promptName: string,
+  promptIndex: number,
+  promptStatuses: PromptStatus[]
+): Promise<void> {
+  const matchImageName = await getImageNameFromMediaContainer(completedTile, promptName);
+
+  if (matchImageName) {
+    await appendAutomationLog(`Get the name of '${promptName}' successfully.`);
+    await markPromptDone(prompt, promptIndex, promptStatuses);
+    return;
+  }
+
+  await appendAutomationLog(`Get the name of '${promptName}' failed: API request or menu flow failed.`);
+  promptStatuses[promptIndex] = PromptStatusFailed;
+
+  await queuePromptForRetry(prompt, promptName, promptIndex, promptStatuses);
+}
+
+async function handleCompletedTile(
+  completedResult: CompletedTileResult,
+  prompt: string,
+  promptName: string,
+  promptIndex: number,
+  promptStatuses: PromptStatus[]
+): Promise<void> {
+  const completedTile = completedResult.tile;
+  await waitBlurForActiveTile(completedTile, 20000);
+  await sleepMilliseconds(3000);
+
+  if (state.mode === CreateModeVideo) {
+    await handleVideoPromptCompletion(completedTile, prompt, promptName, promptIndex, promptStatuses);
+    return;
+  }
+
+  await handleImagePromptCompletion(completedTile, prompt, promptName, promptIndex, promptStatuses);
+}
+
+async function runPromptTask(
+  prompt: string,
+  promptName: string,
+  promptIndex: number,
+  knownTopRowTileIds: Set<string>,
+  promptStatuses: PromptStatus[]
+): Promise<void> {
+  if (!(await waitWhilePaused())) {
+    return;
+  }
+
+  const waitingTime = getPromptWaitTime();
+  const newTileId = await waitForNewTopRowTileId(knownTopRowTileIds, waitingTime, () => state.stopRequested);
+  if (!newTileId) {
+    await appendAutomationLog(`Task skipped for '${promptName}': no new tile detected in time.`);
+    return;
+  }
+
+  if (!(await waitWhilePaused())) {
+    return;
+  }
+
+  const tileResult = await waitForTileDoneById(newTileId, waitingTime, () => state.stopRequested);
+  if (tileResult.status === 'failed') {
+    await queuePromptForRetry(prompt, promptName, promptIndex, promptStatuses);
+    return;
+  }
+
+  if (tileResult.status !== 'completed') {
+    await appendAutomationLog(`Task skipped for '${promptName}': tile did not reach 100% in time.`);
+    return;
+  }
+
+  await handleCompletedTile(tileResult, prompt, promptName, promptIndex, promptStatuses);
 }
 
 export async function startAutomation(config: AutomationConfig): Promise<void> {
@@ -43,14 +238,13 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
   state.stopRequested = false;
   state.pauseRequested = false;
   state.prompts = config.prompts;
-  state.mode = config.mode === 'video' ? 'video' : 'image';
-  state.intervalMs = Math.max(1000, Number(config.intervalMs || 15000));
+  state.mode = config.mode;
+  state.intervalMs = Math.max(1000, Number(config.intervalMs || DEFAULT_INTERVAL_MS));
   state.enableReferenceImages = config.enableReferenceImages !== false;
   state.enableAutoDownload = config.enableAutoDownload !== false;
 
   let promptStatuses = createInitialPromptStatuses(state.prompts.length);
   let startIndex = 0;
-  let activePromptIndex = 0;
   const pendingTasks = new Set<Promise<void>>();
 
   const savedState = await loadAutomationState();
@@ -61,70 +255,17 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
     savedState.promptCount === state.prompts.length
   ) {
     startIndex = Math.max(0, Math.min(Number(savedState.currentIndex || 0), state.prompts.length - 1));
-    if (Array.isArray(savedState.promptStatuses)) {
-      promptStatuses = savedState.promptStatuses
-        .slice(0, state.prompts.length)
-        .concat(createInitialPromptStatuses(Math.max(0, state.prompts.length - savedState.promptStatuses.length)));
-    }
+    promptStatuses = restorePromptStatuses(state.prompts.length, savedState.promptStatuses);
   }
 
   try {
-    const waitForAvailableTaskSlot = async (): Promise<void> => {
-      if (pendingTasks.size < MAX_PENDING_TASKS) {
-        return;
-      }
-
-      await appendAutomationLog(
-        `Reached max pending tasks (${pendingTasks.size}/${MAX_PENDING_TASKS}). Waiting for one task to finish.`
-      );
-      await Promise.race(pendingTasks);
-    };
-
-    const waitForPendingTasks = async (): Promise<void> => {
-      if (!pendingTasks.size) {
-        return;
-      }
-
-      const tasksToWait = [...pendingTasks];
-      await appendAutomationLog(`Waiting for ${tasksToWait.length} task(s) to finish.`);
-      await Promise.allSettled(tasksToWait);
-    };
-
-    const queuePromptForRetry = async (promptToRetry: string, name: string): Promise<void> => {
-      state.prompts.push(promptToRetry);
-      promptStatuses.push('pending');
-
-      await appendAutomationLog(
-        `Generation failed for ${name}. Re-queued prompt at the end (${state.prompts.length}/${state.prompts.length}).`
-      );
-
-      await saveAutomationState({
-        running: true,
-        mode: state.mode,
-        promptCount: state.prompts.length,
-        currentIndex: Math.min(activePromptIndex, state.prompts.length - 1),
-        promptStatuses,
-      });
-    };
-
-    const markPromptDone = async (promptToComplete: string, promptIndex: number): Promise<void> => {
-      promptStatuses[promptIndex] = 'done';
-      await removePromptFromRunnerSettings(promptToComplete);
-    };
-
     await appendAutomationLog(`Automation started. Mode: ${state.mode}. Total prompts: ${state.prompts.length}.`);
 
     if (startIndex > 0) {
       await appendAutomationLog(`Resuming from prompt ${startIndex + 1}.`);
     }
 
-    await saveAutomationState({
-      running: true,
-      mode: state.mode,
-      promptCount: state.prompts.length,
-      currentIndex: startIndex,
-      promptStatuses,
-    });
+    await persistAutomationProgress(startIndex, promptStatuses);
 
     await pauseBeforeStep(`Set mode and model to ${state.mode}.`, () => state.stopRequested, appendAutomationLog);
 
@@ -140,20 +281,13 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
         break;
       }
 
-      activePromptIndex = i;
-      const promptIndex = activePromptIndex;
+      const promptIndex = i;
       const prompt = state.prompts[promptIndex];
       const sceneNumbers = parseSceneNumbers(prompt, promptIndex + 1);
       const promptName = extractPromptPrefixName(prompt, formatSceneName(sceneNumbers.scene, ''));
-      promptStatuses[i] = 'in_progress';
+      promptStatuses[i] = PromptStatusInProgress;
 
-      await saveAutomationState({
-        running: true,
-        mode: state.mode,
-        promptCount: state.prompts.length,
-        currentIndex: promptIndex,
-        promptStatuses,
-      });
+      await persistAutomationProgress(promptIndex, promptStatuses);
 
       if (state.stopRequested) {
         await appendAutomationLog('Stop requested. Exiting before next prompt.');
@@ -168,13 +302,7 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
       }
 
       // ===================== Step 1: select reference image if needed
-      if (state.enableReferenceImages) {
-        const imageNames = extractImageNamesFromPrompt(prompt);
-        if (imageNames.length > 0) {
-          await selectReferenceImage(imageNames);
-          await sleepMilliseconds(randomInt(1000, 2000));
-        }
-      }
+      await maybeSelectReferenceImages(prompt);
       const knownTopRowTileIds = new Set(getTopRowTileIds());
 
       // ===================== Step 2: fill prompt input
@@ -182,72 +310,7 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
 
       // ===================== Step 3: wait for new tile
       const pendingTask = (async (): Promise<void> => {
-        if (!(await waitWhilePaused())) {
-          return;
-        }
-
-        let waitingTime = 60000;
-        if (state.mode === 'video') {
-          waitingTime = await randomInt(150000, 180000);
-        }
-
-        // Wait for a new item to appear in the top row, which indicates that the generation has started
-        const newTileId = await waitForNewTopRowTileId(knownTopRowTileIds, waitingTime, () => state.stopRequested);
-        if (!newTileId) {
-          await appendAutomationLog(`Task skipped for '${promptName}': no new tile detected in time.`);
-          return;
-        }
-
-        if (!(await waitWhilePaused())) {
-          return;
-        }
-        const tileResult = await waitForTileDoneById(newTileId, waitingTime, () => state.stopRequested);
-
-        if (tileResult.status === 'failed') {
-          await queuePromptForRetry(prompt, promptName);
-          return;
-        }
-
-        if (tileResult.status !== 'completed') {
-          await appendAutomationLog(`Task skipped for '${promptName}': tile did not reach 100% in time.`);
-          return;
-        }
-
-        const completedTile = tileResult.tile;
-        await waitBlurForActiveTile(completedTile, 20000);
-        await sleepMilliseconds(3000);
-
-        if (state.enableAutoDownload && state.mode === 'video') {
-          await appendAutomationLog(`Downloading '${promptName}'...`);
-
-          const downloaded = await downloadMediaItem(completedTile, promptName);
-          if (downloaded) {
-            await appendAutomationLog(`Downloaded '${promptName}' successfully.`);
-            await markPromptDone(prompt, promptIndex);
-          } else {
-            await appendAutomationLog(`Download skipped for '${promptName}': API request or menu flow failed.`);
-            promptStatuses[promptIndex] = 'failed';
-          }
-        } else if (state.mode === 'video') {
-          await appendAutomationLog(`Auto-download disabled for '${promptName}'.`);
-          await markPromptDone(prompt, promptIndex);
-        }
-
-        if (state.mode === 'image') {
-          const matchImageName = await getImageNameFromMediaContainer(completedTile, promptName);
-
-          if (matchImageName) {
-            await appendAutomationLog(`Get the name of '${promptName}' successfully.`);
-            await markPromptDone(prompt, promptIndex);
-          } else {
-            await appendAutomationLog(`Get the name of '${promptName}' failed: API request or menu flow failed.`);
-            promptStatuses[promptIndex] = 'failed';
-
-            // put the prompt back to the end of the queue for retry, since we might have hit the rate limit or a fluke failure in the interactions
-            await queuePromptForRetry(prompt, promptName);
-            return;
-          }
-        }
+        await runPromptTask(prompt, promptName, promptIndex, knownTopRowTileIds, promptStatuses);
       })().catch(async (error: unknown) => {
         await appendAutomationLog(`Task failed for '${promptName}': ${(error as Error).message}`);
       });
@@ -260,7 +323,7 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
 
       // Waiting for available task slot if we have reached the max pending tasks limit before starting the next prompt
       if (pendingTasks.size >= MAX_PENDING_TASKS) {
-        await waitForAvailableTaskSlot();
+        await waitForAvailableTaskSlot(pendingTasks);
       }
 
       if (i >= 0 && i < state.prompts.length && !state.stopRequested) {
@@ -270,7 +333,7 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
       i += 1;
     }
 
-    await waitForPendingTasks();
+    await waitForPendingTasks(pendingTasks);
 
     await clearAutomationState();
     await appendAutomationLog('Automation completed.');

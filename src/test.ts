@@ -1,23 +1,18 @@
 import { state } from './constants';
+import { CreateModeVideo } from './enums/modeType';
 import { extractPromptPrefixName, formatSceneName } from './formatting';
-import {
-  downloadMediaItem,
-  getTopRowTileIds,
-  renameMediaItem,
-  waitForNewTopRowTileId,
-  waitForTileDoneById,
-} from './interactions';
+import { downloadMediaItem, getTopRowTileIds, waitForNewTopRowTileId, waitForTileDoneById } from './interactions';
 import { appendAutomationLog } from './storage';
 import { sleepMilliseconds } from './utils';
 
 export async function test(pendingRenameTasks: Set<Promise<void>>) {
   const knownTopRowTileIds = new Set(getTopRowTileIds());
   let renameTo = extractPromptPrefixName('Scene 1 - Image 1', formatSceneName(1, ''));
-  if (state.mode === 'video') {
+  if (state.mode === CreateModeVideo) {
     renameTo = extractPromptPrefixName('Scene 1', formatSceneName(1, ''));
   }
   let waitingTime = 600;
-  if (state.mode === 'video') {
+  if (state.mode === CreateModeVideo) {
     waitingTime = Math.max(120000, state.intervalMs * 4);
   }
   const renameTask = (async (): Promise<void> => {
@@ -50,7 +45,7 @@ export async function test(pendingRenameTasks: Set<Promise<void>>) {
 
     await appendAutomationLog(`Renamed '${renameTo}' successfully.`);
 
-    if (state.mode === 'video') {
+    if (state.mode === CreateModeVideo) {
       await appendAutomationLog(`Downloading '${renameTo}'...`);
       const downloaded = await downloadMediaItem(completedTile, 'Scene 1');
       if (downloaded) {

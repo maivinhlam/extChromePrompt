@@ -1,3 +1,4 @@
+import { CreateModeImage, CreateModeVideo, type CreateMode } from './enums/modeType';
 import { isVisible, sleepMilliseconds } from './utils';
 
 export function findPromptInput(): HTMLElement | null {
@@ -54,7 +55,7 @@ export function findSendButton(): HTMLElement | null {
   );
 }
 
-export function findModelButton(mode: 'image' | 'video'): HTMLElement | null {
+export function findModelButton(mode: CreateMode): HTMLElement | null {
   const buttons = Array.from(document.querySelectorAll("button[aria-haspopup='menu']")) as HTMLElement[];
 
   const primary = buttons.find((button) => {
@@ -63,9 +64,9 @@ export function findModelButton(mode: 'image' | 'video'): HTMLElement | null {
     }
 
     const text = (button.textContent || '').toLowerCase();
-    if (mode === 'image') {
+    if (mode === CreateModeImage) {
       return text.includes('nano banana') || text.includes('crop_16_9');
-    } else if (mode === 'video') {
+    } else if (mode === CreateModeVideo) {
       return text.includes('video');
     }
     return false;

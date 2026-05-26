@@ -1,8 +1,12 @@
-import { LOG_STORAGE_KEY, AUTOMATION_STATE_KEY, STATUS_STORAGE_KEY, MAX_LOG_ITEMS } from './constants';
+import {
+  RUNNER_SETTINGS_KEY,
+  LOG_STORAGE_KEY,
+  AUTOMATION_STATE_KEY,
+  STATUS_STORAGE_KEY,
+  MAX_LOG_ITEMS,
+} from './constants';
 import type { AutomationStatePayload, LogEntry, RunnerSettings } from './types';
 import { formatTimestamp } from './utils';
-
-const RUNNER_SETTINGS_KEY = 'flowPromptRunnerSettings';
 
 export async function loadAutomationState(): Promise<AutomationStatePayload | null> {
   try {

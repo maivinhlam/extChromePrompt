@@ -1,5 +1,5 @@
-export type PromptStatus = 'pending' | 'in_progress' | 'done' | 'failed';
-export type PromptMode = 'image' | 'video';
+import type { CreateMode } from './enums/modeType';
+import type { PromptStatus } from './enums/promeStatusType';
 
 export type AutomationFeatures = {
   enableReferenceImages: boolean;
@@ -8,16 +8,15 @@ export type AutomationFeatures = {
 
 export type AutomationConfig = {
   prompts?: string[];
-  mode?: PromptMode;
+  mode?: CreateMode;
   intervalMs?: number;
   enableReferenceImages?: boolean;
   enableAutoDownload?: boolean;
-  cleanupReferenceImages?: boolean;
 };
 
 export type RunnerSettings = {
   intervalSeconds?: number;
-  mode?: PromptMode;
+  mode?: CreateMode;
   promptsText?: string;
   enableReferenceImages?: boolean;
   enableAutoDownload?: boolean;
@@ -27,7 +26,7 @@ export type RunnerSettings = {
 
 export type AutomationStatePayload = {
   running: boolean;
-  mode: PromptMode;
+  mode: CreateMode;
   promptCount: number;
   currentIndex: number;
   promptStatuses: PromptStatus[];
@@ -41,7 +40,7 @@ export type AutomationState = {
   promptIndex: number;
   prompts: string[];
   matchedImageNames: Record<string, string>;
-  mode: PromptMode;
+  mode: CreateMode;
   intervalMs: number;
   enableReferenceImages: boolean;
   enableAutoDownload: boolean;

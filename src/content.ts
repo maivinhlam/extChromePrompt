@@ -2,8 +2,9 @@ export {};
 
 import { setupMessageListener } from './listeners';
 import { startAutomation } from './automation';
-import { LOG_STORAGE_KEY, STATUS_STORAGE_KEY, state } from './constants';
-import type { AutomationFeatures, PromptMode, RunnerSettings } from './types';
+import { LOG_STORAGE_KEY, RUNNER_SETTINGS_KEY, STATUS_STORAGE_KEY, state } from './constants';
+import { type AutomationFeatures, type RunnerSettings } from './types';
+import { CreateModeImage, CreateModeVideo, type CreateMode } from './enums/modeType';
 import {
   appendAutomationLog,
   loadAutomationStatus,
@@ -17,7 +18,6 @@ import { findModelButton } from './dom-finders';
 // ── Types ──────────────────────────────────────────────
 type LogEntry = { timestamp?: number; message?: string };
 
-const STORAGE_KEY = 'flowPromptRunnerSettings';
 const DEFAULT_PROMPTS_TEXT = 'SCENE 1: A cinematic shot of a forest at sunrise';
 const CONTENT_PANEL_HTML_URL = chrome.runtime.getURL('content.html');
 const PROMPT_PREVIEW_LENGTH = 220;
@@ -60,11 +60,11 @@ async function ensurePanelVisibility(): Promise<void> {
 }
 
 function onRunnerSettingsChanged(changes: Record<string, chrome.storage.StorageChange>, areaName: string): void {
-  if (areaName !== 'local' || !changes[STORAGE_KEY]) {
+  if (areaName !== 'local' || !changes[RUNNER_SETTINGS_KEY]) {
     return;
   }
 
-  const nextSettings = (changes[STORAGE_KEY].newValue as RunnerSettings | undefined) || {};
+  const nextSettings = (changes[RUNNER_SETTINGS_KEY].newValue as RunnerSettings | undefined) || {};
 
   if (nextSettings.injectPanelEnabled === false) {
     setPanelHostVisible(false);
@@ -344,7 +344,7 @@ async function injectPanel(): Promise<void> {
   const persistSettings = async (): Promise<void> => {
     const updated: RunnerSettings = {
       intervalSeconds: getIntervalSeconds(),
-      mode: modeVideoInput.checked ? 'video' : 'image',
+      mode: modeVideoInput.checked ? CreateModeVideo : CreateModeImage,
       promptsText: promptsInput.value,
       ...getFeatureSettings(),
     };
@@ -357,9 +357,9 @@ async function injectPanel(): Promise<void> {
 
     intervalInput.value = String(settings.intervalSeconds || 15);
 
-    const mode: PromptMode = settings.mode === 'video' ? 'video' : 'image';
-    modeImageInput.checked = mode === 'image';
-    modeVideoInput.checked = mode === 'video';
+    const mode: CreateMode = settings.mode;
+    modeImageInput.checked = mode === CreateModeImage;
+    modeVideoInput.checked = mode === CreateModeVideo;
     enableReferenceImagesInput.checked = settings.enableReferenceImages !== false;
     enableAutoDownloadInput.checked = settings.enableAutoDownload !== false;
     promptsInput.value = settings.promptsText || '';
@@ -385,7 +385,7 @@ async function injectPanel(): Promise<void> {
     }
 
     const modelButton = findModelButton(state.mode);
-    if (modelButton) {
+    if (!modelButton) {
       setStatus('Could not find model selection button on the page.', true);
 
       window.alert('Vui lòng chọn đúng model (banana khi tạo ảnh và Video khi tạo video).');
@@ -401,9 +401,8 @@ async function injectPanel(): Promise<void> {
     setCollapsedState(true);
     const automationRun = startAutomation({
       prompts,
-      mode: modeVideoInput.checked ? 'video' : 'image',
+      mode: modeVideoInput.checked ? CreateModeVideo : CreateModeImage,
       intervalMs: getIntervalSeconds() * 1000,
-      cleanupReferenceImages: true,
       ...getFeatureSettings(),
     });
 
@@ -439,10 +438,9 @@ async function injectPanel(): Promise<void> {
     setCollapsedState(true);
     const automationRun = startAutomation({
       prompts,
-      mode: modeVideoInput.checked ? 'video' : 'image',
+      mode: modeVideoInput.checked ? CreateModeVideo : CreateModeImage,
       intervalMs: getIntervalSeconds() * 1000,
       ...getFeatureSettings(),
-      cleanupReferenceImages: false,
     });
 
     updateActionButtons();
@@ -579,8 +577,8 @@ async function injectPanel(): Promise<void> {
       setStatus(nextStatus);
     }
 
-    if (changes[STORAGE_KEY]) {
-      const nextSettings = (changes[STORAGE_KEY].newValue as RunnerSettings | undefined) || {};
+    if (changes[RUNNER_SETTINGS_KEY]) {
+      const nextSettings = (changes[RUNNER_SETTINGS_KEY].newValue as RunnerSettings | undefined) || {};
       promptsInput.value = nextSettings.promptsText || '';
       state.matchedImageNames = { ...(nextSettings.matchedImageNames || {}) };
       updatePromptCount();
