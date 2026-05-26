@@ -49,12 +49,8 @@ export async function waitWhilePaused(state: AutomationState): Promise<boolean> 
   return !state.stopRequested;
 }
 
-export async function waitForNextPromptCountdown(
-  state: AutomationState,
-  intervalMs: number,
-  currentPrompt?: string
-): Promise<void> {
-  const totalSeconds = Math.max(1, Math.ceil(intervalMs / 1000));
+export async function waitForNextPromptCountdown(state: AutomationState, currentPrompt?: string): Promise<void> {
+  const totalSeconds = Math.max(1, Math.ceil(state.intervalMs / 1000));
 
   for (let secondsLeft = totalSeconds; secondsLeft >= 1; secondsLeft -= 1) {
     const canContinue = await waitWhilePaused(state);
@@ -71,7 +67,7 @@ export async function waitForNextPromptCountdown(
       `Current prompt: ${currentPrompt || 'N/A'} | Start next prompt in ${secondsLeft} second${secondsLeft === 1 ? '' : 's'}...`
     );
 
-    const sleepMs = secondsLeft === 1 ? intervalMs - (totalSeconds - 1) * 1000 : 1000;
+    const sleepMs = secondsLeft === 1 ? state.intervalMs - (totalSeconds - 1) * 1000 : 1000;
     await sleepMilliseconds(Math.max(1, sleepMs));
   }
 }

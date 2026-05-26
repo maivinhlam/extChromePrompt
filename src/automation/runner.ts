@@ -300,8 +300,7 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
       }
 
       if (i >= 0 && i < state.prompts.length && !state.stopRequested) {
-        const waitingTime = getPromptWaitTime(state);
-        await waitForNextPromptCountdown(state, waitingTime, promptName);
+        await waitForNextPromptCountdown(state, promptName);
       }
 
       i += 1;
