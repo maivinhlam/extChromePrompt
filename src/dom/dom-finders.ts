@@ -66,7 +66,7 @@ export function findModelButton(mode: CreateMode): HTMLElement | null {
     const text = (button.textContent || '').toLowerCase();
     switch (mode) {
       case CreateModeImage:
-        return text.includes('banana') || text.includes('crop_16_9');
+        return text.includes('banana');
       case CreateModeVideo:
         return text.includes('video');
       default:
