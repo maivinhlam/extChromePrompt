@@ -1,5 +1,5 @@
-import type { CreateMode } from './enums/modeType';
-import type { PromptStatus } from './enums/promeStatusType';
+import type { CreateMode } from './create-mode';
+import type { PromptStatus } from './prompt-status';
 
 export type AutomationFeatures = {
   enableReferenceImages: boolean;

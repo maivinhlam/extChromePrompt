@@ -1,5 +1,5 @@
-import { CreateModeImage, CreateModeVideo, type CreateMode } from './enums/modeType';
-import { isVisible, sleepMilliseconds } from './utils';
+import { CreateModeImage, CreateModeVideo, type CreateMode } from '../domain/create-mode';
+import { isVisible, sleepMilliseconds } from '../utils';
 
 export function findPromptInput(): HTMLElement | null {
   const preferredSlateEditors = Array.from(
@@ -64,18 +64,20 @@ export function findModelButton(mode: CreateMode): HTMLElement | null {
     }
 
     const text = (button.textContent || '').toLowerCase();
-    if (mode === CreateModeImage) {
-      return text.includes('nano banana') || text.includes('crop_16_9');
-    } else if (mode === CreateModeVideo) {
-      return text.includes('video');
+    switch (mode) {
+      case CreateModeImage:
+        return text.includes('banana') || text.includes('crop_16_9');
+      case CreateModeVideo:
+        return text.includes('video');
+      default:
+        return false;
     }
-    return false;
   });
   if (primary) {
     return primary;
   }
 
-  return buttons.find(isVisible) || null;
+  return null;
 }
 
 export function findVideoReferencesTab(): HTMLElement | null {

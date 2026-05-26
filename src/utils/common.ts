@@ -1,5 +1,3 @@
-import { STEP_DELAY_MS } from './constants';
-
 export function sleepMilliseconds(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
@@ -23,19 +21,9 @@ export async function sleepWithStop(ms: number, shouldStop: () => boolean): Prom
   }
 }
 
-export async function pauseBeforeStep(
-  stepText: string,
-  shouldStop: () => boolean,
-  logFn: (msg: string) => Promise<void>
-): Promise<void> {
-  await logFn(`${stepText} Running in ${STEP_DELAY_MS / 1000} seconds...`);
-  await sleepWithStop(STEP_DELAY_MS, shouldStop);
-}
-
 export function formatTimestamp(ts: number): string {
   const now = new Date(ts);
 
-  // Lấy các thành phần riêng để format tuỳ chỉnh
   const yyyy = now.getFullYear();
   const mm = String(now.getMonth() + 1).padStart(2, '0');
   const dd = String(now.getDate()).padStart(2, '0');
@@ -43,21 +31,17 @@ export function formatTimestamp(ts: number): string {
   const min = String(now.getMinutes()).padStart(2, '0');
   const ss = String(now.getSeconds()).padStart(2, '0');
 
-  const custom = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
-  return custom;
+  return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
 }
 
 export function extractImageNamesFromPrompt(prompt: string): string[] {
   const imageNamesMatch = prompt.match(/IMAGES:\s*(.+?)(?:\s*\||\s*$)/i);
-
-  // Lấy chuỗi tên ảnh (hoặc null nếu không khớp)
   const imageNames = imageNamesMatch ? imageNamesMatch[1].trim() : null;
-  const imageArray = imageNames
+
+  return imageNames
     ? imageNames
         .split(',')
-        .map((s) => s.trim())
+        .map((value) => value.trim())
         .filter(Boolean)
     : [];
-
-  return imageArray;
 }

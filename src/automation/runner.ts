@@ -1,21 +1,15 @@
-import { state, MAX_PENDING_TASKS, DEFAULT_INTERVAL_MS } from './constants';
-import { type AutomationConfig } from './types';
+import { DEFAULT_INTERVAL_MS, MAX_PENDING_TASKS } from '../config/automation-settings';
+import { type AutomationConfig } from '../domain/automation-types';
 import {
   type PromptStatus,
   PromptStatusPending,
   PromptStatusDone,
   PromptStatusFailed,
   PromptStatusInProgress,
-} from './enums/promeStatusType';
-import { CreateModeVideo } from './enums/modeType';
-import {
-  loadAutomationState,
-  saveAutomationState,
-  clearAutomationState,
-  appendAutomationLog,
-  setAutomationStatus,
-  removePromptFromRunnerSettings,
-} from './storage';
+} from '../domain/prompt-status';
+import { CreateModeVideo } from '../domain/create-mode';
+import { state } from '../state/automation-state';
+
 import {
   fillPromptInput,
   selectReferenceImage,
@@ -26,9 +20,27 @@ import {
   waitBlurForActiveTile,
   getImageNameFromMediaContainer,
   randomInt,
-} from './interactions';
-import { parseSceneNumbers, formatSceneName, extractPromptPrefixName } from './formatting';
-import { extractImageNamesFromPrompt, pauseBeforeStep, sleepMilliseconds } from './utils';
+} from '../interactions';
+import {
+  parseSceneNumbers,
+  formatSceneName,
+  extractPromptPrefixName,
+  extractImageNamesFromPrompt,
+  sleepMilliseconds,
+  loadAutomationState,
+  saveAutomationState,
+  clearAutomationState,
+  appendAutomationLog,
+  removePromptFromRunnerSettings,
+} from '../utils';
+import {
+  getPromptWaitTime,
+  waitForAvailableTaskSlot,
+  waitForNextPromptCountdown,
+  waitForPendingTasks,
+  waitWhilePaused,
+  pauseBeforeStep,
+} from './auto';
 
 function createInitialPromptStatuses(length: number): PromptStatus[] {
   return Array.from({ length }, () => PromptStatusPending);
@@ -53,27 +65,6 @@ async function persistAutomationProgress(currentIndex: number, promptStatuses: P
     currentIndex,
     promptStatuses,
   });
-}
-
-async function waitForAvailableTaskSlot(pendingTasks: Set<Promise<void>>): Promise<void> {
-  if (pendingTasks.size < MAX_PENDING_TASKS) {
-    return;
-  }
-
-  await appendAutomationLog(
-    `Reached max pending tasks (${pendingTasks.size}/${MAX_PENDING_TASKS}). Waiting for one task to finish.`
-  );
-  await Promise.race(pendingTasks);
-}
-
-async function waitForPendingTasks(pendingTasks: Set<Promise<void>>): Promise<void> {
-  if (!pendingTasks.size) {
-    return;
-  }
-
-  const tasksToWait = [...pendingTasks];
-  await appendAutomationLog(`Waiting for ${tasksToWait.length} task(s) to finish.`);
-  await Promise.allSettled(tasksToWait);
 }
 
 async function queuePromptForRetry(
@@ -113,14 +104,6 @@ async function maybeSelectReferenceImages(prompt: string): Promise<void> {
 
   await selectReferenceImage(imageNames);
   await sleepMilliseconds(randomInt(1000, 2000));
-}
-
-function getPromptWaitTime(): number {
-  if (state.mode === CreateModeVideo) {
-    return randomInt(150000, 180000);
-  }
-
-  return 60000;
 }
 
 async function handleVideoPromptCompletion(
@@ -196,18 +179,18 @@ async function runPromptTask(
   knownTopRowTileIds: Set<string>,
   promptStatuses: PromptStatus[]
 ): Promise<void> {
-  if (!(await waitWhilePaused())) {
+  if (!(await waitWhilePaused(state))) {
     return;
   }
 
-  const waitingTime = getPromptWaitTime();
+  const waitingTime = getPromptWaitTime(state);
   const newTileId = await waitForNewTopRowTileId(knownTopRowTileIds, waitingTime, () => state.stopRequested);
   if (!newTileId) {
     await appendAutomationLog(`Task skipped for '${promptName}': no new tile detected in time.`);
     return;
   }
 
-  if (!(await waitWhilePaused())) {
+  if (!(await waitWhilePaused(state))) {
     return;
   }
 
@@ -276,7 +259,7 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
         continue;
       }
 
-      const canContinue = await waitWhilePaused();
+      const canContinue = await waitWhilePaused(state);
       if (!canContinue) {
         break;
       }
@@ -296,38 +279,29 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
 
       await appendAutomationLog(`Prompt ${promptIndex + 1}/${state.prompts.length}: SCENE ${sceneNumbers.scene}.`);
 
-      // waiting when press pause
-      if (!(await waitWhilePaused())) {
-        break;
-      }
-
-      // ===================== Step 1: select reference image if needed
       await maybeSelectReferenceImages(prompt);
       const knownTopRowTileIds = new Set(getTopRowTileIds());
 
-      // ===================== Step 2: fill prompt input
       await fillPromptInput(prompt);
 
-      // ===================== Step 3: wait for new tile
       const pendingTask = (async (): Promise<void> => {
         await runPromptTask(prompt, promptName, promptIndex, knownTopRowTileIds, promptStatuses);
       })().catch(async (error: unknown) => {
         await appendAutomationLog(`Task failed for '${promptName}': ${(error as Error).message}`);
       });
 
-      // Add the pending task to the set and ensure it's removed when done
       pendingTasks.add(pendingTask);
       void pendingTask.finally(() => {
         pendingTasks.delete(pendingTask);
       });
 
-      // Waiting for available task slot if we have reached the max pending tasks limit before starting the next prompt
       if (pendingTasks.size >= MAX_PENDING_TASKS) {
         await waitForAvailableTaskSlot(pendingTasks);
       }
 
       if (i >= 0 && i < state.prompts.length && !state.stopRequested) {
-        await waitForNextPromptCountdown(state.intervalMs, promptName);
+        const waitingTime = getPromptWaitTime(state);
+        await waitForNextPromptCountdown(state, waitingTime, promptName);
       }
 
       i += 1;
@@ -344,52 +318,5 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
   } finally {
     state.pauseRequested = false;
     state.running = false;
-  }
-}
-
-async function waitWhilePaused(): Promise<boolean> {
-  let loggedPause = false;
-
-  while (state.pauseRequested) {
-    if (state.stopRequested) {
-      await appendAutomationLog('Stop requested.');
-      return false;
-    }
-
-    if (!loggedPause) {
-      await appendAutomationLog('Paused. Click Resume to continue.');
-      loggedPause = true;
-    }
-
-    await sleepMilliseconds(200);
-  }
-
-  if (loggedPause) {
-    await appendAutomationLog('Automation resumed.');
-  }
-
-  return !state.stopRequested;
-}
-
-async function waitForNextPromptCountdown(intervalMs: number, currentPrompt?: string): Promise<void> {
-  const totalSeconds = Math.max(1, Math.ceil(intervalMs / 1000));
-
-  for (let secondsLeft = totalSeconds; secondsLeft >= 1; secondsLeft -= 1) {
-    const canContinue = await waitWhilePaused();
-    if (!canContinue) {
-      return;
-    }
-
-    if (state.stopRequested) {
-      await appendAutomationLog('Stop requested.');
-      return;
-    }
-
-    await setAutomationStatus(
-      `Current prompt: ${currentPrompt || 'N/A'} | Start next prompt in ${secondsLeft} second${secondsLeft === 1 ? '' : 's'}...`
-    );
-
-    const sleepMs = secondsLeft === 1 ? intervalMs - (totalSeconds - 1) * 1000 : 1000;
-    await sleepMilliseconds(Math.max(1, sleepMs));
   }
 }

@@ -1,12 +1,7 @@
-import {
-  RUNNER_SETTINGS_KEY,
-  LOG_STORAGE_KEY,
-  AUTOMATION_STATE_KEY,
-  STATUS_STORAGE_KEY,
-  MAX_LOG_ITEMS,
-} from './constants';
-import type { AutomationStatePayload, LogEntry, RunnerSettings } from './types';
-import { formatTimestamp } from './utils';
+import { MAX_LOG_ITEMS } from '../config/automation-settings';
+import { RUNNER_SETTINGS_KEY, LOG_STORAGE_KEY, AUTOMATION_STATE_KEY, STATUS_STORAGE_KEY } from '../config/storage-keys';
+import type { AutomationStatePayload, LogEntry, RunnerSettings } from '../domain/automation-types';
+import { formatTimestamp } from './common';
 
 export async function loadAutomationState(): Promise<AutomationStatePayload | null> {
   try {

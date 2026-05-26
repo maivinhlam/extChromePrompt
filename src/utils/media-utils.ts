@@ -1,4 +1,4 @@
-import { isVisible } from './utils';
+import { isVisible } from './common';
 
 export function countMainMediaItems(): number {
   return getMainMediaContainers().length;

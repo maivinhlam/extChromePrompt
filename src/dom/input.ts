@@ -1,5 +1,5 @@
-import { randomInt } from './interactions';
-import { sleepMilliseconds } from './utils';
+import { randomInt } from '../interactions';
+import { sleepMilliseconds } from '../utils';
 
 /**
  * Sends a native Enter key event to the target tab.

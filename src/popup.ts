@@ -1,6 +1,6 @@
-import { RUNNER_SETTINGS_KEY } from './constants';
-import { loadRunnerSettings, updateRunnerSettings } from './storage';
-import type { RunnerSettings } from './types';
+import { RUNNER_SETTINGS_KEY } from './config/storage-keys';
+import { loadRunnerSettings, updateRunnerSettings } from './utils';
+import type { RunnerSettings } from './domain/automation-types';
 
 const toggleInput = document.getElementById('injectPanelToggle') as HTMLInputElement | null;
 

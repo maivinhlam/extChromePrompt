@@ -1,4 +1,4 @@
-import { nativeClear, nativeType } from './input';
+import { nativeClear, nativeType } from './dom/input';
 
 export {};
 
