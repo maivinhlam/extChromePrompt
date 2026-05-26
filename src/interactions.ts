@@ -2,7 +2,6 @@ import { sleepMilliseconds, isVisible } from './utils';
 import { appendAutomationLog, saveMatchedImageNames } from './storage';
 import {
   findPromptInput,
-  findSendButton,
   findModelButton,
   findVideoReferencesTab,
   findVideoModelDropdownButton,
@@ -36,62 +35,6 @@ async function withPageInteractionLock<T>(action: () => Promise<T>): Promise<T> 
   }
 }
 
-function getTypingDelay(character: string): number {
-  if (character === ' ') {
-    return 5;
-  }
-
-  if (/[.,;:!?]/.test(character)) {
-    return 6;
-  }
-
-  return 4;
-}
-
-async function typeTextIntoField(field: HTMLInputElement | HTMLTextAreaElement, text: string): Promise<void> {
-  field.focus();
-  field.select();
-  field.value = '';
-  field.dispatchEvent(new Event('input', { bubbles: true }));
-
-  for (const character of text) {
-    field.dispatchEvent(
-      new KeyboardEvent('keydown', {
-        bubbles: true,
-        cancelable: true,
-        key: character,
-      })
-    );
-    field.dispatchEvent(
-      new InputEvent('beforeinput', {
-        bubbles: true,
-        cancelable: true,
-        inputType: 'insertText',
-        data: character,
-      })
-    );
-    field.value += character;
-    field.dispatchEvent(
-      new InputEvent('input', {
-        bubbles: true,
-        cancelable: true,
-        inputType: 'insertText',
-        data: character,
-      })
-    );
-    field.dispatchEvent(
-      new KeyboardEvent('keyup', {
-        bubbles: true,
-        cancelable: true,
-        key: character,
-      })
-    );
-    await sleepMilliseconds(getTypingDelay(character));
-  }
-
-  field.dispatchEvent(new Event('change', { bubbles: true }));
-}
-
 async function waitForTransientUiToClose(timeoutMs: number): Promise<boolean> {
   const started = Date.now();
 
@@ -110,29 +53,6 @@ async function waitForTransientUiToClose(timeoutMs: number): Promise<boolean> {
   }
 
   return false;
-}
-
-async function ensurePageCanOpenNativeUi(timeoutMs = 2000): Promise<boolean> {
-  if (!document.hidden && document.hasFocus()) {
-    return true;
-  }
-
-  const response = await chrome.runtime.sendMessage({ type: 'FOCUS_SENDER_TAB' }).catch(() => null);
-
-  if (!response?.ok) {
-    return !document.hidden;
-  }
-
-  const started = Date.now();
-  while (Date.now() - started < timeoutMs) {
-    if (!document.hidden && document.hasFocus()) {
-      return true;
-    }
-
-    await sleepMilliseconds(50);
-  }
-
-  return !document.hidden;
 }
 
 function getElementClickPoint(element: HTMLElement): { x: number; y: number } {
@@ -236,42 +156,6 @@ async function debuggerClickElement(element: HTMLElement, button: DebuggerMouseB
   return debuggerClickAtPoint(x, y, button);
 }
 
-// Hàm hỗ trợ gõ từng ký tự
-async function typeChar(element: HTMLElement, char: string): Promise<void> {
-  const eventObj = { key: char, char: char, bubbles: true };
-  element.dispatchEvent(new KeyboardEvent('keydown', eventObj));
-  element.dispatchEvent(new KeyboardEvent('keypress', eventObj));
-
-  // Cập nhật giá trị trực tiếp cho input
-  if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-    const input = element as HTMLInputElement | HTMLTextAreaElement;
-    const start = input.selectionStart ?? input.value.length;
-    const end = input.selectionEnd ?? input.value.length;
-    input.value = input.value.substring(0, start) + char + input.value.substring(end);
-    input.selectionStart = input.selectionEnd = start + 1;
-  }
-
-  element.dispatchEvent(new InputEvent('input', { data: char, bubbles: true }));
-  element.dispatchEvent(new KeyboardEvent('keyup', eventObj));
-}
-
-// Hàm hỗ trợ xoá ký tự (Backspace)
-async function backspace(element: HTMLElement): Promise<void> {
-  element.dispatchEvent(
-    new KeyboardEvent('keydown', {
-      key: 'Backspace',
-      keyCode: 8,
-      bubbles: true,
-    })
-  );
-  if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-    const input = element as HTMLInputElement | HTMLTextAreaElement;
-    input.value = input.value.slice(0, -1);
-  }
-  element.dispatchEvent(new InputEvent('input', { bubbles: true }));
-  element.dispatchEvent(new KeyboardEvent('keyup', { key: 'Backspace', keyCode: 8, bubbles: true }));
-}
-
 export async function fillPromptInput(prompt: string): Promise<boolean> {
   return withPageInteractionLock(async () => {
     /**
@@ -317,36 +201,6 @@ export async function safeClick(element: HTMLElement | null): Promise<boolean> {
   }
 
   await sleepMilliseconds(80);
-  return true;
-}
-
-async function openContextMenuAtContainerCenter(mediaContainer: HTMLElement): Promise<boolean> {
-  if (!mediaContainer || !isVisible(mediaContainer)) {
-    return false;
-  }
-
-  const pageReady = await ensurePageCanOpenNativeUi();
-  if (!pageReady) {
-    return false;
-  }
-
-  mediaContainer.scrollIntoView({ block: 'center', inline: 'nearest' });
-  await sleepMilliseconds(80);
-
-  const rect = mediaContainer.getBoundingClientRect();
-  const clientX = rect.left + rect.width / 2;
-  const clientY = rect.top + rect.height / 2;
-
-  const pointTarget = document.elementFromPoint(clientX, clientY) as HTMLElement | null;
-  if (!pointTarget || !mediaContainer.contains(pointTarget)) {
-    return false;
-  }
-
-  const opened = await debuggerClickAtPoint(clientX, clientY, 'right');
-  if (!opened) {
-    return false;
-  }
-
   return true;
 }
 
@@ -419,6 +273,7 @@ function getDirectVideoDownloadUrl(mediaContainer: HTMLElement): string | null {
   return resolveLabsMediaUrl(video.currentSrc || video.getAttribute('src') || '');
 }
 
+/* eslint-disable no-control-regex */
 function sanitizeDownloadBaseName(name: string): string {
   return String(name || '')
     .trim()
@@ -922,9 +777,9 @@ export async function getImageNameFromMediaContainer(mediaContainer: HTMLElement
 
       const text = mediaContainer.textContent || '';
       // get the text after the text "image"  const match = text.match(/image\s*[:\-]?\s*(.+)/i);
-      const match = text.match(/IMAGE\s*[:\-]?\s*(.+)/i);
+      const match = text.match(/IMAGE\s*[:-]?\s*(.+)/i);
 
-      let name = '';
+      let name;
       if (match && match[1]) {
         name = match[1].trim();
       } else {

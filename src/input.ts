@@ -71,44 +71,6 @@ export async function nativeClear(target: chrome.debugger.Debuggee): Promise<voi
 }
 
 /**
- * Interface for the message sent to the background script.
- */
-interface TypingRequest {
-  action: 'START_NATIVE_TYPING';
-  text: string;
-}
-
-/**
- * Focuses on the target element and requests the background script to start typing.
- * @param selector - The CSS selector for the input/textarea.
- * @param promptText - The text string to be typed.
- */
-function startAutoFill(selector: string, promptText: string): void {
-  const inputField = document.querySelector(selector) as HTMLInputElement | HTMLTextAreaElement | null;
-
-  if (!inputField) {
-    console.error(`Automation Error: Element "${selector}" not found.`);
-    return;
-  }
-
-  // CRITICAL: The debugger types into the currently focused element.
-  inputField.focus();
-
-  const message: TypingRequest = {
-    action: 'START_NATIVE_TYPING',
-    text: promptText,
-  };
-
-  chrome.runtime.sendMessage(message, (response) => {
-    if (chrome.runtime.lastError) {
-      console.error('Message failed:', chrome.runtime.lastError.message);
-    } else {
-      console.log('Native typing sequence started.');
-    }
-  });
-}
-
-/**
  * Pastes a string into the focused element using the debugger protocol.
  */
 export async function nativeType(tabId: number, text: string): Promise<void> {
@@ -142,37 +104,4 @@ export async function nativeType(tabId: number, text: string): Promise<void> {
       chrome.debugger.detach(target).catch(() => {});
     }
   }
-}
-
-/**
- * Helper to dispatch a single key down/up sequence
- */
-async function sendKey(target: chrome.debugger.Debuggee, char: string, keyCode?: number): Promise<void> {
-  const isControlKey = char === 'Backspace' || char === 'Enter';
-
-  const options: any = {
-    type: 'keyDown',
-    key: char,
-    // Use 'text' only for actual printable characters
-    text: isControlKey ? undefined : char,
-    unmodifiedText: isControlKey ? undefined : char,
-  };
-
-  if (keyCode) {
-    options.windowsVirtualKeyCode = keyCode;
-    options.nativeVirtualKeyCode = keyCode;
-  }
-
-  await chrome.debugger.sendCommand(target, 'Input.dispatchKeyEvent', options);
-  await chrome.debugger.sendCommand(target, 'Input.dispatchKeyEvent', {
-    ...options,
-    type: 'keyUp',
-  });
-}
-
-/**
- * Helper to handle sleep/delays
- */
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }

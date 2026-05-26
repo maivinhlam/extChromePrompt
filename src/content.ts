@@ -9,14 +9,10 @@ import {
   appendAutomationLog,
   loadAutomationStatus,
   loadRunnerSettings,
-  saveAutomationState,
   setAutomationStatus,
   updateRunnerSettings,
 } from './storage';
 import { findModelButton } from './dom-finders';
-
-// ── Types ──────────────────────────────────────────────
-type LogEntry = { timestamp?: number; message?: string };
 
 const DEFAULT_PROMPTS_TEXT = 'SCENE 1: A cinematic shot of a forest at sunrise';
 const CONTENT_PANEL_HTML_URL = chrome.runtime.getURL('content.html');
@@ -197,7 +193,6 @@ async function injectPanel(): Promise<void> {
   const promptListEmptyEl = shadow.getElementById('promptListEmpty') as HTMLElement;
   const totalPromptsEl = shadow.getElementById('totalPrompts') as HTMLElement;
   const statusEl = shadow.getElementById('status') as HTMLElement;
-  const logEl = shadow.getElementById('log') as HTMLElement;
   const clearPromptsBtn = shadow.getElementById('clearPromptsBtn') as HTMLButtonElement;
   const clearReferentBtn = shadow.getElementById('clearReferentBtn') as HTMLButtonElement;
   const importBtn = shadow.getElementById('importBtn') as HTMLButtonElement;
@@ -311,30 +306,12 @@ async function injectPanel(): Promise<void> {
     }
   };
 
-  const setLog = (text: string): void => {
-    logEl.textContent = text;
-  };
-
   const getIntervalSeconds = (): number => {
     const digitsOnly = intervalInput.value.replace(/\D+/g, '');
     const parsed = Number(digitsOnly);
 
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 15;
   };
-
-  const formatLogTime = (timestamp?: number): string => {
-    if (!timestamp) {
-      return '--:--:--';
-    }
-    const date = new Date(timestamp);
-    if (Number.isNaN(date.getTime())) {
-      return '--:--:--';
-    }
-    return date.toLocaleTimeString();
-  };
-
-  const escapeHtml = (text: string): string =>
-    text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 
   const getFeatureSettings = (): AutomationFeatures => ({
     enableReferenceImages: enableReferenceImagesInput.checked,
@@ -492,20 +469,8 @@ async function injectPanel(): Promise<void> {
     setStatus('Stop requested.');
   };
 
-  const onIncrementInterval = (): void => {
-    const current = getIntervalSeconds();
-    intervalInput.value = String(current + 1);
-    void persistSettings();
-  };
-
-  const onDecrementInterval = (): void => {
-    const current = getIntervalSeconds();
-    intervalInput.value = String(Math.max(1, current - 1));
-    void persistSettings();
-  };
-
   const onClearPrompts = async (): Promise<void> => {
-    let isDelete = confirm('Bạn có chắc chắn muốn xóa tất cả các prompt không?');
+    const isDelete = confirm('Bạn có chắc chắn muốn xóa tất cả các prompt không?');
     if (isDelete) {
       syncPromptLines([]);
       setStatus('Cleared all prompts.');
@@ -515,7 +480,7 @@ async function injectPanel(): Promise<void> {
   };
 
   const onClearReferent = async (): Promise<void> => {
-    let isDelete = confirm('Bạn có chắc chắn muốn xóa tất cả các referent images không?');
+    const isDelete = confirm('Bạn có chắc chắn muốn xóa tất cả các referent images không?');
     if (isDelete) {
       state.matchedImageNames = {};
       updateRunnerSettings(state);
@@ -550,12 +515,6 @@ async function injectPanel(): Promise<void> {
   const onStorageChanged = (changes: Record<string, chrome.storage.StorageChange>, areaName: string): void => {
     if (areaName !== 'local') {
       return;
-    }
-
-    if (changes[LOG_STORAGE_KEY]) {
-      const nextLogs = Array.isArray(changes[LOG_STORAGE_KEY].newValue)
-        ? (changes[LOG_STORAGE_KEY].newValue as LogEntry[])
-        : [];
     }
 
     if (changes[STATUS_STORAGE_KEY]) {
@@ -648,32 +607,6 @@ async function injectPanel(): Promise<void> {
       });
     }
   });
-
-  const startIntervalChange = (direction: 1 | -1): (() => void) => {
-    const step = (): void => {
-      if (direction === 1) {
-        onIncrementInterval();
-        return;
-      }
-
-      onDecrementInterval();
-    };
-
-    step();
-    let intervalId: number | null = null;
-    const timeoutId = window.setTimeout(() => {
-      intervalId = window.setInterval(step, 120);
-    }, 350);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-      if (intervalId !== null) {
-        window.clearInterval(intervalId);
-      }
-    };
-  };
-
-  let activePressCleanup: (() => void) | null = null;
 
   startBtn.addEventListener('click', () => {
     void onStart();

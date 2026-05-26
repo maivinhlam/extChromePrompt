@@ -400,7 +400,8 @@ async function handleTypingFlow(sender: chrome.runtime.MessageSender, text: stri
   const tabId = sender.tab?.id;
 
   if (typeof tabId !== 'number') {
-    throw new Error('Could not resolve sender tab for typing.');
+    console.error('Could not resolve sender tab for typing.');
+    return;
   }
   const target = { tabId };
 
@@ -411,6 +412,7 @@ async function handleTypingFlow(sender: chrome.runtime.MessageSender, text: stri
 
     console.log('Automation completed successfully.');
   } catch (error) {
-    throw error;
+    console.error('Automation failed:', error instanceof Error ? error.message : error);
+    return;
   }
 }
