@@ -9,7 +9,6 @@ import {
   waitForMenu,
 } from '../dom/dom-finders';
 import { CreateModeVideo, type CreateMode } from '../domain/create-mode';
-import { state } from '../state/automation-state';
 import { cleanPromptText, appendAutomationLog, sleepMilliseconds } from '../utils';
 import { randomInt, waitForTransientUiToClose, withPageInteractionLock } from './shared';
 
@@ -150,8 +149,7 @@ export async function selectReferenceImage(expectedNames: string[]): Promise<voi
 
       const dialogAfter = await waitForDialog(500);
       if (dialogAfter) {
-        const imageName = expectedNames[index];
-        const matchImageName = state.matchedImageNames[imageName]?.trim() || imageName;
+        const matchImageName = expectedNames[index];
 
         await sleepMilliseconds(randomInt(200, 300));
 

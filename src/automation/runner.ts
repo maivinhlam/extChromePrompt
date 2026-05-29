@@ -7,7 +7,7 @@ import {
   PromptStatusFailed,
   PromptStatusInProgress,
 } from '../domain/prompt-status';
-import { CreateModeVideo } from '../domain/create-mode';
+import { CreateModeImage, CreateModeVideo } from '../domain/create-mode';
 import { state } from '../state/automation-state';
 
 import {
@@ -92,18 +92,34 @@ async function markPromptDone(
   await removePromptFromRunnerSettings(promptToComplete);
 }
 
-async function maybeSelectReferenceImages(prompt: string): Promise<void> {
+async function maybeSelectReferenceImages(prompt: string): Promise<boolean> {
   if (!state.enableReferenceImages) {
-    return;
+    return true;
   }
 
   const imageNames = extractImageNamesFromPrompt(prompt);
   if (!imageNames.length) {
-    return;
+    return true;
   }
 
-  await selectReferenceImage(imageNames);
+  const matchedImageNames: string[] = [];
+  for (const imageName of imageNames) {
+    const newName = state.matchedImageNames[imageName]?.trim() || '';
+    if (newName) {
+      matchedImageNames.push(newName);
+      continue;
+    }
+  }
+
+  if (state.mode === CreateModeImage) {
+    if (!matchedImageNames.length) {
+      return false;
+    }
+  }
+
+  await selectReferenceImage(matchedImageNames);
   await sleepMilliseconds(randomInt(1000, 2000));
+  return true;
 }
 
 async function handleVideoPromptCompletion(
@@ -279,7 +295,15 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
 
       await appendAutomationLog(`Prompt ${promptIndex + 1}/${state.prompts.length}: SCENE ${sceneNumbers.scene}.`);
 
-      await maybeSelectReferenceImages(prompt);
+      const referenceImagesSelected = await maybeSelectReferenceImages(prompt);
+      if (!referenceImagesSelected) {
+        await appendAutomationLog(`Reference images is not complete generated for '${promptName}'. Rerun`);
+        promptStatuses[promptIndex] = PromptStatusFailed;
+        await persistAutomationProgress(promptIndex, promptStatuses);
+        await queuePromptForRetry(prompt, promptName, promptIndex, promptStatuses);
+        await waitForNextPromptCountdown(state, promptName);
+        continue;
+      }
       const knownTopRowTileIds = new Set(getTopRowTileIds());
 
       await fillPromptInput(prompt);
@@ -304,6 +328,9 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
       }
 
       i += 1;
+      if (i > 100) {
+        break;
+      }
     }
 
     await waitForPendingTasks(pendingTasks);
