@@ -302,6 +302,11 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
         await persistAutomationProgress(promptIndex, promptStatuses);
         await queuePromptForRetry(prompt, promptName, promptIndex, promptStatuses);
         await waitForNextPromptCountdown(state, promptName);
+
+        i += 1;
+        if (i > 100) {
+          break;
+        }
         continue;
       }
       const knownTopRowTileIds = new Set(getTopRowTileIds());
