@@ -151,136 +151,23 @@ _Quy tắc hình ảnh:_ 100% các cảnh cần được gán Reference Image: .
 
 **Định dạng đầu ra:** Chỉ trả về danh sách scene mà không chia thành các phần. Mỗi mô tả scene phải nằm trên một dòng duy nhất. Các dòng liền nhau, không có dòng trống.
 
-### **PHẦN 1: MỞ ĐẦU (HOOK) - TỪ BÌNH MINH TRÊN NÔNG TRẠI ĐẾN KỆ SIÊU THỊ (~6 cảnh)**
+KHUNG KỊCH BẢN VIDEO: "BEYOND THE BANANA: BÍ MẬT CỦA TRÁI CÂY NHIỆT ĐỚI"
 
-**Mục tiêu:** Đưa người xem từ cảm giác nguyên sơ, tinh khiết của thiên nhiên đến sự hiện đại của siêu thị, sau đó sử dụng Người dẫn chương trình (Host) để làm cầu nối dẫn dắt họ vào hành trình khám phá.
-**Cách triển khai:** Sử dụng các kỹ thuật quay phim và hiệu ứng đặc biệt để tạo sự chuyển tiếp mượt mà giữa các cảnh, đồng thời nhấn mạnh sự tương phản giữa thiên nhiên và môi trường hiện đại. Để tránh sự nhàm chán, hãy xáo trộn thứ tự các Key scenes và các góc máy và tốc độ quay giữa các cảnh (ví dụ: từ góc rộng sang cận cảnh, từ chuyển động chậm sang chuyển động nhanh).
+Thời lượng dự kiến: 10 phút
+Đối tượng mục tiêu: Khán giả Mỹ (Đam mê ẩm thực, du lịch, thích khám phá sự mới lạ)
+Phong cách: Năng động, trực quan, pha chút hài hước và bất ngờ.
 
-- **Key Scene 1: Bình minh thức giấc (Góc rộng/Cảnh thiết lập):** Ánh nắng ban mai chiếu qua tán cây trên nông trại, tạo ra những tia sáng vàng rực rỡ (God rays). Âm thanh chim hót mộc mạc. Reference Image: Bình minh vàng rực chiếu qua tán cây nông trại
-- **Key Scene 2: Hơi thở thiên nhiên (Macro/Slow-motion):** Cận cảnh cực nét những giọt sương đêm trong vắt, mát lạnh còn đọng trên những chiếc lá xanh và lăn nhẹ trên bề mặt quả non. Reference Image: Cận cảnh sương đọng trên lá và vỏ quả dưới nắng mai
-- **Key Scene 3: Trượt không gian (Whip-pan/Speed Ramp):** Máy quay lướt nhanh giữa hai hàng cây -> Đột ngột tăng tốc đến mức làm mờ hậu cảnh (Motion blur) -> Xuyên qua không gian và dừng lại sắc nét tại một quầy trưng bày trái cây tươi sáng rực rỡ trong siêu thị. Reference Image: Chuyển cảnh mờ lướt nhanh từ hàng cây sang kệ trái cây siêu thị
-- **Key Scene 4: Chạm sản phẩm (Góc trung):** Host xuất hiện, mỉm cười và nhấc quả Target_Crop tươi ngon nhất, bóng bẩy nhất trên kệ lên để ngắm nhìn. Reference Image: Host mỉm cười cầm trái cây tươi tại quầy siêu thị rực rỡ
-- **Key Scene 5: Khẳng định (Cận cảnh Host):** Cận cảnh Host tương tác với trái cây (chỉ vào gân vỏ, hoặc đưa lên ngửi hương thơm) và bắt đầu giới thiệu về sức hấp dẫn của loại quả này. Reference Image: Cận cảnh tay Host chỉ vào chi tiết vỏ quả
-- **Key Scene 6: Lời mời (Chuyển cảnh Portal / Backward Whip-pan):** Host nhìn thẳng vào ống kính dẫn dắt: "Để có được trái ngọt này... hãy cùng ngược dòng thời gian về lại nông trại!". Host búng tay hoặc đưa quả lên che kín ống kính -> Chuyển cảnh Whip-pan mạnh mẽ đưa khán giả trở lại không gian nông trại bao la. Reference Image: Host đưa quả lại gần che khuất hoàn toàn ống kính máy quay
+Phase 1: Intro & Inspiration (Scenes 1-8): Hook the viewer. Show the final ripe fruit being cut, a lush backyard, and promise them they can grow it in the US (outdoors or indoors in winter).
 
-### **PHẦN 2: KHÔNG GIAN BAO LA & CHU KỲ CỦA THIÊN NHIÊN (~5 cảnh)**
+Phase 2: Preparation & Sprouting (Scenes 9-20): Extracting/cleaning the specific seed of this fruit, soil mix (well-draining, perlite), planting, using a humidity dome/heat mat, and a time-lapse of the sprout emerging.
 
-**Mục tiêu:** Mở rộng không gian sau phần intro của Host, khoe quy mô khổng lồ của vùng chuyên canh.
+Phase 3: Growth & Care (Scenes 21-40): Repotting, sunlight needs, watering technique, organic fertilizing, pruning for shape, and moving the plant indoors under grow lights for US winters. Include 1 scene treating a common pest with Neem oil.
 
-- **Key Scene 7: Chu kỳ thiên nhiên (Time-lapse & Deep Zoom):** Bắt nhịp từ chuyển cảnh siêu thị: Bắt đầu với Góc siêu rộng. Time-lapse (tua nhanh thời gian) những đám mây cuộn chảy di chuyển nhanh, in những bóng đen khổng lồ quét qua bề mặt nông trại rộng lớn -> 2s cuối Crash Zoom cực mạnh xuyên qua biển mây, nhắm thẳng xuống một khu vực canh tác. Reference Image: Mây in bóng di chuyển trên nông trại khổng lồ
-- **Các cảnh tự suy luận:**
-  - Reference Image: Drone bay xuyên qua lớp sương mù buổi sớm lướt sát mặt đồng
-  - Reference Image: Tracking shot góc thấp lướt dọc theo các hàng cây bất tận
-  - Reference Image: Pan 180 độ phô diễn quy mô của các nhà kính công nghệ cao san sát
-  - Reference Image: Ánh sáng mặt trời quét qua thung lũng từ sáng sớm đến trưa, bóng cây đổ dài rồi thu ngắn lại
+Phase 4: Blooming & Pollination (Scenes 41-52): Time-lapse of flower buds specific to this plant. Show natural bee pollination, then explain and visually demonstrate hand-pollination using a small paintbrush. End with petals dropping and fruit set.
 
-### **PHẦN 3: NỀN TẢNG SỰ SỐNG - LÀM ĐẤT & TRỒNG CÂY (~10 cảnh)**
+Phase 5: Fruit Development (Scenes 53-65): The fruit expanding. Branches bending under weight (staking them up). Bagging fruits to protect from squirrels/birds. Show the color transition as it ripens.
 
-**Mục tiêu:** Cho thấy sự chuẩn bị tỉ mỉ, từ cải tạo đất bằng máy móc đến việc ươm mầm sự sống từ bàn tay con người.
-
-- **Key Scene 8: Sức mạnh cơ giới (Ultra-slow motion):** Cận cảnh lưỡi cày của một chiếc máy kéo khổng lồ xé sâu vào lòng đất, lật tung những tảng đất tơi xốp và tạo ra một màn sương bụi vàng óng. Reference Image: Lưỡi cày máy kéo lật tung lớp đất tơi xốp
-- **Key Scene 9: Gieo mầm sự sống (Macro/Dolly in):** Đôi bàn tay chai sạn của người nông dân cẩn thận đặt một bầu ươm cây con xanh mướt (hoặc hạt giống) vào một lỗ đã đào sẵn, sau đó nhẹ nhàng vun lớp đất mùn mỡ màu mỡ xung quanh. Reference Image: Đôi bàn tay chai sạn trồng cây con vào lỗ đất tơi xốp
-- **Các cảnh tự suy luận:**
-  - Reference Image: Khu vực ươm giống trong nhà kính với hàng ngàn khay cây con xanh mướt trải dài
-  - Reference Image: Góc máy từ trên xuống mặt đất cày xới tạo thành những đường vân song song hoàn hảo
-  - Reference Image: Cận cảnh hệ thống cày chuyên dụng đặt các ống nước ngầm màu đen vào trong đất
-  - Reference Image: Nông dân dùng dụng cụ chuyên dụng đào các lỗ thẳng tắp dọc theo hàng cây
-  - Reference Image: Bàn tay rám nắng bốc một vốc đất mùn tơi xốp, để lộ một con giun đất khỏe mạnh
-  - Reference Image: Cận cảnh một giọt sương đọng trên chiếc lá non mềm mại của cây giống vừa trồng
-
-### **PHẦN 4: NUÔI DƯỠNG & BẢO VỆ TỰ NHIÊN (~11 cảnh)**
-
-**Mục tiêu:** Thể hiện các kỹ thuật chăm sóc tỉ mỉ: tưới tiêu, bón phân hữu cơ và kiểm soát dịch hại.
-
-- **Key Scene 10: Hệ thống tưới tiêu khổng lồ (Wide Time-lapse):** Góc toàn cảnh rộng. Một hệ thống hàng ngàn vòi phun đồng loạt bật mở, tạo thành những vòng cung sương trắng xóa bao phủ cánh đồng. Reference Image: Góc nhìn toàn cảnh của hệ thống vòi phun sương vòng cung trên cánh đồng
-- **Key Scene 11: Thiên địch bảo vệ mùa màng (Macro):** Một con bọ rùa đỏ rực bò chầm chậm để săn rệp trên phiến lá non (phương pháp thiên địch sinh học), chứng minh một môi trường canh tác an toàn. Reference Image: Bọ rùa đỏ rực bò trên phiến lá xanh tươi
-- **Các cảnh tự suy luận:**
-  - Reference Image: Giọt nước rơi/đọng trên lá non tạo thành vương miện/ giọt nước (Slow-mo 1000fps)
-  - Reference Image: Khu vực ủ phân hữu cơ bốc khói nghi ngút trong sương sớm
-  - Reference Image: Nông dân rải nhịp nhàng một lớp phân hữu cơ/vỏ trấu quanh gốc cây
-  - Reference Image: Đồ họa 3D xuyên thấu lòng đất, rễ cây hút dinh dưỡng và ngậm nước từ tưới nhỏ giọt ngầm
-  - Reference Image: Drone nông nghiệp bay thấp, xả ra một làn sương dưỡng chất sinh học
-  - Reference Image: Cỏ dại và hoa dại mọc xen kẽ dưới các hàng cây để duy trì hệ sinh thái (Góc thấp)
-  - Reference Image: Ánh sáng mặt trời xiên qua màn sương mù do hệ thống tưới tạo ra (Hiệu ứng God-rays)
-
-### **PHẦN 5: ĐƠM HOA & SỰ CHUYỂN MÌNH KỲ DIỆU (~10 cảnh)**
-
-**Mục tiêu:** Thể hiện sự chuyển biến mạnh mẽ của thời gian từ nụ hoa thành quả chín.
-
-- **Key Scene 12: Xuyên thấu tự nhiên (Crash Zoom to Locked Macro):** 1s bay nhanh xuyên qua các lớp lá dày đặc -> 7s khóa chặt vào một nụ hoa Target_Crop đang đọng sương mai, khẽ rung rinh trong gió. Reference Image: Máy quay xuyên qua lá khóa chặt vào nụ hoa đọng sương
-- **Key Scene 13: Sự chuyển mình của thời gian (Slow pull-back & Time-lapse):** Khung hình khóa chặt vào một quả non. 1s tĩnh -> 7s từ từ zoom lùi kết hợp Time-lapse ngày/đêm chớp nhoáng. Quả phình to kích thước rõ rệt, trở nên căng bóng và chuyển màu (từ xanh sang chín rực rỡ). Reference Image: Quả phình to và chuyển màu qua hiệu ứng time-lapse
-- **Các cảnh tự suy luận:**
-  - Reference Image: Time-lapse siêu thực cảnh một bông hoa nở bung rực rỡ từ nụ
-  - Reference Image: Cận cảnh đàn ong thò vòi hút mật trên hoa, chân lấm tấm phấn (Macro)
-  - Reference Image: Gió thổi mạnh làm hàng chục cánh hoa mỏng manh lìa cuống và bay phấp phới trong không trung
-  - Reference Image: Cận cảnh lớp phấn mỏng tự nhiên phủ trên bề mặt quả chín căng mọng
-  - Reference Image: Cảm biến quang học công nghệ cao chiếu tia sáng xanh dương đo độ ngọt/brix mà không làm hỏng quả
-  - Reference Image: (Wide Time-lapse) Cả cánh đồng đồng loạt khoác lên lớp áo màu sắc rực rỡ báo hiệu mùa thu hoạch
-
-### **PHẦN 6: ĐỈNH ĐIỂM THU HOẠCH (~12 cảnh)**
-
-**Mục tiêu:** Đẩy nhịp độ video lên cao trào với sự hối hả của mùa gặt, công nghệ thu hoạch, và niềm vui của người nông dân.
-
-- **Key Scene 14: Nụ cười thu hoạch (Dolly & Focus Pull):** Lấy nét sắc nét vào một chùm quả trĩu trịt. 3s sau chuyển nét nhẹ nhàng ra phía sau, hé lộ nụ cười rạng rỡ, lấm tấm mồ hôi của một người nông dân đang ngước nhìn. Reference Image: Nụ cười rạng rỡ của nông dân đứng phía sau chùm quả chín
-- **Key Scene 15: Khoảnh khắc chia lìa (Ultra-slow motion):** Cánh tay đeo găng của nông dân, dùng kéo/kìm cắt cuống một cách dứt khoát. Quả nặng nhẹ nhàng rơi vào lòng bàn tay. Reference Image: Dụng cụ cắt cuống sắc bén, quả rơi nhẹ vào bàn tay đeo găng
-- **Các cảnh tự suy luận:**
-  - Reference Image: Dòng sông trái ngọt - Thác trái cây đổ ào ạt vào thùng xe tải/băng chuyền (Top-down Slow-mo)
-  - Reference Image: Cánh tay robot tích hợp camera AI vươn ra nhẹ nhàng hái chính xác một quả chín
-  - Reference Image: (Time-lapse) Bóng dáng nông dân hái quả thoăn thoắt tạo thành những vệt mờ chuyển động
-  - Reference Image: Cận cảnh đôi bàn tay chai sạn dùng lớp vải mỏng nâng niu lau sạch bụi trên bề mặt quả
-  - Reference Image: Cận cảnh lớp túi lưới sinh học bảo vệ quả vừa được tháo ra
-  - Reference Image: Drone bám theo một đoàn xe kéo thu hoạch khổng lồ di chuyển nối đuôi nhau qua các hàng cây
-
-### **PHẦN 7: VẬN CHUYỂN & CHU KỲ MỚI (~10 cảnh)**
-
-**Mục tiêu:** Chuẩn bị đưa sản phẩm ra khỏi vườn, đồng thời khẳng định sức sống tiếp nối của nông trại.
-
-- **Key Scene 16: Bùng nổ hương vị tại vườn (Close-up Slow-mo):** Lưỡi dao lướt qua chẻ đôi một quả chín. 6s cuối zoom siêu cận cảnh vào phần thịt/múi quả mọng nước, những tia nước nhỏ li ti bắn lên lấp lánh dưới ánh sáng tự nhiên. Reference Image: Zoom siêu cận cảnh vào thịt quả bị cắt rỉ nước ép
-- **Key Scene 17: Rời vườn dưới ánh tà dương (Wide Tracking):** Hoàng hôn đổ bóng dài. Những rổ/thùng trái cây xếp vuông vức trên xe tải lăn bánh rời khỏi khu vườn, chở thành quả về thành phố. Reference Image: Xe tải chở đầy thùng trái cây lăn bánh khỏi nông trại dưới ánh hoàng hôn
-- **Các cảnh tự suy luận:**
-  - Reference Image: Máy quay xoay 360 độ (Orbit) quanh một nông dân đang đứng cười ôm giỏ trái cây
-  - Reference Image: Hình ảnh một đứa trẻ ánh mắt sáng rỡ, cười tươi cắn ngập răng vào lát trái cây mọng nước
-  - Reference Image: Cánh đồng sau thu hoạch, yên ả và gọn gàng trong ánh sáng buổi chiều tà
-  - Reference Image: Một mầm non xanh non nớt vừa nhú lên từ mặt đất ngay cạnh rễ gốc của cây mẹ già (Biểu tượng chu kỳ)
-
-### **PHẦN 8: KHÉP KÍN VÒNG LẶP - TRỞ LẠI SIÊU THỊ & KẾT THÚC (~6 cảnh)**
-
-**Mục tiêu:** Đưa khán giả trở lại điểm xuất phát, gói gọn cảm xúc, truyền tải thông điệp cuối cùng và kêu gọi hành động (CTA).
-
-- **Key Scene 18: Sự trở lại mượt mà (Match-Cut / Whip-pan):** Máy quay bám theo thùng xe tải đang di chuyển -> Một cú Whip-pan (quét ngang cực nhanh) biến thùng xe tải thành kệ siêu thị. Quả Target_Crop khổng lồ lúc này nằm ngay ngắn, tỏa sáng trên kệ. Reference Image: Cú lướt máy quay nhanh chuyển từ thùng xe tải sang kệ trái cây siêu thị
-- **Các cảnh tự suy luận (Bổ sung nhịp điệu trước lời chào của Host):**
-  - Reference Image: Bàn tay của một khách hàng khác vui vẻ nhặt trái cây vào giỏ hàng, thể hiện sự tin tưởng
-- **Key Scene 19: Lời kết của Host & Kêu gọi Hành động (Medium Close-up):** Host đứng cạnh quầy siêu thị, cầm trên tay loại quả mà khán giả đã theo dõi từ đầu. Host mỉm cười, tóm tắt thông điệp: "Từ vùng đất lành đến tận tay bạn...". Quanh Host, các icon đồ họa 2D Like, Share, Subscribe bay lên mượt mà. Reference Image: Host mỉm cười cầm quả tại siêu thị, chỉ tay kêu gọi hành động cùng đồ họa Like/Sub hiện lên
-- **Key Scene 20: Dấu ấn chữ ký (Fade to Typography):** Host đặt quả xuống, màn hình từ từ mờ dần sang đen. Từ trong bóng tối, dòng chữ _Inside farm_ hiện ra rực rỡ, sắc nét, đóng vai trò như Logo chính thức khép lại hoàn toàn video. Reference Image: Dòng chữ phát sáng "Inside farm" hiện lên trên nền đen
-
-## **BƯỚC 7: HƯỚNG DẪN PROMPT CAMERA CHO AI**
-
-- **NHÓM MACRO & CẬN CẢNH (Sinh học & Chi tiết)**
-  - **Locked macro push-in:** Khóa nét, từ từ đẩy sát vào chủ thể.
-  - **Fixed repeat-framed macro:** Tĩnh, lặp lại khung hình (Time-lapse nở hoa/nảy mầm).
-  - **Locked close-up:** Cận cảnh hoàn toàn tĩnh.
-  - **Ultra-slow macro orbit:** Xoay 360 độ siêu chậm quanh vật thể macro.
-
-- **NHÓM CHUYỂN ĐỘNG MƯỢT MÀ (Dây chuyền & Bám đuổi)**
-  - **Tracking shot / Low side tracking:** Trượt bám theo (từ góc thấp).
-  - **Smooth glide:** Lướt mượt mà (phòng kính, không gian hẹp).
-  - **Slow dolly:** Trượt dọc theo hành lang/hàng cây.
-
-- **NHÓM TRÊN KHÔNG & GÓC CAO (Quy mô Vĩ mô)**
-  - **Vertical rise to top-down master:** Bay vút lên cao chĩa thẳng xuống 90 độ.
-  - **Elevated oblique tracking:** Trượt bám theo góc cao nghiêng chéo (theo dõi đội hình xe).
-  - **Top-down glide / Hover:** Lơ lửng lướt mặt hướng thẳng góc 90 độ.
-  - **Rising top-down pullaway:** Bay lùi ra xa và dần ngẩng lên cao (Kết video).
-
-- **NHÓM TĨNH, ĐỐI XỨNG & ÁNH SÁNG**
-  - **Static wide composition:** Bố cục góc rộng tĩnh.
-  - **Front-facing symmetrical shot:** Cảnh quay trực diện đối xứng uy lực.
-  - **Static wide composition with volumetric lighting:** Cảnh toàn diện tĩnh với ánh sáng xuyên thấu (God rays).
-
-- **NHÓM CHUYỂN ĐỘNG ĐỘT PHÁ & MATCH-CUT (MỚI)**
-  - **High-altitude to macro fast zoom:** Phóng to (Crash zoom) từ bầu trời lao thẳng xuống siêu cận cảnh.
-  - **Macro to high-altitude fast zoom-out:** Kéo lùi cực nhanh từ siêu cận cảnh ra toàn cảnh vĩ mô.
-  - **Fixed match-cut to slow pull-back:** Liên kết hình ảnh bằng ảnh Start Frame, sau đó từ từ kéo lùi ra xa.
+Phase 6: Harvest & Tasting (Scenes 66-78): Harvesting with shears. Washing, slicing open (macro, slow-mo juicy shot). Tasting with a satisfied reaction. Empowering final message that anyone can do it. Scene 78 is the Outro (Like, Subscribe).
 
 ## **BƯỚC 8: QUY TRÌNH ĐẢM BẢO CHẤT LƯỢNG (DANH SÁCH KIỂM TRA QA ĐẶC BIỆT V4.2)**
 
