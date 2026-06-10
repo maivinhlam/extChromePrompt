@@ -190,3 +190,4 @@ Trước khi nạp kịch bản vào AI, người duyệt kịch bản PHẢI ki
 - Các Cảnh có được trả về nguyên vẹn và không bị chia lẻ thành các phần riêng biệt không?
 - **BẮT BUỘC TUYỆT ĐỐI:** Các ảnh đã được bắt đầu bằng “Image xx: “chưa?
 - **BẮT BUỘC TUYỆT ĐỐI:** Các cảnh đã được bắt đầu bằng “Scene xx: ”chưa?
+- **BẮT BUỘC TUYỆT ĐỐI:** Loại bỏ các cảnh cắt cành, quả để tránh lỗi thị giác của AI chưa?

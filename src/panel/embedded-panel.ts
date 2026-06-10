@@ -11,6 +11,11 @@ function setPanelHostVisible(visible: boolean): void {
 
   if (host) {
     host.style.display = visible ? '' : 'none';
+    if (visible) {
+      document.body.style.setProperty('width', '80%', 'important');
+    } else {
+      document.body.style.removeProperty('margin-right');
+    }
   }
 }
 
@@ -58,6 +63,7 @@ async function injectPanel(): Promise<void> {
 
   const host = document.createElement('div');
   host.id = PANEL_HOST_ID;
+  host.style.cssText = 'position: fixed; right: 0; top: 0; width: 20vw; height: 100vh; z-index: 2147483647;';
 
   const shadow = host.attachShadow({ mode: 'open' });
 

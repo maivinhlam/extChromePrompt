@@ -104,7 +104,7 @@ async function maybeSelectReferenceImages(prompt: string): Promise<boolean> {
 
   const matchedImageNames: string[] = [];
   for (const imageName of imageNames) {
-    const newName = state.matchedImageNames[imageName]?.trim() || '';
+    const newName = state.matchedImageNames[imageName]?.trim() || imageName.trim();
     if (newName) {
       matchedImageNames.push(newName);
       continue;
@@ -269,7 +269,13 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
     await pauseBeforeStep(`Set mode and model to ${state.mode}.`, () => state.stopRequested, appendAutomationLog);
 
     let i = startIndex;
+    let count = 10;
     while (i < state.prompts.length || pendingTasks.size > 0) {
+      count--;
+      if (count <= 0) {
+        await sleepMilliseconds(randomInt(7000, 15000));
+        count = 10;
+      }
       if (i >= state.prompts.length) {
         await Promise.race(pendingTasks);
         continue;

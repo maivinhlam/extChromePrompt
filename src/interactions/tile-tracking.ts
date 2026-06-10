@@ -277,19 +277,14 @@ export async function waitForTileDoneById(
 
 export async function waitBlurForActiveTile(mediaContainer: HTMLElement, waitMs: number): Promise<boolean> {
   const started = Date.now();
-  console.log('🚀 ~ waitBlurForActiveTile ~ started:');
 
   const isTileBlurred = (): boolean => {
     if (!mediaContainer.isConnected) {
-      console.log('🚀 ~ waitBlurForActiveTile ~ false 1:');
-
       return false;
     }
 
     const opacityLayer = mediaContainer.querySelector("div[style*='--blur-amount']") as HTMLElement | null;
     if (!opacityLayer) {
-      console.log('🚀 ~ waitBlurForActiveTile ~ false 2:');
-
       return false;
     }
 
@@ -297,8 +292,6 @@ export async function waitBlurForActiveTile(mediaContainer: HTMLElement, waitMs:
   };
 
   if (!isTileBlurred()) {
-    console.log('🚀 ~ waitBlurForActiveTile ~ ok');
-
     return true;
   }
 
@@ -306,8 +299,6 @@ export async function waitBlurForActiveTile(mediaContainer: HTMLElement, waitMs:
     const observerRoot = document.body;
 
     if (!observerRoot) {
-      console.log('🚀 ~ waitBlurForActiveTile ~ false observerRoot:');
-
       resolve(false);
       return;
     }

@@ -15,52 +15,13 @@ import { DEFAULT_PROMPTS_TEXT, PROMPT_PREVIEW_LENGTH } from './constants';
 
 export function mountEmbeddedPanel(shadow: ShadowRoot): void {
   const wrapper = shadow.getElementById('wrapper') as HTMLDivElement | null;
-  const dragHandle = shadow.getElementById('drag-handle') as HTMLDivElement | null;
   const panelWrap = shadow.getElementById('panel-wrap') as HTMLDivElement | null;
   const reopenBtn = shadow.getElementById('reopen-btn') as HTMLButtonElement | null;
 
-  if (!wrapper || !dragHandle || !panelWrap || !reopenBtn) {
+  if (!wrapper || !panelWrap || !reopenBtn) {
     console.error('Content panel HTML is missing required elements.');
     return;
   }
-
-  let posTop = 72;
-  let posRight = 16;
-  let dragging = false;
-  let dragStartX = 0;
-  let dragStartY = 0;
-
-  dragHandle.addEventListener('mousedown', (e: MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (target.id === 'collapse-btn' || target.id === 'close-btn') {
-      return;
-    }
-    dragging = true;
-    dragStartX = e.clientX;
-    dragStartY = e.clientY;
-    e.preventDefault();
-  });
-
-  document.addEventListener('mousemove', (e: MouseEvent) => {
-    if (!dragging) {
-      return;
-    }
-
-    const dx = e.clientX - dragStartX;
-    const dy = e.clientY - dragStartY;
-    dragStartX = e.clientX;
-    dragStartY = e.clientY;
-
-    posTop = Math.max(0, posTop + dy);
-    posRight = Math.max(0, posRight - dx);
-
-    wrapper.style.top = `${posTop}px`;
-    wrapper.style.right = `${posRight}px`;
-  });
-
-  document.addEventListener('mouseup', () => {
-    dragging = false;
-  });
 
   const collapseBtn = shadow.getElementById('collapse-btn') as HTMLButtonElement;
   const closeBtn = shadow.getElementById('close-btn') as HTMLButtonElement;
@@ -87,8 +48,6 @@ export function mountEmbeddedPanel(shadow: ShadowRoot): void {
   let collapsed = false;
   let expandedPromptIndex: number | null = null;
 
-  panelWrap.style.height = '660px';
-
   const setCollapsedState = (nextCollapsed: boolean): void => {
     collapsed = nextCollapsed;
 
@@ -110,13 +69,12 @@ export function mountEmbeddedPanel(shadow: ShadowRoot): void {
 
   closeBtn.addEventListener('click', () => {
     wrapper.style.display = 'none';
-    reopenBtn.style.top = `${posTop}px`;
-    reopenBtn.style.right = `${posRight}px`;
     reopenBtn.classList.add('visible');
   });
 
   reopenBtn.addEventListener('click', () => {
-    wrapper.style.display = 'flex';
+    wrapper.style.display = '';
+    document.body.style.setProperty('width', '80%', 'important');
     reopenBtn.classList.remove('visible');
   });
 
@@ -285,7 +243,6 @@ export function mountEmbeddedPanel(shadow: ShadowRoot): void {
       window.alert('Vui lòng chọn đúng model (banana khi tạo ảnh và Video khi tạo video).');
       return;
     }
-    console.log('🚀 ~ startFromPanel ~ modelButton:', modelButton);
 
     await clearLogs();
     state.pauseRequested = false;
@@ -293,7 +250,7 @@ export function mountEmbeddedPanel(shadow: ShadowRoot): void {
     await persistSettings();
 
     setStatus(`Started. Total prompts: ${prompts.length}`);
-    setCollapsedState(true);
+    // setCollapsedState(true);
     const automationRun = startAutomation({
       prompts,
       mode: selectedMode,
