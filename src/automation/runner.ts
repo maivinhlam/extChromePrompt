@@ -137,13 +137,25 @@ async function handleVideoPromptCompletion(
 
   await appendAutomationLog(`Downloading '${promptName}'...`);
 
-  const downloaded = await downloadMediaItem(completedTile, promptName);
+  let downloaded = await downloadMediaItem(completedTile, promptName);
   if (downloaded) {
     await appendAutomationLog(`Downloaded '${promptName}' successfully.`);
     await markPromptDone(prompt, promptIndex, promptStatuses);
     return;
+  } else {
+    // retry 3 times with 5 seconds interval
+    const maxRetries = 3;
+    const retryIntervalMs = 15000;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      await sleepMilliseconds(retryIntervalMs * attempt);
+      downloaded = await downloadMediaItem(completedTile, promptName);
+      if (downloaded) {
+        await appendAutomationLog(`Downloaded '${promptName}' successfully.`);
+        await markPromptDone(prompt, promptIndex, promptStatuses);
+        return;
+      }
+    }
   }
-
   await appendAutomationLog(`Download skipped for '${promptName}': API request or menu flow failed.`);
   promptStatuses[promptIndex] = PromptStatusFailed;
 }
@@ -210,7 +222,10 @@ async function runPromptTask(
     return;
   }
 
+  await sleepMilliseconds(15000);
+
   const tileResult = await waitForTileDoneById(newTileId, waitingTime, () => state.stopRequested);
+
   if (tileResult.status === 'failed') {
     await queuePromptForRetry(prompt, promptName, promptIndex, promptStatuses);
     return;
@@ -310,7 +325,7 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
         await waitForNextPromptCountdown(state, promptName);
 
         i += 1;
-        if (i > 100) {
+        if (i > 250) {
           break;
         }
         continue;
@@ -339,7 +354,7 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
       }
 
       i += 1;
-      if (i > 100) {
+      if (i > 250) {
         break;
       }
     }
