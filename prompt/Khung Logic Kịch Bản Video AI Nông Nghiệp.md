@@ -151,23 +151,218 @@ _Quy tắc hình ảnh:_ 100% các cảnh cần được gán Reference Image: .
 
 **Định dạng đầu ra:** Chỉ trả về danh sách scene mà không chia thành các phần. Mỗi mô tả scene phải nằm trên một dòng duy nhất. Các dòng liền nhau, không có dòng trống.
 
-KHUNG KỊCH BẢN VIDEO: "BEYOND THE BANANA: BÍ MẬT CỦA TRÁI CÂY NHIỆT ĐỚI"
+I. TỔNG QUAN KỊCH BẢN VĨ MÔ (EXECUTIVE OVERVIEW)
 
-Thời lượng dự kiến: 10 phút
-Đối tượng mục tiêu: Khán giả Mỹ (Đam mê ẩm thực, du lịch, thích khám phá sự mới lạ)
-Phong cách: Năng động, trực quan, pha chút hài hước và bất ngờ.
+Kịch bản này là một khung kiến trúc nội dung chuẩn hóa (Master Template), phác họa quy trình vận hành khép kín của một trang trại cây ăn quả công nghệ cao trong tương lai gần. Tại đây, toàn bộ chuỗi giá trị từ khâu chuẩn bị vật liệu nhân giống đến thu hoạch và đóng gói được điều hành bởi Trí tuệ nhân tạo (AI), robot tự hành, drone và các thiết bị IoT, hoàn toàn loại bỏ sự can thiệp trực tiếp bằng tay của con người.
 
-Phase 1: Intro & Inspiration (Scenes 1-8): Hook the viewer. Show the final ripe fruit being cut, a lush backyard, and promise them they can grow it in the US (outdoors or indoors in winter).
+Triết lý Cốt lõi (Core Philosophy): Sự giao thoa hoàn hảo giữa "Cơ học chính xác" (Cybernetics) và "Sinh học tự nhiên" (Biology). Công nghệ không chế ngự tự nhiên mà đóng vai trò là "người bảo trợ" thầm lặng, tối ưu hóa từng tế bào sinh học để đạt năng suất và chất lượng đồng đều tối đa.
 
-Phase 2: Preparation & Sprouting (Scenes 9-20): Extracting/cleaning the specific seed of this fruit, soil mix (well-draining, perlite), planting, using a humidity dome/heat mat, and a time-lapse of the sprout emerging.
+Tông màu & Không khí (Tone & Mood): Đẳng cấp, mang tính tương lai (futuristic) nhưng không lạnh lẽo nhờ sự ấm áp từ ánh sáng tự nhiên (bình minh, hoàng hôn) và chất giọng thuyết minh (VO) trầm ấm, mang tính triết lý sâu sắc về sự sống.
 
-Phase 3: Growth & Care (Scenes 21-40): Repotting, sunlight needs, watering technique, organic fertilizing, pruning for shape, and moving the plant indoors under grow lights for US winters. Include 1 scene treating a common pest with Neem oil.
+Tính tùy biến cao (Modular Adaptation): Khung kịch bản được thiết kế với các "điểm neo" kỹ thuật để dễ dàng thay đổi theo đặc tính riêng của từng nhóm cây ăn quả:
 
-Phase 4: Blooming & Pollination (Scenes 41-52): Time-lapse of flower buds specific to this plant. Show natural bee pollination, then explain and visually demonstrate hand-pollination using a small paintbrush. End with petals dropping and fruit set.
+Nhóm quả vỏ mỏng/nhạy cảm vật lý (Bơ, xoài, đu đủ...)
 
-Phase 5: Fruit Development (Scenes 53-65): The fruit expanding. Branches bending under weight (staking them up). Bagging fruits to protect from squirrels/birds. Show the color transition as it ripens.
+Nhóm quả vỏ dày/khổng lồ (Sầu riêng, mít...)
 
-Phase 6: Harvest & Tasting (Scenes 66-78): Harvesting with shears. Washing, slicing open (macro, slow-mo juicy shot). Tasting with a satisfied reaction. Empowering final message that anyone can do it. Scene 78 is the Outro (Like, Subscribe).
+Nhóm quả mọc thành chùm (Nhãn, vải, nho...)
+
+Nhóm quả có múi (Cam, bưởi, quýt...)
+
+II. KHUNG NỘI DUNG TỔNG QUÁT 9 PHÂN ĐOẠN (THE 9-PHASE LOGICAL PIPELINE)
+
+Toàn bộ kịch bản được cấu trúc chặt chẽ theo 9 phân đoạn tuyến tính, mô phỏng trọn vẹn vòng đời sản phẩm từ dạng tiềm năng (hạt/mô) đến thành phẩm xuất khẩu:
+
+[Vật liệu Giống] ──> [Chuẩn bị Đất/Giá thể] ──> [Nhà ươm Thông minh] ──> [Cấy trồng Tự hành] ──> [Chăm sóc Kỹ thuật số] ──> [Thụ phấn & Đậu quả] ──> [Gia cố & Nuôi dưỡng] ──> [Thu hoạch Chính xác] ──> [Đóng gói Bản quản]
+
+PHÂN ĐOẠN 1: Khởi đầu & Tầm nhìn Toàn cảnh (Giới thiệu Tầm nhìn)
+
+Mục tiêu: Tạo ấn tượng thị giác cực đại (Visual Hook) về thành phẩm hoàn hảo và quy mô khổng lồ của nông trại tự vận hành.
+
+Hình ảnh: Cận cảnh quả chín mọng đọng sương trên cành lúc rạng đông $\rightarrow$ Cú máy bay cao (drone reveal) mở rộng góc nhìn ra hàng vạn cây trồng thẳng hàng tắp lự đến tận chân trời.
+
+Âm thanh: Bản giao hưởng âm thanh tự nhiên (tiếng sương rớt, côn trùng) hòa quyện mượt mà với âm trầm cơ khí từ xa (tiếng máy bơm áp lực, tiếng vo ve nhẹ của drone).
+
+Thông điệp VO: Mọi sự sống vĩ đại đều khởi đầu từ một thực thể siêu nhỏ, nhưng đích đến cuối cùng là sự hoàn hảo được định lượng của quả chín trên cành.
+
+PHÂN ĐOẠN 2: Trung tâm Xử lý & Chuẩn bị Vật liệu Giống (Cơ giới hóa Sơ chế)
+
+Mục tiêu: Chứng minh sự đồng đều tuyệt đối ngay từ khâu đầu vào của chuỗi cung ứng.
+
+Hình ảnh: Vật liệu giống (hạt giống hoặc mắt ghép/mẫu cấy mô) được đưa vào hệ thống sàng lọc tự động: máng rung cơ học, máy quét laser quang học (optical sorter) để loại bỏ vật thể lỗi, cánh tay robot phân loại vào khay tiêu chuẩn.
+
+Âm thanh: Tiếng rít khí nén cao áp, tiếng lách cách cơ khí nhịp điệu, tiếng quét của tia laser cảm biến.
+
+Thông điệp VO: Sự đồng bộ của một khu vườn không bắt đầu từ mặt đất, nó bắt đầu từ bộ mã di truyền được chọn lọc nghiêm ngặt bởi công nghệ quang phổ.
+
+PHÂN ĐOẠN 3: Cơ giới hóa Chuẩn bị Đất & Thiết lập Hạ tầng Kỹ thuật
+
+Mục tiêu: Thể hiện việc kiến tạo môi trường sống nhân tạo lý tưởng cho hệ rễ của cây trồng mục tiêu.
+
+Hình ảnh: Đội hình máy kéo không người lái (Autonomous Tractors) cày xới, tạo luống cao (hoặc thiết lập hố trồng chuyên dụng), đồng thời rải hệ thống dây tưới nhỏ giọt ngầm và cảm biến độ ẩm đất.
+
+Âm thanh: Tiếng xích sắt nghiền đất tơi xốp, tiếng xì xì của van áp lực nước, tiếng động cơ điện chuyển hướng tự động.
+
+Thông điệp VO: Thiết lập cấu trúc đất vững chãi và hướng nước thông minh là bước kỹ nghệ thầm lặng trước khi đón nhận mầm sống mới.
+
+PHÂN ĐOẠN 4: Vườn ươm Thông minh & Thích nghi Tự động (Nursery & Hardening)
+
+Mục tiêu: Quá trình nuôi dưỡng cây con trong môi trường kiểm soát nghiêm ngặt (Micro-climate).
+
+Hình ảnh: Gieo hạt/cắm cành tự động $\rightarrow$ Hệ thống phun sương siêu mịn tạo độ ẩm $\rightarrow$ Timelapse hạt nứt vỏ hoặc mắt ghép liền sẹo $\rightarrow$ Robot nhấc nguyên bầu rễ cây con khỏe mạnh lên băng chuyền xuất vườn.
+
+Âm thanh: Tiếng phun sương mịn như gió thổi, tiếng chuyển động mượt mà của băng tải đệm cao su.
+
+Thông điệp VO: Tránh xa các biến động của thời tiết, mỗi cây non được tôi luyện cấu trúc rễ trong môi trường lý tưởng trước khi đối mặt với tự nhiên rộng lớn.
+
+PHÂN ĐOẠN 5: Cấy trồng Tự hành & Định vị Không gian (Transplanting)
+
+Mục tiêu: Đưa cây con ra thực địa với độ chính xác đến từng milimet nhờ định vị vệ tinh (RTK/GPS).
+
+Hình ảnh: Các xe cấy trồng tự hành di chuyển song song, cánh tay robot đặt nhẹ nhàng bầu cây xuống lòng đất, ép chặt đất xung quanh gốc và kích hoạt ngay đầu phun nhỏ giọt tại chỗ để cây bén rễ.
+
+Âm thanh: Tiếng bánh xích lăn trên đất ẩm, tiếng cơ cấu hạ đặt cây gõ nhẹ, tiếng nước ngấm vào đất khô.
+
+Thông điệp VO: Mỗi vị trí đặt cây là một tọa độ số học chuẩn xác, đảm bảo khoảng cách tối ưu để đón nhận tối đa ánh sáng và dinh dưỡng trong tương lai.
+
+PHÂN ĐOẠN 6: Chăm sóc, Bảo vệ & Giám sát Kỹ thuật số (Canopy Management)
+
+Mục tiêu: Thể hiện việc quản lý và chăm bón cá thể hóa (mỗi cây trồng là một "bệnh án" riêng biệt).
+
+Hình ảnh: Máy xới cỏ mini luồn lách giữa các hàng; các drone nông nghiệp bay tầm thấp phun sương bảo vệ lá bằng công nghệ tĩnh điện; robot tuần tra (Rover) quét cảm biến đa phổ để phân tích sức khỏe từng chiếc lá.
+
+Âm thanh: Tiếng cánh quạt drone vo ve đều đặn, tiếng vòi phun áp lực cao, tiếng lách cách tinh tế từ cụm gimbal camera thông minh.
+
+Thông điệp VO: Công nghệ không thay thế sự chăm sóc, nó số hóa mọi biểu hiện sinh lý của lá và rễ để đưa ra lượng dưỡng chất chính xác đến từng micro-lít.
+
+PHÂN ĐOẠN 7: Thụ phấn, Ra hoa & Thiết lập Trái non (Flowering & Pollination)
+
+Mục tiêu: Giai đoạn chuyển dịch quan trọng từ sinh trưởng sinh dưỡng sang sinh trưởng sinh sản.
+
+Hình ảnh: Đặc tả hoa của cây mục tiêu hé nở dần (Timelapse) $\rightarrow$ Robot thụ phấn nhân tạo (sử dụng xung khí chứa hạt phấn hoặc quét camera AI định vị nhụy hoa) $\rightarrow$ Cánh hoa rụng đi để lộ quả non tí hon xanh mướt.
+
+Âm thanh: Tiếng gió lướt qua tán lá rậm rạp, tiếng kích hoạt xung khí siêu nhẹ của thiết bị thụ phấn, tiếng côn trùng thụ phấn tự nhiên phụ trợ.
+
+Thông điệp VO: Sự nở hoa là lời hẹn của mùa vụ; công nghệ đồng hành để đảm bảo từng bông hoa đều hoàn thành sứ mệnh chuyển hóa thành quả ngọt.
+
+PHÂN ĐOẠN 8: Phát triển Trái & Gia cố Kết cấu (Fruit Development & Support)
+
+Mục tiêu: Bảo vệ và hỗ trợ cây trồng khi gánh tải trọng quả nặng hoặc trước biến động thời tiết.
+
+Hình ảnh: Quả lớn dần theo thời gian (timelapse) $\rightarrow$ Robot tiếp cận lắp đặt các cấu kiện gia cố sinh học (như vòng nâng đỡ quả nặng đối với sầu riêng, túi bọc quả bảo vệ đối với xoài/bơ, hoặc khung đỡ cành) $\rightarrow$ Hệ thống điều hòa nhiệt độ cục bộ kích hoạt khi trời nắng gắt.
+
+Âm thanh: Tiếng cành cây kẽo kẹt sinh học dưới sức nặng, tiếng lắp đặt khóa gài polymer mềm của robot, tiếng gió rì rào trong tán lá dày bóng mượt.
+
+Thông điệp VO: Sự tăng trưởng cần bệ đỡ bền vững; chúng tôi bảo vệ cấu trúc cành và quả khỏi trọng lực cũng như tác động vật lý của thiên tai.
+
+PHÂN ĐOẠN 9: Thu hoạch Robot & Đóng gói Khép kín (Harvest & Post-Harvest)
+
+Mục tiêu: Điểm nút thăng hoa của kịch bản – thu hoạch hoàn hảo không tì vết và đóng gói xuất khẩu.
+
+Hình ảnh:
+
+Harvest: Robot gặt tiếp cận, cảm biến đo độ chín (không tiếp xúc), tay cắt laser/cơ học cắt cuống cực ngọt $\rightarrow$ Đỡ quả êm ái đặt vào khay đệm của xe trung chuyển tự hành.
+
+Post-Harvest: Quả được rửa bằng bọt nước siêu âm, sấy khô bằng khí nóng thổi nhẹ $\rightarrow$ Camera AI quét 360 độ phân loại kích thước, khuyết tật $\rightarrow$ Cánh tay delta xếp quả vào khay định hình chống va đập $\rightarrow$ Đưa vào kho lạnh thông minh.
+
+Ending: Drone bay kéo ngược về phía hoàng hôn lãng mạn phủ bóng lên nông trại yên bình đang chuẩn bị bước vào chu kỳ đêm.
+
+Âm thanh: Tiếng cắt cuống dứt khoát, tiếng đặt quả êm ái vào nệm xốp, tiếng dòng nước tuần hoàn rào rào, tiếng quạt sấy khô ấm áp, tiếng dế kêu râm ran lúc chạng vạng.
+
+Thông điệp VO:
+
+Lúc thu hoạch: Quy mô công nghiệp không đồng nghĩa với thô bạo. Sự nhẹ nhàng là tôn chỉ tuyệt đối khi tiếp xúc với thành quả của cả một năm dài.
+
+Kết thúc: Chu kỳ kết thúc khi những chiếc container lạnh rời trang trại, nhưng những thân cây vẫn ở lại, tràn đầy nhựa sống và sẵn sàng cho đợt đơm chồi tiếp theo dưới bầu trời đêm yên tĩnh.
+
+III. BẢN ĐỒ TÙY BIẾN CHO TỪNG LOẠI CÂY CỦ THỂ (SPECIFIC CROP ADAPTATION)
+
+Để biến khung kịch bản này thành kịch bản chi tiết cho một loại cây cụ thể, hãy áp dụng bảng chuyển đổi thuộc tính dưới đây:
+
+Phân đoạn kỹ thuật
+
+Loại quả Vỏ dày / Nặng (Ví dụ: Sầu riêng, Mít)
+
+Loại quả Vỏ mỏng / Nhạy cảm (Ví dụ: Bơ, Xoài, Đu đủ)
+
+Loại quả Chùm / Nhỏ (Ví dụ: Nhãn, Vải, Nho)
+
+Phân đoạn 2 (Hạt/Giống)
+
+Chọn mắt ghép từ cây mẹ ưu việt, robot thực hiện ghép nêm tự động bằng laser.
+
+Hạt giống hoặc mẫu cấy mô trong thạch dinh dưỡng.
+
+Cành chiết hoặc cây cấy mô siêu sạch bệnh.
+
+Phân đoạn 7 (Thụ phấn)
+
+Robot thụ phấn nhân tạo bằng đầu phun phấn áp lực hơi vào ban đêm (thời điểm hoa nở).
+
+Phun bổ sung vi lượng (Boron, Canxi) bằng drone để tăng tỷ lệ đậu quả tự nhiên nhờ gió/ong.
+
+Thiết lập các trạm phát sóng siêu âm đuổi côn trùng hại hoa, bảo vệ ong thụ phấn tự nhiên.
+
+Phân đoạn 8 (Gia cố)
+
+Tay máy robot buộc dây cáp treo quả vào thân chính để tránh gãy cành.
+
+Robot bọc quả bằng túi vải không dệt tự hủy để tránh ruồi vàng và cháy nắng.
+
+Robot lắp đặt lưới nâng đỡ toàn bộ chùm quả từ bên dưới lòng tán.
+
+Phân đoạn 9 (Thu hoạch)
+
+Cần cơ cấu "bắt quả" chịu lực lớn (túi lưới cơ khí cường lực hoặc cánh tay robot đa khớp nâng từ dưới).
+
+Đầu gắp mềm bằng silicon chứa đầy chất lỏng (Soft-robotic gripper) để tránh tạo vết thâm trên vỏ.
+
+Cắt nguyên chùm quả bằng kéo rung siêu âm chống rụng hạt, xếp vào khay treo lơ lửng.
+
+IV. ĐỀ XUẤT SẢN XUẤT VÀ HẬU KỲ CHUYÊN NGHIỆP (PRODUCTION GUIDE)
+
+Ứng dụng CGI/VFX lai (Hybrid CGI):
+
+Do việc quay thực tế một trang trại có 100% robot vận hành là bất khả thi ở thời điểm hiện tại, giải pháp tối ưu là quay bối cảnh nông trại thật (dùng drone góc rộng và máy quay mặt đất) sau đó ghép các mô hình 3D (CGI) của robot tự hành, drone phun thuốc và cánh tay robot thu hoạch vào khung hình.
+
+Kỹ thuật Chuyển cảnh (Pacing & Transitions):
+
+Sử dụng kỹ thuật chuyển cảnh "Match Cut" dựa trên hình dáng hình học (ví dụ: chuyển từ một hạt giống hình bầu dục ở Phân đoạn 2 sang hình ảnh quả non hình bầu dục ở Phân đoạn 7) để tạo dòng chảy liên tục cho người xem.
+
+Chỉnh màu (Color Grading):
+
+Ngoại cảnh (Farm): Sử dụng tông màu rực rỡ, độ bão hòa cao (Vibrant & Warm). Màu xanh lá của tán cây phải mọng nước; màu đất phải có độ ẩm sẫm màu; ánh sáng bình minh/hoàng hôn phải có màu vàng cam ấm áp để tạo cảm giác gần gũi với sự sống.
+
+Nội cảnh (Factory/Nursery): Sử dụng tông màu sạch sẽ, hơi xanh lạnh (Clean Teal & Silver) của kim loại inox và ánh sáng LED để nhấn mạnh yếu tố công nghệ cao, vô trùng và chính xác.
+
+## **BƯỚC 7: HƯỚNG DẪN PROMPT CAMERA CHO AI**
+
+- **NHÓM MACRO & CẬN CẢNH (Sinh học & Chi tiết)**
+  - **Locked macro push-in:** Khóa nét, từ từ đẩy sát vào chủ thể.
+  - **Fixed repeat-framed macro:** Tĩnh, lặp lại khung hình (Time-lapse nở hoa/nảy mầm).
+  - **Locked close-up:** Cận cảnh hoàn toàn tĩnh.
+  - **Ultra-slow macro orbit:** Xoay 360 độ siêu chậm quanh vật thể macro.
+
+- **NHÓM CHUYỂN ĐỘNG MƯỢT MÀ (Dây chuyền & Bám đuổi)**
+  - **Tracking shot / Low side tracking:** Trượt bám theo (từ góc thấp).
+  - **Smooth glide:** Lướt mượt mà (phòng kính, không gian hẹp).
+  - **Slow dolly:** Trượt dọc theo hành lang/hàng cây.
+
+- **NHÓM TRÊN KHÔNG & GÓC CAO (Quy mô Vĩ mô)**
+  - **Vertical rise to top-down master:** Bay vút lên cao chĩa thẳng xuống 90 độ.
+  - **Elevated oblique tracking:** Trượt bám theo góc cao nghiêng chéo (theo dõi đội hình xe).
+  - **Top-down glide / Hover:** Lơ lửng lướt mặt hướng thẳng góc 90 độ.
+  - **Rising top-down pullaway:** Bay lùi ra xa và dần ngẩng lên cao (Kết video).
+
+- **NHÓM TĨNH, ĐỐI XỨNG & ÁNH SÁNG**
+  - **Static wide composition:** Bố cục góc rộng tĩnh.
+  - **Front-facing symmetrical shot:** Cảnh quay trực diện đối xứng uy lực.
+  - **Static wide composition with volumetric lighting:** Cảnh toàn diện tĩnh với ánh sáng xuyên thấu (God rays).
+
+- **NHÓM CHUYỂN ĐỘNG ĐỘT PHÁ & MATCH-CUT (MỚI)**
+  - **High-altitude to macro fast zoom:** Phóng to (Crash zoom) từ bầu trời lao thẳng xuống siêu cận cảnh.
+  - **Macro to high-altitude fast zoom-out:** Kéo lùi cực nhanh từ siêu cận cảnh ra toàn cảnh vĩ mô.
+  - **Fixed match-cut to slow pull-back:** Liên kết hình ảnh bằng ảnh Start Frame, sau đó từ từ kéo lùi ra xa.
 
 ## **BƯỚC 8: QUY TRÌNH ĐẢM BẢO CHẤT LƯỢNG (DANH SÁCH KIỂM TRA QA ĐẶC BIỆT V4.2)**
 
