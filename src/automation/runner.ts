@@ -324,9 +324,7 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
         await waitForNextPromptCountdown(state, promptName);
 
         i += 1;
-        if (i > 250) {
-          break;
-        }
+
         continue;
       }
       const knownTopRowTileIds = new Set(getTopRowTileIds());
@@ -353,9 +351,6 @@ export async function startAutomation(config: AutomationConfig): Promise<void> {
       }
 
       i += 1;
-      if (i > 250) {
-        break;
-      }
     }
 
     await waitForPendingTasks(pendingTasks);
