@@ -143,6 +143,14 @@ function sanitizeDownloadBaseName(name: string): string {
     .replace(/^_+|_+$/g, '');
 }
 
+function sanitizeFolderName(name: string): string {
+  const regex = /Scene[_\s]+([^-]+)-/i;
+  const match = name.match(regex);
+
+  // Nếu khớp định dạng thì trả về nhóm số 1 (tên folder)
+  return match ? match[1] : 'veo3_video';
+}
+
 function buildVideoDownloadFilename(renameTo: string): string {
   const baseName = sanitizeDownloadBaseName(renameTo) || 'video';
 
@@ -206,8 +214,10 @@ export async function downloadMediaItem(mediaContainer: HTMLElement, renameTo = 
     const videoUrl = getDirectVideoDownloadUrl(mediaContainer);
     if (videoUrl) {
       await simulateHumanPresenceBeforeDownload(mediaContainer);
+      // get folder name from renameTo
+      const folderName = sanitizeFolderName(renameTo) || 'veo3_video';
 
-      const filename = buildVideoDownloadFilename(renameTo);
+      const filename = `./${folderName}/${buildVideoDownloadFilename(renameTo)}`;
       await appendAutomationLog(`Downloading video directly from ${videoUrl} as ${filename}`);
       return requestDirectDownload(videoUrl, filename);
     }

@@ -8,7 +8,8 @@ type PendingDownload = {
 };
 
 type PendingDirectDownload = {
-  filename: string;
+  filename?: string;
+  folder?: string;
 };
 
 type DebuggerTarget = {
@@ -84,10 +85,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message?.type === 'DOWNLOAD_URL') {
-    const filename =
+    const folder = sanitizeFolder(message.folder);
+    const baseFilename =
       typeof message.filename === 'string' && message.filename.trim() ? message.filename.trim() : undefined;
 
-    const pendingDirectDownload = filename ? { filename } : null;
+    const filename = folder && baseFilename ? `${folder}/${baseFilename}` : baseFilename;
+
+    const pendingDirectDownload: PendingDirectDownload | null = filename ? { filename } : folder ? { folder } : null;
     if (pendingDirectDownload) {
       pendingDirectDownloads.push(pendingDirectDownload);
     }
@@ -268,10 +272,15 @@ async function focusSenderTab(sender: chrome.runtime.MessageSender): Promise<voi
 chrome.downloads.onDeterminingFilename.addListener((item, suggest) => {
   const pendingDirectDownload = pendingDirectDownloads.shift();
   if (pendingDirectDownload) {
-    suggest({
-      filename: pendingDirectDownload.filename,
-      conflictAction: 'uniquify',
-    });
+    const { filename, folder } = pendingDirectDownload;
+    if (filename) {
+      suggest({ filename, conflictAction: 'uniquify' });
+    } else if (folder) {
+      const autoName = item.filename ? item.filename.split(/[/\\]/).pop() || 'download' : 'download';
+      suggest({ filename: `${folder}/${autoName}`, conflictAction: 'uniquify' });
+    } else {
+      suggest();
+    }
     return;
   }
 
@@ -324,6 +333,19 @@ function detectFileExtension(item: chrome.downloads.DownloadItem) {
   }
 
   return 'bin';
+}
+
+function sanitizeFolder(folder: unknown): string | undefined {
+  if (typeof folder !== 'string' || !folder.trim()) {
+    return undefined;
+  }
+  const cleaned = folder
+    .trim()
+    .replace(/\.\./g, '')
+    .replace(/^[/\\]+/, '')
+    .replace(/[/\\]+$/, '')
+    .replace(/[<>:"|?*]/g, '');
+  return cleaned || undefined;
 }
 
 function normalizeCapturedFlowHeaders(requestHeaders?: chrome.webRequest.HttpHeader[]): CapturedRequestHeaders {
