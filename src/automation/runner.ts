@@ -145,7 +145,7 @@ async function handleVideoPromptCompletion(
   } else {
     // retry 3 times with 5 seconds interval
     const maxRetries = 3;
-    const retryIntervalMs = 15000;
+    const retryIntervalMs = 5000;
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       await sleepMilliseconds(retryIntervalMs * attempt);
       downloaded = await downloadMediaItem(completedTile, promptName);
@@ -222,8 +222,7 @@ async function runPromptTask(
     return;
   }
 
-  await sleepMilliseconds(15000);
-
+  // await sleepMilliseconds(15000);
   const tileResult = await waitForTileDoneById(newTileId, waitingTime, () => state.stopRequested);
 
   if (tileResult.status === 'failed') {

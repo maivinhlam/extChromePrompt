@@ -1,6 +1,7 @@
 import { CreateModeVideo } from '../domain/create-mode';
 import { state } from '../state/automation-state';
 import { isVisible, sleepMilliseconds } from '../utils';
+import { getDirectVideoDownloadUrl } from './media-actions';
 
 type TileDoneResult =
   | { status: 'completed'; tile: HTMLElement }
@@ -193,7 +194,12 @@ export async function waitForTileDoneById(
     }
 
     if (isTileGenerationComplete(tile)) {
-      return { status: 'completed', tile };
+      const videoUrl = getDirectVideoDownloadUrl(tile);
+      if (videoUrl) {
+        return { status: 'completed', tile };
+      } else {
+        return null;
+      }
     }
 
     const text = (tile.textContent || '').toLowerCase();

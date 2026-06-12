@@ -82,22 +82,32 @@ export async function loadRunnerSettings(): Promise<RunnerSettings> {
   }
 }
 
-export async function updateRunnerSettings(partialSettings: Partial<RunnerSettings>): Promise<RunnerSettings> {
+let _settingsLock: Promise<void> = Promise.resolve();
+
+function withSettingsLock<T>(fn: () => Promise<T>): Promise<T> {
+  const next = _settingsLock.then(() => fn());
+  _settingsLock = next.then(
+    () => {},
+    () => {}
+  );
+  return next;
+}
+
+async function applyRunnerSettingsUpdate(partialSettings: Partial<RunnerSettings>): Promise<RunnerSettings> {
   const existing = await loadRunnerSettings();
-  const nextSettings: RunnerSettings = {
-    ...existing,
-    ...partialSettings,
-  };
+  const nextSettings: RunnerSettings = { ...existing, ...partialSettings };
 
   try {
-    await chrome.storage.local.set({
-      [RUNNER_SETTINGS_KEY]: nextSettings,
-    });
+    await chrome.storage.local.set({ [RUNNER_SETTINGS_KEY]: nextSettings });
   } catch {
     // no-op
   }
 
   return nextSettings;
+}
+
+export function updateRunnerSettings(partialSettings: Partial<RunnerSettings>): Promise<RunnerSettings> {
+  return withSettingsLock(() => applyRunnerSettingsUpdate(partialSettings));
 }
 
 export async function saveMatchedImageNames(matchedImageNames: Record<string, string>): Promise<void> {
@@ -110,33 +120,32 @@ export async function saveMatchedImageNames(matchedImageNames: Record<string, st
   }
 }
 
-export async function removePromptFromRunnerSettings(prompt: string): Promise<boolean> {
+export function removePromptFromRunnerSettings(prompt: string): Promise<boolean> {
   const normalizedPrompt = String(prompt || '').trim();
   if (!normalizedPrompt) {
-    return false;
+    return Promise.resolve(false);
   }
 
-  try {
-    const existing = await loadRunnerSettings();
-    const promptsText = typeof existing.promptsText === 'string' ? existing.promptsText : '';
-    const promptLines = promptsText
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean);
-    const promptIndex = promptLines.findIndex((line) => line === normalizedPrompt);
+  return withSettingsLock(async () => {
+    try {
+      const existing = await loadRunnerSettings();
+      const promptsText = typeof existing.promptsText === 'string' ? existing.promptsText : '';
+      const promptLines = promptsText
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean);
+      const promptIndex = promptLines.findIndex((line) => line === normalizedPrompt);
 
-    if (promptIndex < 0) {
+      if (promptIndex < 0) {
+        return false;
+      }
+
+      promptLines.splice(promptIndex, 1);
+      await applyRunnerSettingsUpdate({ promptsText: promptLines.join('\n') });
+
+      return true;
+    } catch {
       return false;
     }
-
-    promptLines.splice(promptIndex, 1);
-
-    await updateRunnerSettings({
-      promptsText: promptLines.join('\n'),
-    });
-
-    return true;
-  } catch {
-    return false;
-  }
+  });
 }

@@ -123,7 +123,7 @@ async function patchFlowWorkflowDisplayName(identity: FlowWorkflowIdentity, disp
   return !!response?.ok;
 }
 
-function getDirectVideoDownloadUrl(mediaContainer: HTMLElement): string | null {
+export function getDirectVideoDownloadUrl(mediaContainer: HTMLElement): string | null {
   const video = mediaContainer.querySelector('video') as HTMLVideoElement | null;
   if (!video) {
     return null;

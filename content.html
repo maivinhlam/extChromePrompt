@@ -145,6 +145,7 @@
     padding: 16px;
     min-height: unset;
     display: flex;
+    height: 100%;
     flex-direction: column;
     color: var(--md-sys-color-on-surface);
     font-family: Roboto, "Segoe UI", sans-serif;
@@ -182,6 +183,26 @@
     accent-color: var(--md-sys-color-primary);
   }
 
+  .prompt-group {
+    margin: 0 0 8px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: 16px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: center;
+    background: var(--md-sys-color-surface-container);
+    overflow: auto;
+  }
+
+  .prompt-group legend {
+    padding: 0 6px;
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+    font-weight: 500;
+  }
+
   .field-header {
     display: flex;
     align-items: center;
@@ -195,8 +216,8 @@
   }
 
   .prompt-list-shell {
-    min-height: 350px;
-    max-height: 350px;
+    /* min-height: 150px;
+    max-height: 350px; */
     width: 100%;
     overflow-y: auto;
     border-radius: 16px;
@@ -429,6 +450,26 @@
     color: var(--md-sys-color-on-surface-variant);
   }
 
+  .flex-1 {
+    flex: 1;
+  }
+
+  .flex-2 {
+    flex: 2;
+  }
+
+  .flex-3 {
+    flex: 3;
+  }
+
+  .flex-4 {
+    flex: 4;
+  }
+
+  .flex-10 {
+    flex: 10;
+  }
+
   .feature-item input {
     margin: 0;
   }
@@ -438,7 +479,6 @@
     gap: 8px;
     margin-top: 12px;
     justify-content: space-around;
-
   }
 
   .actions button {
@@ -571,7 +611,7 @@
 
   <div id="panel-wrap">
     <main class="panel">
-      <fieldset class="mode-group">
+      <fieldset class="mode-group flex-1">
         <legend>Mode</legend>
         <label class="mode-item">
           <input id="modeImage" type="radio" name="runMode" value="image" checked />
@@ -583,7 +623,7 @@
         </label>
       </fieldset>
 
-      <fieldset class="mode-group">
+      <fieldset class="prompt-group flex-10">
         <legend> <span>Prompt list: <span id="totalPrompts">0</span></span>
         </legend>
         <div class="prompt-list-shell">
@@ -594,11 +634,11 @@
         <textarea id="prompts" class="prompt-source" placeholder="SCENE 1: A cinematic shot of a forest at sunrise"
           aria-hidden="true" tabindex="-1"></textarea>
       </fieldset>
-      <div class="status-row">
+      <div class="status-row flex-1">
         <p id="status">Ready.</p>
       </div>
 
-      <div class="import-btn-row">
+      <div class="import-btn-row flex-1">
         <button id="importBtn" type="button" title="Nhập danh sách prompt">Import Prompt</button>
         <div class="import-clear-btns">
           <button id="clearPromptsBtn" type="button" class="clear-prompts-btn import-clear-item"
@@ -609,9 +649,9 @@
         </div>
       </div>
 
-      <div class="bottom-bar">
+      <div class="bottom-bar flex-1">
         <div class="feature-list">
-          <label class="feature-item" style="align-items: baseline;">
+          <label class="feature-item">
             <span>Delay</span>
             <input id="intervalSeconds" type="number" min="1" max="500" value="15" />
           </label>
@@ -626,7 +666,7 @@
         </div>
       </div>
 
-      <div class="actions">
+      <div class="actions flex-1">
         <button id="startBtn" type="button" title="Bắt đầu chạy">⚡ Start</button>
         <button id="pauseBtn" type="button" hidden title="Tạm dừng quá trình chạy">Pause</button>
         <button id="resumeBtn" type="button" hidden title="Tiếp tục quá trình chạy">Resume</button>
