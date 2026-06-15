@@ -217,7 +217,7 @@ export async function downloadMediaItem(mediaContainer: HTMLElement, renameTo = 
       // get folder name from renameTo
       const folderName = sanitizeFolderName(renameTo) || 'veo3_video';
 
-      const filename = `./${folderName}/${buildVideoDownloadFilename(renameTo)}`;
+      const filename = `${folderName}/${buildVideoDownloadFilename(renameTo)}`;
       await appendAutomationLog(`Downloading video directly from ${videoUrl} as ${filename}`);
       return requestDirectDownload(videoUrl, filename);
     }
