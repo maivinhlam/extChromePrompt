@@ -347,6 +347,13 @@ export function mountEmbeddedPanel(shadow: ShadowRoot): void {
     }
 
     syncPromptLines([...getPromptLines(), ...importedPrompts]);
+
+    if (state.running) {
+      for (const p of importedPrompts) {
+        state.prompts.push(p);
+      }
+    }
+
     setStatus(`Imported ${importedPrompts.length} prompt${importedPrompts.length === 1 ? '' : 's'}.`);
   };
 
@@ -393,6 +400,12 @@ export function mountEmbeddedPanel(shadow: ShadowRoot): void {
     void persistSettings();
   });
   enableAutoDownloadInput.addEventListener('change', () => {
+    void persistSettings();
+  });
+  intervalInput.addEventListener('input', () => {
+    if (state.running) {
+      state.intervalMs = getIntervalSeconds() * 1000;
+    }
     void persistSettings();
   });
   promptsInput.addEventListener('input', () => {
