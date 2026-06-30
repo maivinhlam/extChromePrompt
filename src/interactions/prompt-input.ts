@@ -32,6 +32,7 @@ export async function fillPromptInput(prompt: string): Promise<boolean> {
     const response = await chrome.runtime.sendMessage({
       action: 'PERFORM_TYPE',
       text: newPrompt,
+      checkDuplicate: false,
     });
     if (response?.status === 'completed') {
       console.log('This specific typing task is DONE!');
@@ -156,6 +157,7 @@ export async function selectReferenceImage(expectedNames: string[]): Promise<voi
         const response = await chrome.runtime.sendMessage({
           action: 'PERFORM_TYPE',
           text: matchImageName,
+          checkDuplicate: true,
         });
         if (response?.status === 'completed') {
           console.log('This specific typing to matchImageName task is DONE!');

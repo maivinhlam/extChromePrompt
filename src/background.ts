@@ -157,7 +157,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message?.action === 'PERFORM_TYPE') {
-    void handleTypingFlow(sender, message.text)
+    void handleTypingFlow(sender, message.text, message.checkDuplicate)
       .then(() => sendResponse({ ok: true }))
       .catch((error: Error) => sendResponse({ ok: false, error: error.message }));
     return true;
@@ -418,7 +418,11 @@ async function patchFlowWorkflowDisplayName(
 /**
  * A wrapper to handle the clear + type sequence
  */
-async function handleTypingFlow(sender: chrome.runtime.MessageSender, text: string): Promise<void> {
+async function handleTypingFlow(
+  sender: chrome.runtime.MessageSender,
+  text: string,
+  checkDuplicate: boolean
+): Promise<void> {
   const tabId = sender.tab?.id;
 
   if (typeof tabId !== 'number') {
@@ -430,7 +434,7 @@ async function handleTypingFlow(sender: chrome.runtime.MessageSender, text: stri
   try {
     await ensureDebuggerAttached(target);
     await nativeClear(target);
-    await nativeType(tabId, text);
+    await nativeType(tabId, text, checkDuplicate);
 
     console.log('Automation completed successfully.');
   } catch (error) {

@@ -23,6 +23,14 @@ export function setupMessageListener(): void {
       return;
     }
 
+    if (message?.type === 'PAUSE_AUTOMATION') {
+      state.pauseRequested = true;
+      appendAutomationLog(message.reason || 'Pause requested.');
+      sendResponse({ ok: true });
+      state.pauseRequested = true;
+      return;
+    }
+
     sendResponse({ ok: false, error: 'Unknown message.' });
   });
 }
