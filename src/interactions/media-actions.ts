@@ -144,7 +144,7 @@ function sanitizeDownloadBaseName(name: string): string {
 }
 
 function sanitizeFolderName(name: string): string {
-  const regex = /Scene[_\s]+([^-]+)-/i;
+  const regex = /^([^-_\s]+(?:[_\s][^-_\s]+)*)[-_\s]+Scene/i;
   const match = name.match(regex);
 
   // Nếu khớp định dạng thì trả về nhóm số 1 (tên folder)
