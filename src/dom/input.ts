@@ -71,6 +71,51 @@ export async function nativeClear(target: chrome.debugger.Debuggee): Promise<voi
 }
 
 /**
+ * Simulates typing a string character-by-character via keyboard events,
+ * with a random delay between each keystroke to mimic human typing speed.
+ */
+export async function nativeTypeKeyByKey(tabId: number, text: string): Promise<void> {
+  const target: chrome.debugger.Debuggee = { tabId };
+  let attachedHere = false;
+
+  try {
+    try {
+      await chrome.debugger.attach(target, '1.3');
+      attachedHere = true;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error || 'Unknown error');
+
+      if (!message.includes('Another debugger is already attached')) {
+        throw error;
+      }
+    }
+
+    for (const char of text) {
+      await chrome.debugger.sendCommand(target, 'Input.dispatchKeyEvent', {
+        type: 'rawKeyDown',
+        key: char,
+      });
+      await chrome.debugger.sendCommand(target, 'Input.dispatchKeyEvent', {
+        type: 'char',
+        key: char,
+        text: char,
+      });
+      await chrome.debugger.sendCommand(target, 'Input.dispatchKeyEvent', {
+        type: 'keyUp',
+        key: char,
+      });
+
+      await sleepMilliseconds(randomInt(60, 180));
+    }
+  } catch (err) {
+    console.error('Native key-by-key typing failed:', err);
+    if (attachedHere) {
+      chrome.debugger.detach(target).catch(() => {});
+    }
+  }
+}
+
+/**
  * Pastes a string into the focused element using the debugger protocol.
  */
 export async function nativeType(tabId: number, text: string): Promise<void> {
@@ -89,10 +134,33 @@ export async function nativeType(tabId: number, text: string): Promise<void> {
       }
     }
 
-    await chrome.debugger.sendCommand(target, 'Input.insertText', {
-      text,
-    });
+    // await chrome.debugger.sendCommand(target, 'Input.insertText', {
+    //   text,
+    // });
+    console.log('🚀 ~ nativeType ~ text:', text);
 
+    const atMatch = /([\s\S]*?)(@)(\S+)([\s\S]*)/.exec(text);
+
+    console.log('🚀 ~ nativeType ~ atMatch:', atMatch);
+    if (atMatch) {
+      const [, before, at, word, rest] = atMatch;
+
+      if (before) {
+        await chrome.debugger.sendCommand(target, 'Input.insertText', { text: before });
+      }
+      await sleepMilliseconds(randomInt(600, 1000));
+      await nativeTypeKeyByKey(tabId, '@');
+      await sleepMilliseconds(randomInt(200, 400));
+
+      await nativeTypeKeyByKey(tabId, word);
+      await sleepMilliseconds(randomInt(200, 400));
+      await sendEnterKey(target);
+      await nativeTypeKeyByKey(tabId, ' ');
+
+      await chrome.debugger.sendCommand(target, 'Input.insertText', { text: rest });
+    } else {
+      await chrome.debugger.sendCommand(target, 'Input.insertText', { text });
+    }
     await sleepMilliseconds(randomInt(600, 1000)); // Wait for the text to be processed before sending Enter
     await sendEnterKey(target);
     if (attachedHere) {

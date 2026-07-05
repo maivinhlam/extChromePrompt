@@ -50,7 +50,17 @@ export async function waitWhilePaused(state: AutomationState): Promise<boolean> 
 }
 
 export async function waitForNextPromptCountdown(state: AutomationState, currentPrompt?: string): Promise<void> {
-  const totalSeconds = Math.max(1, Math.ceil(state.intervalMs / 1000));
+  // 1. Cấu hình khoảng random (Ví dụ: ngẫu nhiên cộng thêm từ 1 đến 5 giây)
+  // Bạn có thể tùy chỉnh min/max theo nhu cầu (tính bằng mili-giây)
+  const minJitterMs = 1000;  // 1 giây
+  const maxJitterMs = 5000;  // 5 giây
+  const randomJitter = Math.floor(Math.random() * (maxJitterMs - minJitterMs + 1)) + minJitterMs;
+
+  // Tổng thời gian chờ mới = Thời gian gốc + Khoảng ngẫu nhiên
+  const finalIntervalMs = state.intervalMs + randomJitter;
+
+  // 2. Tính toán số giây dựa trên thời gian mới đã có random
+  const totalSeconds = Math.max(1, Math.ceil(finalIntervalMs / 1000));
 
   for (let secondsLeft = totalSeconds; secondsLeft >= 1; secondsLeft -= 1) {
     const canContinue = await waitWhilePaused(state);
@@ -67,7 +77,8 @@ export async function waitForNextPromptCountdown(state: AutomationState, current
       `Current prompt: ${currentPrompt || 'N/A'} | Start next prompt in ${secondsLeft} second${secondsLeft === 1 ? '' : 's'}...`
     );
 
-    const sleepMs = secondsLeft === 1 ? state.intervalMs - (totalSeconds - 1) * 1000 : 1000;
+    // 3. Đoạn cuối cùng sẽ bù nốt số mili-giây lẻ của finalIntervalMs
+    const sleepMs = secondsLeft === 1 ? finalIntervalMs - (totalSeconds - 1) * 1000 : 1000;
     await sleepMilliseconds(Math.max(1, sleepMs));
   }
 }
