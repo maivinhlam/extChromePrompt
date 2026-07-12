@@ -1,0 +1,125 @@
+Episode Title (EN)
+
+The Tilting Hearth
+
+One-sentence logline (VI)
+
+Khi cố gắng kích hoạt hệ thống kích thủy lực cơ-khí để cân chỉnh lại độ nghiêng nguy hiểm của trạm đang sụp lún, một kỹ sư cô độc phát hiện ra một vết rò áp suất vi mô ở vách greenhouse đang hút ngược một dòng khí hiếm phóng xạ cực kỳ bất thường dâng lên từ các đứt gãy địa chất dưới lòng đất.
+
+Core mission for future human habitat
+
+Khôi phục độ cân bằng cơ học của toàn bộ trạm trú ẩn (structural seal verification after impact event) và ổn định áp suất khí quyển của greenhouse (greenhouse pressure stabilization) bằng cách bơm keo bít chịu lực cao và cân chỉnh chân đế cơ học ngoài trời, bảo vệ lứa cây mầm nông nghiệp khỏi bị hủy diệt do mất áp suất âm thầm.
+
+Character state clarity
+
+[Aiden] khi ở trong: Greenhouse interior mờ lạnh, Lab địa chất tối tăm, và Airlock interior dính đầy cát bụi xám xịt từ các sự cố trước.
+
+[Grant] khi ở ngoài: Gầm kết cấu thép chật hẹp dưới sàn Hab (exterior repair zone), bên ngoài vỏ vách greenhouse (outside greenhouse shell), và bãi đá vụn xung quanh móng trạm (meteor impact field).
+
+Xác nhận: Chỉ có một con người duy nhất, không có đồng đội, không có robot phản hồi cảm xúc.
+
+Primary anomaly / discovery
+
+Mức sụt áp trong greenhouse diễn ra cực kỳ chậm nhưng không thể định vị được vết rách bằng bọt xà phòng kiểm tra thông thường. Tuy nhiên, cảm biến phân tích quang phổ dòng khí thoát ra ngoài vỏ vách phát hiện một hiện tượng kỳ lạ: dòng khí rò rỉ không chỉ chứa hỗn hợp dưỡng khí $O_2/N_2$ của trạm, mà đang bị nhiễm một lượng vết khí Helium-3 ($^3\text{He}$) siêu hiếm dâng lên từ lòng đất—một đồng vị chỉ có thể sinh ra từ các lò phản ứng hạt nhân chu kỳ Tritium quân sự tuyệt mật của Trái Đất.
+
+Hidden rational cause
+
+Lò phản ứng hạt nhân bị tan chảy sâu dưới lòng đất đang đun sôi và phá hủy các cấu trúc rỗng dưới móng Hab. Khi toàn bộ trạm nghiêng đi, trọng lực đè nén các khe nứt đá basalt, ép lượng khí Helium-3 tích tụ từ lõi phản ứng cổ xưa kia dâng ngược lên theo các đường nứt địa chất. Một trận mưa vi thiên thạch gần đây va chạm vào vách ngoài của greenhouse đã tạo ra một vết rách chân chim ở vòng đệm polymer chịu lực (elastomer gasket). Dòng khí từ greenhouse thoát ra ngoài đã tạo ra hiệu ứng Venturi vô tình hút dòng khí Helium-3 từ kẽ nứt đất lên và đẩy ngược vào vòng lặp cảm biến của trạm.
+
+Meteor / impact role
+
+Inciting incident & Physical trigger – Vụ va chạm của một dải vi thiên thạch (meteor impact field) đâm sầm vào vách ngoài của greenhouse, tạo ra vết nứt chân chim ở đệm cao su chịu lực, đồng thời chấn động rung lắc làm gia tốc độ nghiêng của nền móng Hab từ $1.25^\circ$ lên tới mức nguy hiểm $1.5^\circ$.
+
+Hazard stack
+
+Mất áp suất âm thầm (Decompression threat): Áp suất greenhouse tụt giảm chậm nhưng liên tục, đe dọa làm vỡ tế bào lứa thực vật mầm trong vòng 2 giờ tới nếu không bít kín hoàn toàn.
+
+Quá tải kích thủy lực nâng hạ: Hệ thống kích nâng chịu tải trọng hàng chục tấn dưới gầm Hab bị rò rỉ dầu thủy lực áp lực cao do cát bụi mài mòn, đe dọa sập đổ đè bẹp [Grant] khi anh đang thao tác bên dưới.
+
+Mù cảm biến hồng ngoại do bụi tĩnh điện: Bụi bốc lên từ quá trình kích nâng bám chặt vào camera hồng ngoại cầm tay, khiến việc dò tìm luồng khí lạnh rò rỉ bằng chênh lệch nhiệt độ trở nên bất khả thi.
+
+Nhiễm độc khí hiếm làm loãng oxy: Sự tích tụ khí Helium-3 dâng lên từ khe nứt dưới gầm trạm chật hẹp làm loãng nồng độ oxy cục bộ quanh bộ đồ của [Grant], làm tăng nguy cơ ngạt khí không báo trước nếu bộ lọc của suit bị quá tải.
+
+Solitude proof beats
+
+[Aiden] đứng một mình trong greenhouse interior, dùng một thanh dọi cơ học (plumb bob) tự chế bằng một sợi dây cáp và một chiếc ốc vít nặng thả từ trần nhà xuống để đo độ nghiêng thực tế của bức tường Hab trong sự im lặng tuyệt đối.
+
+[Grant] quỳ rạp dưới gầm thép tối tăm, ẩm ướt hơi nước ngưng tụ của Hab, một mình dùng kích cơ học dự phòng nặng 40 kg để chêm vào bệ đỡ gỉ sét mà không có bất kỳ thiết bị nâng tự động nào hỗ trợ.
+
+[Aiden] quay lại airlock, ngồi bệt xuống sàn thép lạnh ngắt, tự rót một cốc nước lọc đã được tái chế từ bùn phóng xạ tập trước (nay đã qua bộ lọc zeolit nhưng vẫn có vị kim loại nhàn nhạt), lặng lẽ nuốt trôi trong tiếng vo vo vô cảm của hệ thống tái chế.
+
+Resilience proof beats
+
+Dù hai chân tê dại và mỏi nhừ sau 4 tiếng quỳ dưới gầm trạm chật hẹp chứa đầy bụi bẩn, [Grant] vẫn bám chặt tay vào đường ống áp lực cao để siết chặt van khóa dầu thủy lực bị rò rỉ.
+
+Khi vách gầm trạm dịch chuyển nhẹ phát ra tiếng rít kim loại ghê rợn báo hiệu nguy cơ sập đè, [Grant] không bò ra ngoài thoát thân mà kiên quyết dùng búa cơ học đóng nốt nêm chêm thép định vị cuối cùng dưới chân bệ nâng.
+
+[Aiden], sau khi trở vào nhà với bả vai bị bầm tím do va đập dưới gầm trạm, lập tức dùng keo bít silicone nóng để tự vá lại lớp đệm cao su của vách greenhouse bằng tay, tỉ mẩn bôi từng vệt keo chịu lực dưới ánh đèn pin yếu ớt để cứu lứa cây mầm.
+
+Trailer beats
+
+Scene 1: Sợi dây dọi tự chế treo lơ lửng giữa greenhouse đang từ từ lệch khỏi tâm vạch vẽ trên sàn thép, nhịp lắc của nó báo hiệu toàn bộ cấu trúc trạm đang nghiêng đi một cách không thể đảo ngược dưới ánh hoàng hôn đỏ rực.
+
+Scene 2: [Grant] nằm ngửa dưới gầm trạm tối tăm, chật hẹp. Đèn pin trên mũ bảo hiểm rọi lên những giọt dầu thủy lực màu đỏ sẫm đang nhỏ giọt như máu từ một xi-lanh nâng khổng lồ bị rạn nứt cơ học.
+
+Scene 3: Một luồng khí áp suất cao xì ra từ vết rách vách ngoài greenhouse, cuốn theo những hạt regolith mịn bay vút lên bầu khí quyển mỏng, lấp lánh như sương muối dưới ánh nắng nhạt nhòa của Sao Hỏa.
+
+Act 1 — Fragile Routine + Mission Goal
+
+Interior (Hab): [Aiden] đứng trong greenhouse, căng thẳng nhìn sợi dây dọi tự chế treo lơ lửng lệch hẳn khỏi tâm vạch định vị trên nền thép. Trạm đã nghiêng tới mức $1.5^\circ$. Đồng thời, áp suất của phòng greenhouse bắt đầu tụt giảm âm thầm. Nếu không tiến hành kích nâng cân bằng lại móng trạm và bít kín các vết nứt cấu trúc ngay lập tức, toàn bộ lứa khoai tây thử nghiệm sẽ chết ngạt do mất áp và Hab sẽ bị biến dạng cơ học vĩnh viễn.
+
+Mission: [Aiden] chuẩn bị bộ kích nâng cơ-thủy lực cầm tay, xà beng chịu lực nặng và các bình keo bít elastomer chịu nhiệt độ cực lạnh. Anh thực hiện EVA xuống khu vực gầm móng trạm (exterior repair zone) để gia cố chân đế nâng cơ học.
+
+Anomaly: Khi kiểm tra vách ngoài của greenhouse bằng cảm biến quang phổ khí cầm tay để tìm vết rò, [Grant] phát hiện thiết bị không hiển thị dòng khí $O_2$ đơn thuần mà liên tục nhảy chỉ số cảnh báo sự xuất hiện của đồng vị Helium-3 ($^3\text{He}$) thoát ra ngay sát nền đất đá nứt rạn cạnh chân Hab.
+
+Act 2 — Outside Investigation + Escalation
+
+Exterior (Exterior Repair Zone): [Grant] bò rạp dưới gầm trạm tối tăm, chật hẹp và ngập tràn cát bụi. Tiếng rít của kết cấu kim loại chịu lực quá tải rợn người truyền qua xương sọ. Gió ngoài bề mặt giật mạnh, cuốn theo những mảnh đá vụn từ bãi va chạm thiên thạch va đập vào vách ngoài greenhouse phát ra tiếng cộc cộc liên tục.
+
+Deeper Discovery: Khi [Grant] quét hồng ngoại nhiệt để tìm vị trí rò rỉ khí ấm của greenhouse, anh phát hiện ra vết nứt không nằm ở vách kính mà nằm ở vòng đệm cao su polymer liên kết giữa chân đế Hab và nền đá. Từ khe nứt đá basalt ngay bên dưới, một dòng khí lạnh vô hình chứa Helium-3 đậm đặc đang phun ngược lên, bị lực hút Venturi từ vết rách greenhouse hút thẳng vào trong vòng lặp cảm biến của trạm. Anh nhận ra toàn bộ Hab đang nằm ngay trên một vết đứt gãy địa chất hoạt động như một ống khói dẫn khí phóng xạ từ lò phản ứng đang meltdown sâu bên dưới lòng đất dâng lên.
+
+Escalation: Một chiếc xi-lanh kích thủy lực nâng móng trạm bất ngờ bị nổ gioăng áp suất do cát bụi xâm nhập, dầu đỏ phun ra xối xả dưới gầm trạm. Cấu trúc Hab đột ngột sụt xuống thêm $0.05^\circ$, phát ra tiếng kim loại bị xé rách chói tai. Toàn bộ trọng lượng hàng chục tấn của trạm bắt đầu đè nghiêng về phía [Grant], đe dọa nghiền nát anh dưới gầm thép chật hẹp, đồng thời vết rách đệm vách greenhouse bị kéo giãn rộng hơn khiến áp suất sụt giảm nhanh gấp ba lần.
+
+Act 3 — Crisis + Decision + Aftermath
+
+Climax: Áp suất greenhouse tụt giảm chạm mức nguy hiểm. Kim đồng hồ đo áp cơ học dưới gầm trạm rung lắc dữ dội. Xi-lanh nâng chính đang sụp đổ dần và bộ suit của [Grant] bị kẹt chốt vai vào một dầm thép chịu lực gỉ sét do rung lắc cơ học đột ngột. Chỉ còn chưa đầy 5 phút trước khi cấu trúc Hab sụp nghiêng vĩnh viễn làm nứt toác toàn bộ vách ngăn greenhouse và nghiền nát [Grant].
+
+Climax decision: [Grant] phải đưa ra quyết định sinh tử: Hoặc dùng dao cắt đứt đai bảo hiểm vai của bộ suit để thoát thân bò ra ngoài gầm trạm, chấp nhận từ bỏ việc cứu móng trạm và để mặc cho greenhouse mất áp hoàn toàn (tiêu hủy lứa thực vật); hoặc chấp nhận mạo hiểm tính mạng nằm ngửa dưới gầm trạm đang sụt xuống, dùng cả hai chân đạp chặt làm điểm tựa và dùng tay trái nâng chiếc kích cơ học dự phòng nặng 40 kg để chêm định vị thủ công vào bệ khóa gầm, gánh chịu tải trọng tĩnh cực lớn có thể làm gãy nát xương tay và chân nếu kích trượt bệ.
+
+Aftermath: [Grant] chọn ở lại quỳ rạp dưới gầm trạm và kích cơ học thành công bệ định vị khóa an toàn. Chấn động dừng lại ở độ nghiêng $1.55^\circ$. Anh dùng keo bít silicone nóng khẩn cấp để vá tạm vết rách vách ngoài greenhouse trước khi lết trở lại airlock trong tình trạng kiệt sức hoàn toàn, cơ đùi và bả vai trái bị chấn thương phần mềm nghiêm trọng do lực ép cơ học dưới gầm thép.
+
+Aftermath & Cliffhanger: Áp suất greenhouse được khôi phục và ổn định trở lại, lứa cây mầm nông nghiệp được cứu sống tạm thời. [Aiden] ngồi co rúm trên sàn lab mờ tối, tự băng bó bả vai trái bầm tím bằng gạc y tế. Tuy nhiên, khi anh mở bảng phân tích quang phổ khí ổn định từ cảm biến greenhouse, anh sững sờ: nồng độ Helium-3 trong khí thở của trạm đã tăng lên mức $0.02\%$ và chưa có dấu hiệu dừng lại. Điều này xác nhận một sự thật đáng sợ hơn: vết rách tuy đã được vá bên ngoài, nhưng lượng khí Helium-3 phóng xạ độc hại đã xâm nhập sâu vào hệ thống lọc khí tuần hoàn trung tâm của Hab. Trạm sinh tồn của anh giờ đây không chỉ đang nghiêng đi trên nền đất yếu, mà nó đã biến thành một "buồng ngạt phóng xạ" vô hình đang từ từ tích tụ độc tính ngay bên trong từng nhịp thở của anh.
+
+Hook 1
+
+Sợi dây dọi tự chế treo lơ lửng giữa greenhouse từ từ lệch ra khỏi vạch vẽ chuẩn trên sàn thép, một biểu tượng thị giác đơn giản nhưng đầy ám ảnh về sự sụp đổ chậm rãi của ngôi nhà duy nhất trên hành tinh đỏ.
+
+Hook 2
+
+Tiếng dầu thủy lực phun xè xè dưới áp lực cực cao dưới gầm trạm tối tăm, phản chiếu ánh sáng đỏ mờ từ đèn mũ bảo hiểm của nhân vật giống như những tia máu phun ra từ vết thương của một con quái vật cơ khí khổng lồ.
+
+Hook 3
+
+Quyết định dùng chính cơ thể và chiếc kích cơ học thủ công để chống đỡ cấu trúc trạm đang sụp lún, đặt cược tính mạng dưới gầm thép chật hẹp để bảo vệ tương lai sinh học của loài người.
+
+Hook 4
+
+Sự trớ trêu tột cùng khi cứu được trạm khỏi sụp đổ vật lý nhưng lại vô tình biến hệ thống lọc khí thở tuần hoàn thành một buồng tích tụ khí phóng xạ Helium-3 không thể đào thải.
+
+Climax decision
+
+Chấp nhận nằm ngửa dưới gầm trạm đang sụt lún chật hẹp, chịu đựng nguy cơ bị nghiền nát và chấn thương cơ học cực nặng để chêm kích cơ học khóa cứng bệ móng trạm, cứu lấy greenhouse và toàn bộ hệ sinh tồn của Hab thay vì bỏ chạy thoát thân.
+
+Ending image
+
+[Aiden] ngồi tựa đầu vào vách kính mờ của greenhouse interior, nhắm nghiền mắt thở dốc dưới ánh đèn LED tím yếu ớt. Ở góc phòng, sợi dây dọi dầm thép vẫn treo lệch một góc $1.55^\circ$ tĩnh lặng, câm nín. Trên màn hình điều khiển bên cạnh, biểu tượng cảnh báo nồng độ Helium-3 màu vàng đen bắt đầu nhấp nháy một chu kỳ tăng dần đều đặn, âm thầm cảnh báo từng hơi thở của anh giờ đây đã mang độc tính vô hình của lò phản ứng hạt nhân tan chảy dưới sâu.
+
+Why this episode feels different
+
+Tập phim này đưa vào yếu tố khủng hoảng địa chất cơ học (structural tilting) kết hợp với hiểm họa rò rỉ khí hiếm phóng xạ âm thầm. Nó biến gầm trạm chật hẹp, tối tăm thành một bối cảnh ngột ngạt cực độ, thách thức nhân vật về mặt vật lý thủ công nặng nhọc và buộc người xem phải đối mặt với một nghịch lý sinh tồn mới: khi ngôi nhà an toàn duy nhất nay đã bị nhiễm độc từ chính nền móng của nó.
+
+Conversion notes
+
+Hình ảnh: Tận dụng tối đa không gian chật hẹp, tối tăm dưới gầm trạm với những tia sáng quét hẹp từ đèn mũ bảo hiểm, tương phản với ánh sáng tím/hồng ấm áp nhưng mờ mịt sương mù áp suất của greenhouse interior.
+
+Âm thanh: Tiếng kim loại bị uốn cong biến dạng dội âm nặng nề, tiếng xè xè của áp suất khí thoát ra kẽ đệm polymer, tiếng thở dốc nghẹn ngào, ho khan của nhân vật khi hít phải lượng khí độc Helium-3 tích tụ dưới gầm trạm.

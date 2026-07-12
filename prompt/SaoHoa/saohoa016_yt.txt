@@ -1,0 +1,125 @@
+Episode Title (EN)
+
+The Resonant Peak
+
+One-sentence logline (VI)
+
+Khi cố gắng lắp đặt tháp viễn thông trên đỉnh núi đá basalt để kết nối mạng lưới thuộc địa tương lai, một kỹ sư cô độc phải đối đầu với hiện tượng cộng hưởng cơ - điện từ cực đoan khiến cột ăng-ten rung lắc dữ dội và phóng ra những dải lửa corona xanh lam có thể phá hủy hoàn toàn bộ đồ EVA.
+
+Core mission for future human habitat
+
+Thiết lập hệ thống chuyển tiếp thông tin liên lạc tầm cao (communications relay for future colony network) trên đỉnh địa hình nhằm đồng bộ hóa dữ liệu định vị khí tượng giữa Hab, mạng lưới vệ tinh quỹ đạo và các đoàn tàu đổ bộ của nhân loại trong tương lai.
+
+Character state clarity
+
+[Aiden] khi ở trong: Lab interior mờ tối đầy màn hình nhiễu, Airlock interior bám đầy bụi đen, và Sleeping bay chật hẹp chứa thiết bị mã hóa tín hiệu.
+
+[Grant] khi ở ngoài: Sườn dốc đá basalt thẳng đứng (exposed ridge), đỉnh tháp đá cô độc lộng gió, và khu vực neo cáp ngoài trời.
+
+Xác nhận: Chỉ có một con người duy nhất, không có đồng đội, không có robot phản hồi cảm xúc.
+
+Primary anomaly / discovery
+
+Khi [Grant] vừa đóng điện thử nghiệm bộ phát sóng vi ba dải tần cao trên đỉnh cột đá basalt, toàn bộ cột ăng-ten bằng hợp kim titan bắt đầu phát ra tiếng rít cơ học chói tai rồi rung bần bật với biên độ tăng dần dù không hề có gió mạnh. Đồng thời, một luồng ánh sáng tĩnh điện màu xanh lục-lam nhạt (hiện tượng lửa Saint Elmo) bắt đầu bao phủ lấy đỉnh tháp và các khớp nối kim loại trên bộ đồ EVA của anh, phát ra tiếng nổ lép bép liên tục.
+
+Hidden rational cause
+
+Đỉnh núi đá vốn là một mạch đá dyke basalt cổ chứa hàm lượng magnetite ($Fe_3O_4$) và pyrrhotite (quặng sắt từ sulfua) cực cao, tạo nên một từ trường cục bộ cực mạnh. Tần số phát sóng vi ba ($GHz$) của bộ chuyển tiếp vô tình trùng khớp với tần số cộng hưởng điện môi của cấu trúc khoáng vật học của đỉnh núi. Hiện tượng co thắt điện (electrostriction) đã biến toàn bộ đỉnh tháp đá thành một máy phát siêu âm cơ học khổng lồ, tạo ra dao động hạ âm ($18\text{ Hz}$) làm rung chuyển nền đất đá nứt rạn và kích hoạt sự ion hóa khí quyển carbon dioxide ($CO_2$) mỏng manh của Sao Hỏa dưới điện trường cực mạnh.
+
+Meteor / impact role
+
+Source of mystery & Climax hazard – Một mảnh thiên thạch sắt-niken (M-type) khổng lồ rơi xuống đỉnh núi từ hàng vạn năm trước đã bị chôn vùi ngay dưới chân cột đá. Mảnh thiên thạch này hoạt động như một lõi nam châm cực đại, khuếch đại dòng từ thông và làm cho hiện tượng cộng hưởng cơ-điện từ xảy ra mạnh hơn gấp hàng chục lần so với tính toán lý thuyết của Hab.
+
+Hazard stack
+
+Cộng hưởng hạ âm phá hủy mô cơ thể: Tần số dao động $18\text{ Hz}$ của tháp đá truyền thẳng vào cơ thể [Grant] qua đế giày, gây ra hiện tượng rung giật nhãn cầu (mất tiêu cự mắt), buồn nôn dữ dội và đe dọa làm tổn thương các cơ quan nội tạng.
+
+Hủy hoại hệ thống điện tử của bộ đồ bảo hộ: Các tia phóng điện corona (St. Elmo's fire) liên tục đánh vào các cảm biến áp suất và van xả oxy trên vai của [Grant], đe dọa làm đoản mạch máy tính sinh tồn của bộ suit.
+
+Nguy cơ rơi ngã từ độ cao 300 mét (exposed ridge): Sự rung lắc dữ dội của nền đá basalt khiến các chốt neo cáp an toàn của [Grant] bị lỏng dần, trong khi gió đêm bắt đầu giật mạnh dọc theo sườn dốc đứng trơn trượt.
+
+Sự cố vòng lặp oxy của Hab: Sự mất đồng bộ tín hiệu từ tháp truyền thông khiến hệ thống điều khiển tự động của Hab bị lỗi đồng bộ, kích hoạt chu kỳ khởi động lại liên tục của máy lọc carbon dioxide trong nhà, đe dọa làm [Aiden] ngạt thở nếu không khắc phục kịp thời.
+
+Solitude proof beats
+
+[Aiden] ngồi im lặng trong góc tối của sleeping bay, bật một đoạn băng ghi âm tiếng mưa rơi trên mái tôn ở Trái Đất—âm thanh mà anh đã nghe đi nghe lại hàng nghìn lần đến mức thuộc lòng từng nhịp điệu—để lấp đầy khoảng không câm lặng đến đáng sợ của Hab.
+
+[Grant] đứng một mình trên đỉnh cột đá basalt hẹp chưa đầy 2 mét vuông, xung quanh là vực sâu hun hút và đường chân trời Sao Hỏa cong cong, xa xăm dưới bầu trời đen kịt không một bóng mây, cảm nhận sâu sắc sự nhỏ bé vô vọng của mình.
+
+[Aiden] quay lại airlock interior dính đầy bụi, tự dùng một miếng bọt biển ẩm để lau đi những vết muối xám bám trên cổ áo bộ suit, lặng lẽ nhìn cái bóng của chính mình phản chiếu trên tấm thép mạ chrome lạnh lẽo của vách tường.
+
+Resilience proof beats
+
+Dù đầu óc quay cuồng và mắt bị mờ đi vì dao động hạ âm cực mạnh truyền qua cơ thể, [Grant] vẫn nghiến răng, dùng hai tay bấu chặt lấy thân tháp ăng-ten, kiên trì dùng cờ-lê phi từ tính để siết chặt đai ốc giảm chấn.
+
+Khi một cú phóng điện corona làm cháy đen một mảng lớp bọc bảo vệ trên vai phải và gây giật điện tê dại cánh tay, [Grant] không buông tay mà nhanh chóng dùng tay trái còn lại để gài sợi cáp tiếp đất dự phòng vào khe nứt của đá basalt.
+
+[Aiden] sau khi lết trở về Hab, dù toàn thân run rẩy và nôn mửa do di chứng của hạ âm, vẫn không đi nằm mà bò rạp dưới sàn cabin điều khiển để đấu nối thủ công các dây cáp analog, bỏ qua máy tính bị lỗi để khôi phục hệ thống tuần hoàn khí thở bằng tay.
+
+Trailer beats
+
+Scene 1: Một góc nhìn từ dưới thung lũng sâu hướng lên một cột đá basalt dựng đứng đen thẫm, cô độc xé toạc bầu trời chiều Sao Hỏa. Đỉnh tháp đá lấp lánh những vệt sáng xanh violet mờ ảo như một ngọn hải đăng ma quái.
+
+Scene 2: Trong lab interior mờ tối, [Aiden] áp hai tay vào tai, khuôn mặt nhăn nhó đau đớn khi những chiếc cốc thủy tinh trên bàn thí nghiệm bắt đầu tự dịch chuyển và va vào nhau tạo ra những tiếng kêu lách cách đều đặn.
+
+Scene 3: Trên đỉnh cột đá lộng gió, [Grant] đang leo lơ lửng trên thân tháp kim loại. Những luồng sét corona xanh lét phóng ra từ các đầu ngón tay găng tay của anh, chiếu sáng rõ nét khuôn mặt đầy mồ hôi sau lớp kính bảo hộ đang bị rung giật liên tục.
+
+Act 1 — Fragile Routine + Mission Goal
+
+Interior (Hab): [Aiden] đang theo dõi dữ liệu khí tượng từ vệ tinh. Một đợt bão bụi quy mô lớn đang hình thành ở bán cầu nam và sẽ quét qua khu vực của Hab trong vài ngày tới. Để duy trì liên lạc và nhận dữ liệu điều hướng khẩn cấp cho hệ thống pin mặt trời, trạm viễn thông trên đỉnh tháp đá (communications relay for future colony network) bắt buộc phải hoạt động ngay lập tức. Nếu không, Hab sẽ hoàn toàn bị cô lập và mù thông tin trong bão bụi.
+
+Mission: [Aiden] chuẩn bị bộ phát sóng dải tần cao, các cuộn cáp treo thép và bộ dụng cụ phi từ tính chịu lực. Anh thực hiện EVA để di chuyển lên sườn núi đá dốc đứng (exposed ridge) nhằm lắp đặt transponder trên đỉnh cột đá cao nhất thung lũng.
+
+Anomaly: Khi [Grant] vừa kết nối nguồn điện từ Hab lên đỉnh tháp, tháp ăng-ten không phát tín hiệu ổn định mà bắt đầu phát ra âm thanh trầm u u như tiếng động cơ phản lực chạy không tải, mặt đất dưới chân anh bắt đầu truyền lên những nhịp rung giật cơ học đều đặn.
+
+Act 2 — Outside Investigation + Escalation
+
+Exterior (Exposed Ridge): [Grant] leo lên đỉnh cột đá dưới ánh hoàng hôn mờ tối. Gió rít qua các khe đá basalt kêu u u. Khi anh chạm tay vào thân tháp vô tuyến, một cú giật điện tĩnh mạnh bắn ra, kèm theo đó là lớp sương bụi mịn regolith xung quanh bắt đầu tự dựng đứng lên rồi bay lơ lửng xung quanh tháp như bị hút bởi một lực vô hình.
+
+Deeper Discovery: Thiết bị đo trường điện từ cầm tay của anh bị quá tải hoàn toàn. Nhìn xuống chân cột đá, anh phát hiện một vỉa quặng kim loại lấp lánh màu xám bạc bị lộ ra do chấn động rung lắc làm sụt lở lớp bụi phủ—đó là một mảnh thiên thạch sắt cực lớn nằm kẹt giữa cấu trúc đá basalt giàu từ tính. Sóng vi ba phát ra từ ăng-ten đã kích hoạt một phản ứng cộng hưởng cơ - điện từ cực đoan giữa tháp vô tuyến và vỉa quặng ngầm.
+
+Escalation: Dao động cơ học đạt đến tần số $18\text{ Hz}$ khiến mắt của [Grant] bị rung giật nhãn cầu, anh không thể lấy nét tầm nhìn để thao tác kỹ thuật. Các luồng điện corona xanh lam bắt đầu phóng dày đặc từ đỉnh tháp vào vỏ bộ đồ EVA của anh, gây ra hiện tượng quá nhiệt cục bộ trên lớp sợi carbon bảo vệ. Cáp an toàn của anh bị lực rung giật mạnh làm tuột dần khỏi mấu neo đá.
+
+Act 3 — Crisis + Decision + Aftermath
+
+Climax: Hệ thống sinh tồn của Hab báo động đỏ: Máy tính kiểm tra vòng tuần hoàn khí của [Aiden] bị mất đồng bộ dữ liệu với vệ tinh, liên tục tự khởi động lại và ngừng cấp oxy vào greenhouse. Chỉ còn 10 phút trước khi lứa cây trồng bị ngạt khí và hệ thống sưởi bị ngắt hoàn toàn. Tháp viễn thông đang rung lắc đến mức sắp gãy gập làm đôi do cộng hưởng cơ học.
+
+Climax decision: [Grant] phải đưa ra quyết định sinh tử: Hoặc ngắt nguồn điện chính để dập tắt dòng cộng hưởng bảo toàn mạng sống và leo xuống, chấp nhận làm sập hệ thống sinh tồn của Hab và mất liên lạc vĩnh viễn với quỹ đạo; hoặc chấp nhận leo lên đỉnh tháp đang rung lắc dữ dội giữa các tia phóng điện corona, dùng một thanh đồng tiếp địa thủ công đóng trực tiếp vào mạch thiên thạch sắt để xả toàn bộ điện tích tích tụ của đỉnh núi xả xuống lòng đất sâu. Hành động này sẽ tạo ra một cú phóng điện cực đại chạy thẳng qua vỏ bộ đồ EVA, có thể phá hủy hoàn toàn bộ pin sưởi ấm của suit giữa đêm lạnh $-90^\circ\text{C}$.
+
+Aftermath: [Grant] quyết định leo lên và đóng thanh tiếp địa. Một luồng chớp sáng xanh lục khổng lồ bùng lên, soi sáng toàn bộ đỉnh núi đá. Tháp vô tuyến lập tức dừng rung lắc, tiếng u u biến mất hoàn toàn. Nhưng bộ pin sưởi của bộ đồ EVA bị nổ cầu chì bảo vệ, hệ thống sưởi ấm trong bộ suit của anh tắt ngấm. [Grant] phải lết trở về airlock trong tình trạng cơ thể lạnh cóng, các ngón tay tê dại không còn cảm giác dưới cái lạnh thấu xương của đêm Sao Hỏa.
+
+Aftermath & Cliffhanger: Hệ thống sinh tồn của Hab được đồng bộ hóa trở lại và hoạt động ổn định, lứa thực vật được cứu sống. [Aiden] ngồi co rúm bên cạnh máy sưởi trong phòng bảo dưỡng, dùng chăn giữ nhiệt quấn chặt quanh người để chống chọi với cơn sốt do hạ thân nhiệt đột ngột. Tuy nhiên, khi anh mở bảng phân tích dữ liệu vô tuyến sạch thu được sau khi lắp đặt thành công trạm viễn thông, anh sững sờ phát hiện ra một tín hiệu sub-carrier cực kỳ yếu, được mã hóa tự động theo chu kỳ lặp lại, đang phát ra từ sâu bên dưới mạch thiên thạch sắt của đỉnh núi—một tín hiệu mang chuỗi ký tự định danh định vị cũ của Trái Đất nhưng chưa từng có trong lịch sử công bố của bất kỳ cơ quan hàng không vũ trụ nào.
+
+Hook 1
+
+Hiện tượng lửa Saint Elmo (corona discharge) màu xanh lam nhạt bao phủ lấy toàn bộ đỉnh tháp đá và các khớp ngón tay bọc kim loại của nhân vật, nhảy múa ma mị trong đêm tối lạnh lẽo của hành tinh đỏ.
+
+Hook 2
+
+Sự nguy hiểm tột cùng của tần số hạ âm $18\text{ Hz}$ truyền qua cơ thể, không thể nghe thấy bằng tai nhưng làm rung động nhãn cầu và các cơ quan nội tạng của nhân vật, tạo ra nỗi sợ hãi sinh học vô hình.
+
+Hook 3
+
+Quyết định dùng chính bộ đồ EVA làm vật dẫn dòng điện tĩnh khổng lồ để đóng cọc tiếp địa cứu lấy hệ thống viễn thông cốt lõi của trạm tương lai.
+
+Hook 4
+
+Bí ẩn về một tín hiệu kỹ thuật số cổ xưa, được mã hóa tinh vi phát ra từ lòng đất sâu ngay dưới đỉnh núi đá, mở ra giả thuyết về một sứ mệnh tuyệt mật bị chôn vùi từ lâu trước khi Hab được thành lập.
+
+Climax decision
+
+Chấp nhận dùng thanh đồng tiếp địa đóng vào lõi thiên thạch để xả dòng điện tích tụ, chấp nhận chịu cú phóng điện cực mạnh làm nổ tung hệ thống sưởi ấm của bộ đồ EVA và đối mặt với nguy cơ đóng băng đến chết trên đường lết trở về Hab, nhằm cứu lấy trạm viễn thông và hệ sinh tồn của trạm.
+
+Ending image
+
+[Aiden] ngồi cuộn tròn trong chiếc chăn giữ nhiệt bằng bạc phản quang dưới ánh đèn đỏ mờ của phòng ngủ, đôi mắt mệt mỏi nhìn màn hình hiển thị chuỗi tín hiệu nhấp nháy liên tục từ lòng đất sâu. Ngoài kia, tháp viễn thông đứng im lìm, sừng sững trên đỉnh cột đá basalt đen thẫm, kiên định truyền những dòng dữ liệu của loài người vào khoảng không vũ trụ vô tận.
+
+Why this episode feels different
+
+Tập phim này đưa vào yếu tố nguy hiểm cơ học tần số thấp (hạ âm) kết hợp với hiện tượng tĩnh điện khí quyển thực tế của Sao Hỏa. Nó không chỉ thách thức nhân vật về mặt thể chất mà còn tạo ra sự căng thẳng về mặt giác quan (mất tiêu cự tầm nhìn do rung giật nhãn cầu), đồng thời gieo rắc một bí ẩn lịch sử sâu sắc hơn về sự hiện diện của con người trước đây trên hành tinh này.
+
+Conversion notes
+
+Hình ảnh: Tận dụng tối đa sự tương phản giữa bóng tối sâu thẳm của vực thẳm thung lũng, sắc đen của đá basalt, ánh sáng xanh violet nhấp nháy của hiện tượng phóng điện corona, và ánh chớp cực mạnh lúc xả tĩnh điện.
+
+Âm thanh: Tiếng u u trầm ấm áp của tần số hạ âm dội qua micro của mũ bảo hiểm, tiếng nổ lép bép gắt của tĩnh điện, tiếng thở dốc run rẩy, răng đập vào nhau lập cập của nhân vật khi bộ đồ bị mất hệ thống sưởi ấm hoàn toàn trong đêm lạnh.

@@ -1,0 +1,125 @@
+Episode Title (EN)
+
+The Siphon Vent
+
+One-sentence logline (VI)
+
+Trong nỗ lực cứu vãn lớp màng bảo vệ của module Hab mở rộng trước một trận mưa thiên thạch dữ dội sắp đổ bộ, một kỹ sư cô độc vô tình kích hoạt sự sụt áp kinh hoàng khi một hố sụt mới xuất hiện bên vách trạm mở ra một họng hút chân không cổ xưa rỉ ra từ cơ sở ngầm, đe dọa hút cạn toàn bộ khí thở của trạm vào lòng đất.
+
+Core mission for future human habitat
+
+Triển khai tấm chắn bảo vệ và kiểm tra độ kín kết cấu của các module mở rộng (meteor shielding test / structural seal verification after impact event) nhằm chuẩn bị phòng ngự trước dải va chạm thiên thạch quỹ đạo sắp quét qua, bảo vệ toàn vẹn không gian sống của Hab.
+
+Character state clarity
+
+[Aiden] khi ở trong: Airlock interior mờ tối, Lab địa chất ẩm ướt hơi lạnh, Sleeping bay bám đầy bụi đỏ, và hành lang kỹ thuật hẹp của module mở rộng.
+
+[Grant] khi ở ngoài: Bề mặt bên ngoài vách module mở rộng (outside greenhouse shell), hố va chạm mới (meteor impact field), rìa họng hút tối tăm nứt toác ngoài bề mặt.
+
+Xác nhận: Chỉ có một con người duy nhất, không có đồng đội, không có robot phản hồi cảm xúc.
+
+Primary anomaly / discovery
+
+Khi [Grant] đang đóng neo định vị cho lớp giáp che chắn thiên thạch, một chấn động nhỏ làm nứt toác nền regolith ngay cạnh vách module. Thay vì phun khí nóng hay bụi ra ngoài, khe nứt này lại hoạt động như một họng hút (siphon) khổng lồ, tạo ra một luồng gió hút cực mạnh hút ngược cát bụi và khí thở từ các vết rách rò rỉ của module mở rộng xuống lòng đất sâu với áp lực âm cực lớn.
+
+Hidden rational cause
+
+Họng hút này thực chất là một đường ống thông khí áp lực lớn của cơ sở hạt nhân ngầm 60 tuổi dưới lòng đất. Khi lò phản ứng ngầm bị rò rỉ nhiệt và sụp lún ở các tập trước, nó đã tạo ra một buồng chứa trống rỗng có nhiệt độ cực cao đã nguội đi đột ngột sau khi thăng hoa hết khí, tạo nên một vùng chân không áp suất âm cực thấp ($< 1\text{ mbar}$). Vụ va chạm thiên thạch nhỏ làm nứt vỡ lớp đá basalt ngăn cách, khiến áp suất khí quyển mỏng của Sao Hỏa ($6\text{ mbar}$) và khí thở trong Hab ($1000\text{ mbar}$) bị hút dồn dập xuống hầm ngầm này để cân bằng áp suất.
+
+Meteor / impact role
+
+Inciting incident & External timer - Một mảnh thiên thạch tiên phong đâm trúng rìa ngoài của module mở rộng, làm nứt vỡ vách đá basalt nền và để lộ họng thông khí ngầm áp suất âm, đồng thời tạo ra thời gian đếm ngược (timer) khi dải thiên thạch chính sẽ đổ bộ trong vòng 45 phút tiếp theo.
+
+Hazard stack
+
+Sụt áp suất Hab cực nhanh: Áp lực hút từ họng thông khí ngầm kéo giãn vết rách trên vách polymer của module mở rộng, đe dọa hút sạch $100\%$ dưỡng khí của Hab trong 15 phút.
+
+Lực hút cơ học nguy hiểm: Sức hút cực lớn từ họng Siphon kéo giật [Grant] sát về phía khe nứt, đe dọa xé rách suit bảo hộ hoặc nuốt chửng anh xuống hố sâu tối tăm không có đáy.
+
+Tầm nhìn mù bụi: Luồng gió hút cuộn tròn tạo ra một lốc xoáy bụi regolith mịn ngược chiều, bám dày đặc vào mặt kính mũ bảo hiểm của [Grant] và che khuất hoàn toàn ánh sáng đèn pha.
+
+Nghẽn van xả khẩn cấp của suit: Bụi mịn bị hút ngược bít chặt van điều áp thở của bộ đồ EVA của [Grant], đe dọa gây ngạt khí $CO_2$ cục bộ ngay trong suit.
+
+Solitude proof beats
+
+[Aiden] đứng một mình trong hành lang kỹ thuật hẹp, dùng một tấm bìa nhựa mỏng tự áp chặt vào vách ngăn để cảm nhận lực hút chân không đang kéo rít qua kẽ hở bằng xúc giác run rẩy của mình, trong sự im lặng câm nín của cả trạm.
+
+[Grant] bò rạp trên bề mặt bụi đỏ lộng gió, một mình bám vào những móc khóa kim loại cũ gỉ sét để chống chọi với sức hút của họng đất ngầm, bóng anh đơn độc in lên dải hoàng hôn tím ngắt đang nhạt dần.
+
+[Aiden] trở về Hab, ngồi bệt dưới sàn sắt, tự dùng tay xoa bóp khớp vai bị sái do sức kéo giật của họng hút, lặng lẽ nhìn bảng đồng hồ đếm ngược oxy nhấp nháy màu vàng mờ mịt không có ai chia sẻ.
+
+Resilience proof beats
+
+Dù bả vai trái bị chấn thương sái khớp do bị kéo giật bởi luồng hút chân không, [Grant] vẫn không buông dây cáp, dùng một tay còn lại kiên trì ghì chặt súng bắn đinh cơ học để bắn neo gia cố màng chắn polymer.
+
+Khi van xả $CO_2$ của suit bị bít tắc gây ngạt, [Grant] không hoảng loạn tháo chạy về airlock mà tự dùng đầu gối tì chặt xuống đá để làm điểm tựa, đập mạnh tay vào ngực để giải phóng bụi kẹt trong van thở bằng rung động cơ học.
+
+[Aiden] sau khi vá tạm thời cấu trúc, dù toàn thân run rẩy vì thiếu oxy và sốc chấn thương, vẫn kiên quyết tự bò rạp quanh các khớp nối vách để dán băng keo elastomer chịu áp bằng tay, tỉ mẩn bôi từng lớp keo bít bảo vệ dưới ánh đèn pin sắp cạn pin.
+
+Trailer beats
+
+Scene 1: Góc nhìn từ trên cao của module mở rộng Hab nằm lọt thỏm giữa thung lũng đá đen hoang vu. Những tia chớp thiên thạch xé rách bầu trời màu cam tối của hành tinh đỏ ở phía xa.
+
+Scene 2: Trong hành lang kỹ thuật hẹp, những tấm vách polymer dẻo bỗng co rút và bị hút lõm mạnh về phía ngoài như thể bị một bàn tay vô hình khổng lồ bóp nghẹt.
+
+Scene 3: [Grant] nằm rạp sát mặt đất, hai chân anh bị nhấc bổng lơ lửng khi một luồng gió bụi hình phễu khổng lồ đang hút sầm sập mọi thứ xung quanh vào một khe nứt đen ngóm dưới vách đá.
+
+Act 1 — Fragile Routine + Mission Goal
+
+Interior (Hab): [Aiden] đang kiểm tra các cảm biến khí quyển của phòng thí nghiệm. Hệ thống cảnh báo sớm ghi nhận một dải thiên thạch mật độ cao sắp quét qua quỹ đạo Sao Hỏa và sẽ va chạm trực tiếp với khu vực của Hab trong vòng 45 phút nữa. Để bảo vệ các module mở rộng có vách mỏng, anh buộc phải ra ngoài lắp đặt hệ thống màng giáp bảo vệ cơ học nén bằng regolith (meteor shielding test).
+
+Mission: [Aiden] chuẩn bị súng bắn đinh chịu lực cao, các cuộn màng polymer chống xé rách và bộ dây cáp neo giữ. Anh thực hiện EVA khẩn cấp ra khu vực ngoài vách module mở rộng (outside greenhouse shell).
+
+Anomaly: Khi bắt đầu đóng chiếc đinh neo thứ ba xuống nền đá basalt, mặt đất rung chuyển nhẹ do một vụ va chạm thiên thạch nhỏ gần đó. Ngay lập tức, chiếc đinh neo bị giật phăng khỏi tay anh, bay biến vào một khe nứt đất mới xuất hiện, kèm theo một tiếng rít gió trầm đục kéo dài.
+
+Act 2 — Outside Investigation + Escalation
+
+Exterior (Outside Greenhouse Shell): [Grant] tiếp cận khe nứt đất. Anh kinh ngạc phát hiện ra một họng rỗng có cấu trúc tròn hoàn hảo như miệng ống dẫn rỉ sét đã bị mài mòn bởi thời gian. Một luồng gió áp lực âm cực mạnh đang điên cuồng hút lớp cát bụi xung quanh vào lòng đất.
+
+Deeper Discovery: [Grant] đưa máy đo áp suất cầm tay lại gần khe nứt; thiết bị liên tục báo lỗi do áp suất môi trường tụt giảm nhanh chóng về mức tiệm cận chân không tuyệt đối ($< 1\text{ mbar}$). Lớp đá basalt bị nứt vỡ từ trận va chạm thiên thạch đã mở ra lối dẫn trực tiếp vào hệ thống đường ống thông khí khổng lồ của lò phản ứng ngầm bị bỏ hoang. Lực hút chân không từ khoang ngầm bắt đầu kéo giãn các mối nối màng của module mở rộng Hab bên cạnh, tạo ra các vết nứt chân chim trên vách cách nhiệt.
+
+Escalation: Sức hút của họng Siphon mạnh đến mức kéo giật chân của [Grant] về phía khe nứt. Bả vai trái của anh bị giật sái khớp đau đớn khi cố bám vào dầm thép. Bụi mịn regolith bị hút ngược tạo thành một cơn lốc cục bộ bám chặt lấy mũ bảo hiểm, làm mờ $95\%$ tầm nhìn của anh. Đồng thời, van xả $CO_2$ của bộ đồ EVA bị bụi bít kín, khiến nồng độ khí độc trong mũ bảo hiểm tăng vọt, làm anh bắt đầu choáng váng đầu óc.
+
+Act 3 — Crisis + Decision + Aftermath
+
+Climax: Áp suất trong module mở rộng Hab tụt giảm xuống mức $500\text{ mbar}$ và tiếp tục giảm nhanh. Trận mưa thiên thạch chính bắt đầu đổ bộ, những mảnh văng nhỏ bắt đầu cày xới mặt đất xung quanh. Màng bảo vệ polymer chưa được cố định đang bị gió kéo rách từng mảng. [Grant] chỉ còn 3 phút trước khi ngất xỉu vì ngộ độc khí $CO_2$ và mất áp suất Hab hoàn toàn.
+
+Climax decision: [Grant] phải đưa ra quyết định sinh tử: Hoặc dùng súng bắn đinh cơ học bắn thẳng sợi cáp thép cứu sinh vào vách đá phía xa để kéo mình ra ngoài họng hút và rút lui vào airlock an toàn (chấp nhận để mặc module mở rộng bị hút sụp áp và thiên thạch phá hủy hoàn toàn); hoặc chấp nhận dùng chính thân người (được bọc bởi tấm khiên giáp regolith nặng 50 kg đang mang theo) nằm rạp đè chặt lên miệng họng Siphon để tạm thời bít luồng hút chân không bằng trọng lực vật lý, dùng tay phải còn lại bắn đinh cố định màng chắn màng bảo vệ vách Hab giữa cơn mưa thiên thạch.
+
+Aftermath: [Grant] quyết định dùng tấm khiên regolith và chính cơ thể mình để nằm chặn miệng họng Siphon. Lực hút khổng lồ ép chặt tấm khiên xuống vách ống, tạm thời ngăn dòng sụt áp. Anh chịu đựng những cú va chạm của bụi đá thiên thạch nhỏ bắn vào lưng bộ suit, dùng tay phải hoàn thành việc bắn đinh cố định màng bảo vệ của Hab trước khi lết trở lại airlock trong tình trạng kiệt quệ, bả vai trái sái khớp hoàn toàn và mũ bảo hiểm nứt rạn nhẹ.
+
+Aftermath & Cliffhanger: Module mở rộng được bảo vệ an toàn trước trận mưa thiên thạch, áp suất Hab ổn định trở lại. [Aiden] lết về phòng bảo dưỡng, dùng hệ thống tời cơ học tự kéo nắn lại khớp vai trái trong tiếng thét câm lặng. Tuy nhiên, khi anh phân tích dòng áp suất âm từ họng Siphon vừa bít tạm thời, anh phát hiện ra một sự thật đáng sợ: Buồng chân không khổng lồ dưới sâu kia không chỉ dừng lại ở việc hút khí, mà nó đang co ngót cơ học do sự nguội đi đột ngột của lò phản ứng bị tan chảy. Cả vùng địa chất thung lũng xung quanh Hab đang bị uốn cong hướng tâm và co rút về phía lò phản ứng ngầm — một sự sụp đổ địa tầng quy mô lớn (caldera collapse) sắp sửa xảy ra, đe dọa nuốt chửng toàn bộ cấu trúc Hab xuống lòng đất tối đen trong vòng vài tháng tới.
+
+Hook 1
+
+Hiểm họa của một lực hút chân không áp suất âm ($< 1\text{ mbar}$) vô hình từ lòng đất, đảo ngược mọi thói quen đối phó với sự cố rò rỉ khí áp suất dương thông thường của nhân vật.
+
+Hook 2
+
+Âm thanh gió rít trầm đục, ma mị hút ngược bụi đá rào rào qua các khe nứt, tạo nên tiếng kêu gào cơ học khô khốc dội thẳng qua bộ đồ bảo hộ của nhân vật.
+
+Hook 3
+
+Quyết định dùng chính cơ thể bọc giáp regolith nặng nề nằm đè lên miệng họng Siphon để bít luồng chân không, đặt cược tính mạng giữa cơn mưa thiên thạch đang oanh tạc bề mặt.
+
+Hook 4
+
+Bí ẩn địa chất rợn người khi toàn bộ vùng nền thung lũng của Hab đang tự co rút và uốn cong về phía một lõi sụp lún ngầm khổng lồ, biến cuộc chiến sinh tồn thành một cuộc chạy đua với sự sụp đổ của địa tầng.
+
+Climax decision
+
+Chấp nhận dùng tấm khiên regolith nặng và cơ thể mình nằm đè chặt lên họng hút chân không ngầm để chặn luồng sụt áp khẩn cấp, chịu đựng rủi ro sái khớp vai nặng và các mảnh thiên thạch va đập vào lưng bộ suit để cố định thành công lớp màng bảo vệ Hab.
+
+Ending image
+
+[Aiden] ngồi tựa đầu vào vách kim loại của phòng bảo dưỡng, bả vai trái được cố định bằng nẹp thép tự chế, đôi mắt mệt mỏi nhìn màn hình địa chấn. Trên màn hình, mô hình lưới 3D của thung lũng hiển thị những đường cong uốn lõm sâu về tâm ngầm, nhấp nháy những vệt màu đỏ sẫm báo hiệu địa tầng đang co ngót, lạnh lùng chứng minh rằng mặt đất dưới chân anh đang từ từ sụp đổ vào khoảng không vô tận bên dưới.
+
+Why this episode feels different
+
+Tập phim này đưa vào hiểm họa áp suất âm (chân không) và co ngót địa tầng, tạo nên sự tương phản hoàn hảo với các sự cố quá áp hoặc nổ vỡ của các tập trước. Nó biến mặt đất Sao Hỏa từ một thực thể thù dọa bên ngoài thành một "chiếc phễu" khổng lồ đang từ từ hút cạn và nuốt chửng mọi nỗ lực kiến tạo của con người.
+
+Conversion notes
+
+Hình ảnh: Tông màu chủ đạo là cam tối và xám xịt của lốc xoáy bụi regolith mịn cuộn ngược chiều vào hố sụt, tương phản rực rỡ với ánh chớp sáng trắng của thiên thạch va chạm trên bầu trời tối.
+
+Âm thanh: Tiếng rít gió hút trầm đục, tiếng búa nện rầm rầm của đá văng va chạm vào lưng suit, tiếng thở dốc nghẹn ngào do ngạt $CO_2$ tăng dần, và tiếng "khục" khô khốc của khớp vai được nắn lại bằng tời cơ học.

@@ -1,0 +1,125 @@
+Episode Title (EN)
+
+The Cryogenic Purge
+
+One-sentence logline (VI)
+
+Để thanh lọc lượng khí phóng xạ Helium-3 đang tích tụ trong hệ tuần hoàn của trạm, một kỹ sư cô độc phải kích hoạt thủ công giàn ngưng tụ cực lạnh ngoài trời để hóa lỏng dưỡng khí và tách bỏ Helium khí, nhưng sự cố kẹt van áp lực âm cực hạn đe dọa làm đóng băng vĩnh viễn hệ thống sưởi ấm của bộ suit và phá hủy giàn thanh lọc.
+
+Core mission for future human habitat
+
+Khôi phục hệ thống tách khí hóa lỏng cực lạnh (cryogenic air separation and nitrogen replenishment) để tái cấu trúc và loại bỏ khí hiếm Helium-3 độc hại ra khỏi vòng tuần hoàn khí thở của Hab, bảo vệ lứa cây trồng thử nghiệm nảy mầm trong greenhouse (seed growth / crop survival trial).
+
+Character state clarity
+
+[Aiden] khi ở trong: Buồng máy nén trung tâm lạnh giá, Airlock interior mờ sương, Lab địa chất tối tăm ẩm ướt hơi nước đóng băng.
+
+[Grant] khi ở ngoài: Sàn lắp ráp thiết bị ngưng tụ ngoài trời (solar field exterior), khu vực bệ tản nhiệt cực lớn ngoài bề mặt (exterior repair zone), sườn núi đón gió lạnh.
+
+Xác nhận: Chỉ có một con người duy nhất, không có đồng đội, không có robot phản hồi cảm xúc.
+
+Primary anomaly / discovery
+
+Khi vận hành giàn hóa lỏng cực lạnh ngoài trời ở nhiệt độ cực thấp khoảng $-190^\circ\text{C}$, [Grant] nhận thấy dòng chất lưu không chuyển sang trạng thái lỏng trong suốt của $O_2$ và $N_2$ thông thường, mà xuất hiện một lớp màng chất lỏng siêu nhớt, phát sáng lân quang tím cực nhạt dưới cảm biến quang học, liên tục tự dâng ngược lên thành ống dẫn dù không có bơm đẩy.
+
+Hidden rational cause
+
+Lớp màng chất lỏng kỳ lạ đó thực chất là hỗn hợp Helium-3 đậm đặc kết hợp với tạp chất neon ($Ne$) và argon ($Ar$) có sẵn trong khí quyển mỏng của Sao Hỏa. Khi gặp nhiệt độ lạnh sâu của giàn ngưng tụ kết hợp với bức xạ ion hóa từ rò rỉ ngầm dưới lòng đất, hỗn hợp này bị ion hóa cục bộ, tạo ra hiện tượng dịch chuyển mao dẫn cực nhanh do sức căng bề mặt biến đổi dị thường (hiệu ứng tương tự hiện ứng siêu lưu nhiệt động học nhưng ở áp suất cao). Sự dâng ngược này làm nghẽn hoàn toàn van xả khí Helium-3, biến hệ thống ngưng tụ thành một quả bom áp suất cực lạnh.
+
+Meteor / impact role
+
+Midpoint escalation & Trigger – Chấn động địa chất từ một vụ va chạm vi thiên thạch gần đó làm nứt đường ống dẫn chất làm lạnh helium lỏng ($LHe$) của lò phản ứng dự phòng, khiến chất làm lạnh rò rỉ trực tiếp vào khoang trộn khí của giàn hóa lỏng ngoài trời, đột ngột hạ nhiệt độ giàn ngưng tụ từ $-180^\circ\text{C}$ xuống mức cực hạn $-220^\circ\text{C}$, kích hoạt phản ứng ngưng tụ dị thường và làm kẹt cứng toàn bộ van an toàn.
+
+Hazard stack
+
+Đóng băng hoại tử cực hạn: Nhiệt độ $-220^\circ\text{C}$ từ đường ống rò rỉ truyền trực tiếp qua lớp bảo vệ của găng tay EVA của [Grant] khi anh cố gắng xử lý, đe dọa gây hoại tử mô lạnh sâu trong vài giây.
+
+Quá áp nổ vỡ bình ngưng lỏng: Áp suất bình chứa $N_2/O_2$ lỏng tăng vọt do hiện tượng kẹt van xả khí Helium, đe dọa phát nổ phá hủy toàn bộ giàn năng lượng mặt trời bên cạnh.
+
+Mất áp suất tuần hoàn Hab: Hệ thống xả khí tự động của Hab phải liên tục ngắt vòng lặp để ngăn Helium-3 đi vào greenhouse, khiến nồng độ $CO_2$ trong phòng ngủ của [Aiden] tăng vọt lên mức gây ngộ độc thần kinh.
+
+Mù cảm biến hồng ngoại nhiệt độ cực thấp: Sương mù ni-tơ lạnh giá bao phủ khu vực ngoài trời, làm mất hoàn toàn khả năng đo đạc nhiệt độ bằng camera nhiệt, buộc [Grant] phải thao tác hoàn toàn bằng xúc giác và ước lượng thủ công.
+
+Solitude proof beats
+
+[Aiden] đứng một mình trong buồng máy nén trung tâm mờ sương, tự đeo mặt nạ khí thở khẩn cấp, nghe tiếng nhịp tim và tiếng ho khan của chính mình dội lại qua lớp mặt nạ nhựa cao su lạnh ngắt dính mồ hôi.
+
+[Grant] quỳ rạp trên sàn kim loại ngoài trời lộng gió đêm Sao Hỏa, xung quanh là sương ni-tơ lạnh buốt màu trắng đục che khuất hoàn toàn đường chân trời hoang vu, cô đơn tuyệt đối trong màn sương lạnh giá.
+
+[Aiden] trở về Lab, ngồi bệt dưới góc phòng mờ tối, tự đun một cốc dinh dưỡng sệt bằng chiếc thìa sưởi chạy pin yếu, lặng lẽ nuốt trôi trong khi nhìn vạch hiển thị oxy giảm dần đều đặn trên bức tường thép lạnh lẽo.
+
+Resilience proof beats
+
+Dù hai ngón tay trái bị đông cứng tê dại do chạm phải đường ống rò rỉ cực lạnh, [Grant] vẫn không buông cờ-lê, dùng cả hai tay ghì chặt cơ học để vặn chốt mở van xả khẩn cấp.
+
+Khi bình ngưng phát ra tiếng rít cơ học rung bần bật báo hiệu sắp nổ, [Grant] không bỏ chạy mà quyết định dùng bình chữa cháy $CO_2$ xịt trực tiếp vào chốt van để tạo ra sốc nhiệt ngược, cố gắng làm co giãn kim loại để giải phóng chốt kẹt.
+
+[Aiden] sau khi lết trở về Hab, dù toàn thân run rẩy vì thiếu oxy và chấn thương bỏng lạnh ở tay, vẫn kiên trì bò quanh các ống lọc khí của greenhouse để tự tay kiểm tra từng hạt zeolit lọc, bảo đảm không còn một vết Helium-3 nào sót lại trong đất trồng.
+
+Trailer beats
+
+Scene 1: Góc quay cực rộng nhìn từ sườn núi đón gió lạnh. Màn sương ni-tơ trắng đục cuồn cuộn bốc lên từ một giàn kim loại khổng lồ cô đơn, nuốt chửng dải sáng hoàng hôn lam nhạt của Sao Hỏa.
+
+Scene 2: [Aiden] trong buồng máy nén trung tâm mờ sương, mặt nạ khí thở của anh bám đầy hơi nước ngưng tụ, đôi mắt anh đỏ sọc mệt mỏi nhìn qua lớp kính nhựa mờ đục.
+
+Scene 3: Trên bệ tản nhiệt ngoài trời, [Grant] đang bò rạp, hai tay bấu chặt vào chiếc van lớn phủ đầy sương băng trắng xóa. Một luồng khí áp suất cao xì ra làm bốc lên những hạt băng li ti óng ánh như thủy tinh dưới ánh đèn pin.
+
+Act 1 — Fragile Routine + Mission Goal
+
+Interior (Hab): [Aiden] đứng trong buồng điều khiển trung tâm, hơi thở nghẹn ngào do nồng độ Helium-3 trong khí thở của Hab đã chạm mức $0.05\%$. Để thanh lọc khí thở cứu bản thân và lứa khoai tây mầm trong greenhouse, anh bắt buộc phải khởi động chu trình ngưng tụ cực lạnh ngoài trời (cryogenic air separation) nhằm hóa lỏng không khí trong Hab, giữ Helium-3 ở dạng khí và xả bỏ hoàn toàn ra ngoài vũ trụ.
+
+Mission: [Aiden] chuẩn bị găng tay bảo ôn dày, bình chứa chất làm lạnh và bộ điều áp cơ học. Anh phải thực hiện EVA ra khu vực bệ tản nhiệt ngoài trời (solar field exterior) để nạp khí nén vào giàn hóa lỏng.
+
+Anomaly: Khi giàn nạp ngoài trời hoạt động, cảm biến lưu lượng cho thấy dòng chất lưu lạnh không di chuyển theo chu trình chảy xuống bình gom mà liên tục tự dâng ngược lên theo đường dẫn nạp, dội ngược áp suất cực lạnh về phía Hab.
+
+Act 2 — Outside Investigation + Escalation
+
+Exterior (Solar Field Exterior): [Grant] thực hiện EVA ra khu vực bệ tản nhiệt cực lạnh. Gió đêm rít gào buốt giá dội vào bộ suit bảo hộ. Nhiệt độ xung quanh giàn ngưng xuống tới mức không tưởng $-190^\circ\text{C}$, sương ni-tơ trắng đục bao phủ toàn bộ lối đi.
+
+Deeper Discovery: [Grant] dùng đèn pin rọi vào buồng hóa lỏng cực lạnh và kinh ngạc phát hiện lớp màng chất lỏng tím cực nhạt đang dâng ngược lên thành ống gốm cách điện. Anh nhận ra vụ va chạm vi thiên thạch cũ đã làm nứt đường ống Helium lỏng làm lạnh lò phản ứng ngầm, đẩy nhiệt độ bình ngưng xuống sâu $-220^\circ\text{C}$ và kích hoạt hiệu ứng biến dị sức căng bề mặt của Helium-3 tích tụ, làm kẹt cứng các van xả áp khí.
+
+Escalation: Bình ngưng lỏng bắt đầu rung giật dữ dội, áp suất tăng vọt lên mức giới hạn đỏ. Màng sương ni-tơ rò rỉ bám dày đặc vào mặt kính mũ bảo hiểm của [Grant], đông cứng thành một lớp màng đục mờ che khuất $90\%$ tầm nhìn. Cùng lúc đó, nồng độ $CO_2$ trong Hab vọt lên do hệ thống lọc của trạm tự khởi động lại liên tục để tự bảo vệ.
+
+Act 3 — Crisis + Decision + Aftermath
+
+Climax: Bình ngưng sắp phát nổ trong vòng 3 phút, đe dọa phá hủy vách ngoài của Hab và toàn bộ tấm pin năng lượng mặt trời xung quanh. Bộ đồ của [Grant] bị đóng băng khớp vai trái do rò rỉ hơi lạnh cực hạn. Anh đứng trước quyết định sinh tử: Hoặc ngắt điện giàn ngưng để bảo toàn mạng sống và bò trở lại airlock, chấp nhận để khí Helium-3 tích tụ làm ngạt thở bản thân và giết chết toàn bộ hệ sinh thái của Hab trong đêm; hoặc chấp nhận dùng bàn tay phải (với lớp găng tay mỏng chịu lạnh kém) cầm búa cơ học gõ trực tiếp vào van xả áp bị kẹt ở nhiệt độ $-220^\circ\text{C}$ để xả áp khẩn cấp, đối mặt với nguy cơ khí lạnh phun trực tiếp đóng băng hoại tử hoàn toàn cánh tay của mình.
+
+Climax decision: [Grant] quyết định dùng búa gõ van. Một luồng khí siêu lạnh phun ra cực mạnh xé toạc lớp bọc bảo vệ cổ tay phải của suit. Khớp van được giải phóng, áp suất bình ngưng hạ nhiệt đột ngột, khí Helium-3 phóng xạ được xả sạch ra khí quyển mỏng của Sao Hỏa. Nhưng bàn tay phải của [Grant] bị bỏng lạnh sâu nghiêm trọng, các ngón tay tê dại mất cảm giác hoàn toàn.
+
+Aftermath: [Aiden] lết về đến airlock, tự tháo găng tay trong đau đớn tột cùng, ngâm bàn tay phải bỏng lạnh tím tái vào nước ấm sệt để cứu vãn các mô cơ. Hệ thống khí thở của Hab đã sạch Helium-3, lứa cây mầm nông nghiệp được cứu sống.
+
+Aftermath & Cliffhanger: Khi [Aiden] mở dữ liệu phân tích dải phổ khí Helium-3 vừa được cô lập trước khi xả ra ngoài, anh sững sờ: đồng vị Helium-3 thu được có tỷ lệ phân rã dị thường không thuộc về bất kỳ chu kỳ Tritium quân sự nào của Trái Đất mà anh biết. Nó mang cấu trúc của một loại nhiên liệu phản ứng đã được làm giàu hạt nhân cực kỳ tinh vi, có niên đại phân rã ước tính lên tới hơn 60 năm—nghĩa là lò phản ứng đang tan chảy dưới sâu kia đã hoạt động và meltdown từ trước khi con người chính thức đặt những bước chân đầu tiên lên Sao Hỏa rất lâu.
+
+Hook 1
+
+Hiện tượng sương mù ni-tơ lạnh giá bốc lên trắng xóa ngoài trời đêm Sao Hỏa, đông kết thành các dải băng mờ ma mị phủ kín các tấm pin mặt trời dưới ánh sáng nhạt của các chòm sao xa xăm.
+
+Hook 2
+
+Tiếng rít áp suất cao buốt óc của giàn hóa lỏng cực lạnh, kèm theo âm thanh kim loại co ngót giòn tan do nhiệt độ âm cực hạn đe dọa vỡ toác cấu trúc giàn ngưng.
+
+Hook 3
+
+Quyết định dùng búa cơ học gõ khóa van kẹt ở nhiệt độ $-220^\circ\text{C}$, chấp nhận dòng khí siêu lạnh phun thẳng vào cánh tay để giải cứu toàn bộ hệ tuần hoàn khí thở của Hab.
+
+Hook 4
+
+Bí ẩn lịch sử chấn động về niên đại thực tế của lò phản ứng hạt nhân đang tan chảy, lật đổ mọi giả định trước đó về lịch sử thám hiểm hành tinh đỏ của loài người.
+
+Climax decision
+
+Chấp nhận dùng bàn tay phải thao tác búa gõ mở van xả bị đông cứng ở nhiệt độ âm cực hạn $-220^\circ\text{C}$ bất chấp rủi ro rách suit và bỏng lạnh hoại tử sâu cánh tay do dòng khí siêu lạnh phun trào trực tiếp, nhằm xả sạch Helium-3 cứu sống bản thân và lứa thực vật trong Hab.
+
+Ending image
+
+[Aiden] ngồi tựa đầu vào vách tường Lab mờ tối, ngâm bàn tay phải tím tái đầy vết rộp bỏng lạnh vào bồn nước ấm sệt dính bùn đất sét. Trên màn hình điều hành bên cạnh, dòng phân tích phổ Helium-3 đã biến mất hoàn toàn, trả lại màu xanh an toàn cho hệ thống tuần hoàn khí thở. Nhưng ở góc dưới, dòng chữ hiển thị niên đại phân rã hạt nhân "Decay Age: ~62 Years" nhấp nháy màu vàng sẫm lạnh lùng, âm thầm hé lộ một sự thật lịch sử bị chôn vùi từ lâu.
+
+Why this episode feels different
+
+Tập phim này đưa mối đe dọa sinh học của khí phóng xạ thành hiểm họa nhiệt động học cực hạn (cryogenic hazard). Nó biến không khí lạnh của Sao Hỏa thành một áp lực vật lý có thể cảm nhận trực tiếp qua sự hoại tử tế bào, đồng thời đẩy bí ẩn lịch sử của series từ một giả thuyết âm mưu thành một bằng chứng vật lý không thể chối cãi thông qua đo lường đồng vị phóng xạ.
+
+Conversion notes
+
+Hình ảnh: Tông màu chủ đạo là xanh lam cực lạnh và trắng xóa của sương ni-tơ ngưng tụ, tương phản rực rỡ với ánh sáng lân quang tím nhạt của khí Helium-3 bị kích hoạt điện môi ngoài trời đêm.
+
+Âm thanh: Tiếng gõ kim loại giòn, tiếng rít chói tai của chất lưu cực lạnh thoát khí, tiếng ho khan và thở dốc nặng nề của nhân vật qua mặt nạ khí thở mờ sương ngưng tụ.

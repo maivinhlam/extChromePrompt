@@ -1,0 +1,137 @@
+Dựa vào kịch bản sau, viết cho tôi 225 phân cảnh, nhưng trước tiên, hãy đưa 75 phân cảnh đầu.
+
+Lưu ý:
+
+- Scene có nhân vật Aiden thì đổi tên thành AidenCharactor.
+
+- Scene có nhân vật Grant thì đổi tên thành GrantCharactor.
+
+- luôn luôn bắt đầu scene bằng chính xác từ: "SaoHoa020-".
+
+- ở sau số thứ tự của scene, thêm dấu ":", ví dụ: "SCENE 001" đổi thành "SCENE 001: "
+
+Episode Title (EN)
+
+The Fracture Grid
+
+One-sentence logline (VI)
+
+Trong nỗ lực khôi phục mạng lưới điện mặt trời đang bị xé toác bởi các đứt gãy địa chất từ sự sụp lún thung lũng, một kỹ sư cô độc phát hiện các tấm pin bị nuốt chửng bởi một khe nứt sâu đang giải phóng một nguồn điện từ trường áp điện cực mạnh từ lòng đất, đe dọa làm đoản mạch và phát nổ toàn bộ hệ thống tụ điện của trạm.
+
+Core mission for future human habitat
+
+Khôi phục bãi thu năng lượng mặt trời (solar field restoration) và tiến hành cấu trúc lại cầu cáp điện cao áp chịu lực vượt qua vết đứt gãy địa chất nhằm duy trì dòng điện sưởi ấm và vận hành cơ bản cho hệ thống sinh tồn của Hab trước khi mạng lưới điện hoàn toàn sụp đổ.
+
+Character state clarity
+
+[Aiden] khi ở trong: Workshop mờ tối không có điện sưởi, buồng chứa tụ điện trung tâm bốc hơi lạnh, và airlock interior bám đầy sương giá dày đặc.
+
+[Grant] khi ở ngoài: Bãi pin mặt trời đổ nát sạt lở (solar field exterior), miệng khe nứt địa chất mới nứt rộng (exposed ridge), và đáy rãnh đứt gãy gồ ghề đầy bụi sét.
+
+Xác nhận: Chỉ có một con người duy nhất, không có đồng đội, không có robot phản hồi cảm xúc.
+
+Primary anomaly / discovery
+
+Khi [Grant] tiếp cận mảng pin mặt trời số 4 bị mất kết nối, anh phát hiện sợi cáp ngầm bọc thép chịu tải cao thế của trạm đã bị kéo đứt văng xuống khe nứt địa chất mới xuất hiện. Đáng kinh ngạc hơn, dòng điện cao áp không hề bị ngắt mà đang có một luồng năng lượng khổng lồ phóng ngược từ dưới hố sâu lên, tạo ra các dải phát quang lân quang màu cam xám kỳ dị uốn lượn xung quanh các giá đỡ kim loại bị uốn cong cơ học của bãi pin.
+
+Hidden rational cause
+
+Sự sụp lún địa tầng quy mô lớn (caldera collapse) của thung lũng đã tạo ra áp lực uốn cong cơ học khổng lồ lên các vỉa quặng áp điện (piezoelectric) tự nhiên—cụ thể là mạch thạch anh ($SiO_2$) và tourmaline xen kẽ đá basalt cổ dưới lòng đất. Khi các mảng địa tầng bị nén chặt đến cực hạn bởi sức nặng hàng vạn tấn, chúng sinh ra hiệu ứng áp điện (piezoelectric effect) khổng lồ phóng ra điện thế xoay chiều cực cao ($>10,000\text{ V}$). Sợi cáp ngầm bị đứt của Hab rơi xuống đã vô tình tiếp xúc trực tiếp với vỉa quặng áp điện này, tạo thành một mạch dẫn ngược dòng điện áp điện khổng lồ trực tiếp về phía hệ thống tụ điện của Hab.
+
+Meteor / impact role
+
+Source of damage & Catalyst – Một dư chấn sụt lún ngầm từ vụ va chạm thiên thạch lớn ở bán kính 15km trước đó kích hoạt sự sụt lở dồn dập tại sườn đồi chứa mạng lưới điện mặt trời, trực tiếp làm sụt nghiêng 40% giàn pin và nén chặt vỉa quặng áp điện bên dưới móng trạm.
+
+Hazard stack
+
+Nguy cơ nổ cụm tụ điện lưu trữ (Critical battery depletion): Dòng điện áp điện cao thế xoay chiều liên tục nhồi ngược vào hệ thống lưu trữ điện DC của Hab, đe dọa làm nóng chảy và phát nổ toàn bộ dãy tụ điện Lithium-ion của trạm trong vòng 30 phút.
+
+Sạt lở sườn dốc trượt cát (Terrain slip): Bãi cát bụi dốc $40^\circ$ bao quanh bãi pin cực kỳ kém ổn định do chấn động địa chất, liên tục sạt trượt và kéo lê các dầm đỡ sắt nhọn có thể cắt đứt cáp bảo hiểm của [Grant].
+
+Phóng điện áp điện khí quyển mỏng: Hiện tượng áp điện khuếch đại điện trường khí quyển carbon dioxide mỏng của Sao Hỏa, tạo ra các tia lửa tĩnh điện màu cam liên tục đánh mạnh vào găng tay bọc sợi carbon của [Grant] khi anh tiếp cận đầu cáp.
+
+Mất hệ thống sưởi ấm nội thất: Để ngăn chặn vụ nổ tụ điện, [Aiden] buộc phải ngắt hoàn toàn cầu dao nguồn chính của Hab, đưa toàn bộ môi trường sống bên trong vào trạng thái đóng băng nhanh dưới đêm lạnh cực hạn.
+
+Solitude proof beats
+
+[Aiden] đứng một mình trong gian workshop tối đen không có lò sưởi, dùng quai hàm cắn chặt để tuốt vỏ bảo vệ một sợi cáp đồng chịu tải nặng 15kg bằng lực cơ thô bạo do cả hai bàn tay đang phải gồng giữ kìm cơ học ép cốt cách điện.
+
+[Grant] đứng quỳ rạp cô độc giữa bãi pin mặt trời bị xé rách làm hai bởi vết nứt sâu hoắm, gió đêm rít qua những tấm silicon vỡ nát phát ra âm thanh như tiếng huýt sáo thê lương, bóng anh đơn độc chìm vào hoàng hôn tím ngắt nhạt nhòa của Sao Hỏa.
+
+[Aiden] trở về Hab, ngồi thụp dưới sàn cabin đóng băng mờ tối, run rẩy tự hà hơi ấm vào hai bàn tay nứt nẻ rớm máu vì lạnh, câm lặng nhìn màn hình hiển thị trạng thái điện năng tối tăm không một bóng người chia sẻ hay đón tiếp.
+
+Resilience proof beats
+
+Mặc cho dòng phóng điện áp điện đánh lép bép làm cháy mém lớp sợi polymer ngoài cổ găng tay, [Grant] vẫn nghiến răng chịu đựng cơn đau giật điện tê dại, dùng cả hai tay ghì chặt đầu cáp bị đứt để kéo nó ra khỏi khe nứt chứa mạch quặng áp điện.
+
+Khi sườn cát sạt lở cuốn trôi hai tấm pin mặt trời nặng nề đè sấn lên đùi trái, [Grant] không bỏ chạy; anh dùng búa cơ học đóng mạnh gãy khớp nối tấm pin để tự giải thoát chân mình, quyết không buông dây cáp dẫn điện cốt lõi của trạm.
+
+[Aiden] sau khi khôi phục được dòng điện, dù toàn thân run rẩy vì kiệt sức và sốc điện nhẹ, vẫn tự mình lết bò dưới sàn gầm chứa tụ điện để dùng tay nhặt sạch từng mảnh cách điện bằng sứ bị vỡ, đảm bảo không có nguy cơ cháy nập thứ cấp cho ca làm việc ngày mai.
+
+Trailer beats
+
+Scene 1: Góc nhìn toàn cảnh từ trên cao của bãi pin mặt trời khổng lồ của Hab. Một vệt nứt ngoằn ngoèo, sâu hoắm xẻ dọc bãi pin làm hai nửa, uốn cong các khung kim loại kiên cố như những chiếc tăm tre.
+
+Scene 2: Trong gian workshop mờ tối không có điện sưởi, [Aiden] thở ra những luồng hơi nước dày đặc trắng xóa. Ánh sáng duy nhất phát ra từ chiếc đèn pin đeo đầu yếu ớt sắp cạn pin phản chiếu khuôn mặt dính bụi đồng xám xịt.
+
+Scene 3: Trên sườn dốc trơn trượt của khe nứt, [Grant] đang bám chặt vào một sợi dây cáp thép cứu sinh. Phía dưới sâu thẳm hố tối đen, những tia lửa nhỏ màu cam đỏ rực lên liên tục theo nhịp điệu của lòng đất đang nứt vỡ.
+
+Act 1 — Fragile Routine + Mission Goal
+
+Interior (Hab): [Aiden] đang theo dõi hệ thống phân phối tải điện trong phòng điều khiển Hab. Đột ngột, chuông cảnh báo quá tải điện áp từ bãi pin mặt trời ngoài trời réo vang dữ dội. Đồng hồ hiển thị nhiệt độ của các tụ điện Lithium-ion trong nhà bắt đầu tăng vọt do nhận một dòng điện xoay chiều cực cao bí ẩn. Nếu không ngắt mạch và khôi phục dòng sạc một chiều của bãi pin ngay lập tức, các tụ điện lưu trữ năng lượng sẽ tự phát nổ, phá hủy hoàn toàn trung tâm phân phối điện của trạm trước đêm lạnh.
+
+Mission: [Aiden] chuẩn bị bộ kìm bọc cao su cách điện chịu tải cao, một cuộn cáp đồng bọc chì dự phòng và các thanh chêm cơ học. Anh thực hiện EVA khẩn cấp ra khu vực bãi thu năng lượng mặt trời (solar field exterior) để cô lập đường cáp bị đứt.
+
+Anomaly: Khi ngắt cầu dao tổng ngoài trời, [Grant] nhận thấy các thiết bị đo dòng vẫn hiển thị dòng điện chạy ngược từ vết nứt đất lên với điện thế tăng dần theo từng đợt rung động địa chấn của thung lũng.
+
+Act 2 — Outside Investigation + Escalation
+
+Exterior (Solar Field Exterior): [Grant] tiếp cận rìa của vết nứt địa chất mới xuất hiện. Gió đêm quét qua sườn đồi, cuốn theo những đám mây bụi sét xám mịn. Anh kinh ngạc nhìn thấy vệt cáp dẫn điện chính bọc thép dày cộm của Hab đã bị đứt gãy kéo dài thòng xuống khe sâu. Dưới đáy khe nứt, những mảng quặng đá basalt xám bóng tự phát ra những tia lửa điện màu cam đỏ nhấp nháy liên tục theo từng nhịp co rút của địa tầng thung lũng.
+
+Deeper Discovery: [Grant] đưa máy đo điện môi cầm tay sát khe nứt; thiết bị liên tục báo động quá tải điện thế ($>10,000\text{ V}$). Anh nhận ra lực nén ép khổng lồ từ sự co ngót của thung lũng sạt lở đã đè nén mạch quặng thạch anh dưới sâu, tạo ra hiệu ứng áp điện khổng lồ trực tiếp phóng ngược vào cáp đứt của trạm. Dòng điện áp điện xoay chiều này đang trực tiếp sạc phá hủy hệ thống tụ điện một chiều của Hab.
+
+Escalation: Sườn cát dốc đứng của khe nứt bắt đầu sạt lở do các đợt rung chấn liên tiếp của thung lũng sụt lún. Một giàn pin nặng trượt xuống, uốn cong các chân dầm thép khóa chặt chân đùi của [Grant] sát rìa miệng hố. Đồng thời, tĩnh điện tích tụ trong không khí mỏng phóng ra các tia lửa điện làm tê liệt tạm thời cảm biến hiển thị trên mũ bảo hiểm của anh, che khuất $90\%$ tầm nhìn trong bóng tối hoàng hôn đang sụp xuống.
+
+Act 3 — Crisis + Decision + Aftermath
+
+Climax: Hệ thống lưu trữ điện của Hab phát tín hiệu cảnh báo nổ tụ điện trong vòng 5 phút do quá nhiệt dòng xoay chiều ngược. [Grant] đang bị kẹt chân dưới dầm tấm pin bị nghiêng, trong khi tay phải anh đang nắm lấy sợi cáp áp điện nóng bỏng rực tia lửa. Gió đêm lạnh $-100^\circ\text{C}$ bắt đầu gào rú thổi mạnh dọc theo sườn dốc trơn trượt.
+
+Climax decision: [Grant] phải đưa ra quyết định sinh tử: Dùng kìm cơ học nặng đập nát hoàn toàn tủ chia nguồn năng lượng mặt trời ngoài trời để ngắt kết nối vật lý với bãi pin hoàn toàn nhằm triệt tiêu dòng áp điện (nhưng hành động này sẽ phá hủy vĩnh viễn $60\%$ khả năng sạc điện một chiều của bãi pin mặt trời của Hab, đẩy trạm vào tình trạng thiếu điện trầm trọng kéo dài); hoặc chấp nhận dùng tay trái (đeo găng bảo hộ mỏng cách điện kém) bò rạp sát rìa sạt lở để tự tay đấu nối ngược một cầu chì cách điện thủy tinh thủ công vào đầu cáp áp điện nóng bỏng dưới hố sâu để xả dòng tĩnh điện xuống mạch đất basalt giàu từ tính trước khi tụ điện trong nhà phát nổ.
+
+Aftermath: [Grant] quyết định dùng tay đấu nối cầu chì xả tĩnh điện đất. Cú phóng hồ quang cực mạnh xé toạc lớp bọc găng tay trái của anh, gây bỏng điện sâu nghiêm trọng các ngón tay và làm nổ tung bộ cảm biến đo nhịp tim của suit bảo hộ. Anh ngắt được dòng áp điện dị thường, giữ lại mạng lưới pin mặt trời toàn vẹn nhưng bàn tay trái hoàn toàn mất cảm giác vì bỏng điện lạnh. [Grant] lết trở lại airlock trong tình trạng kiệt quệ, run rẩy chịu đựng cơn sốt co giật do dòng điện cao áp chạy qua cơ thể.
+
+Aftermath & Cliffhanger: Bãi pin mặt trời hoạt động trở lại, dòng sạc điện một chiều được khôi phục cứu sống các tụ điện của trạm. [Aiden] ngồi tự sơ cứu quấn chặt gạc băng y tế dính máu lên bàn tay trái bỏng điện mưng mủ. Tuy nhiên, khi anh phân tích biểu đồ xung áp điện thu được từ sự nén ép thạch anh trong khe nứt địa chất, anh sững sờ nhận ra chu kỳ nén ép địa tầng đang tăng tốc với tốc độ lũy thừa: Lực uốn cong của thung lũng đang dồn nén về phía lò phản ứng ngầm nhanh gấp đôi dự toán ban đầu. Mặt đất nâng đỡ Hab của anh không chỉ đang sụp lún từ từ, mà nó đang tiến sát tới điểm sập gãy cấu trúc toàn diện (caldera collapse) chỉ trong vòng chưa đầy 6 tuần tới—sớm hơn rất nhiều so với mọi kế hoạch sơ tán hay gia cố mà anh có thể chuẩn bị một mình.
+
+Hook 1
+
+Hiện tượng áp điện (piezoelectric effect) khổng lồ từ lòng đất bị nén ép phát ra những tia lửa điện màu cam đỏ lân quang ma mị chạy dọc theo các vết nứt đá basalt trong đêm lạnh của hành tinh đỏ.
+
+Hook 2
+
+Âm thanh rè gắt chói tai của dòng điện tĩnh cao thế phóng qua găng tay của bộ đồ EVA, hòa lẫn với tiếng nứt gãy của đất đá sạt lở từ rìa thung lũng đang co rút.
+
+Hook 3
+
+Quyết định dùng bàn tay cách điện mỏng để đấu nối trực tiếp cầu chì cao áp xả tĩnh điện cứu lấy trái tim năng lượng của trạm, đánh đổi bằng chấn thương bỏng điện sâu của người kỹ sư mở đường.
+
+Hook 4
+
+Bí ẩn vật lý địa chất đáng sợ khi chính áp lực của sự sụp sập thung lũng đang biến mặt đất dưới chân thành một chiếc máy phát điện cao áp khổng lồ đang từ từ bóp nghẹt mạng lưới sinh tồn của con người.
+
+Climax decision
+
+Chấp nhận dùng bàn tay trái cách điện mỏng để đấu nối thủ công cầu chì xả dòng áp điện cao thế $10,000\text{ V}$ trực tiếp xuống đất đá basalt giàu từ tính bất chấp rủi ro phóng hồ quang điện phá hủy bộ đồ bảo hộ và bỏng điện lạnh sâu tay, nhằm cứu lấy cụm tụ điện lưu trữ năng lượng cốt lõi của Hab.
+
+Ending image
+
+[Aiden] ngồi tựa đầu vào vách kim loại của buồng ngủ tối tăm không có sưởi, bàn tay trái quấn băng gạc dày cộm rỉ máu đỏ sẫm được tì lên ngực. Bên ngoài cửa sổ nhỏ, bãi pin mặt trời khổng lồ im lìm phản chiếu ánh trăng mờ nhạt của Sao Hỏa. Nhưng trên màn hình địa chấn nhấp nháy bên cạnh, đồ thị biểu thị lực nén ép của địa tầng đang uốn cong vọt lên một vạch đỏ sẫm rùng mình, lạnh lùng báo hiệu thời gian sinh tồn của ngôi nhà duy nhất chỉ còn tính bằng tuần.
+
+Why this episode feels different
+
+Tập phim này đưa mối đe dọa địa chất từ các tập trước thành một hiểm họa vật lý địa chất áp điện cực đoan (piezoelectric geohazard) thực tế. Nó biến chính kết cấu đá nền tự nhiên thành một nguồn phát năng lượng thù địch đe dọa phá hủy công nghệ của con người, đẩy nhân vật vào cuộc chiến năng lượng ngột ngạt và đưa áp lực thời gian của toàn series về mốc đếm ngược sinh tử cực kỳ cận kề.
+
+Conversion notes
+
+Hình ảnh: Tông màu chủ đạo là sắc đen thẫm của khe nứt basalt, sắc cam đỏ rực rỡ của các tia chớp phóng điện áp điện, tương phản với ánh sáng xanh lam nhạt lạnh lẽo của những tấm pin mặt trời bị nứt rạn dưới ánh hoàng hôn tím xám.
+
+Âm thanh: Tiếng o o trầm của dòng điện tĩnh áp thế lớn dội qua micro mũ bảo hiểm, tiếng gạch sứ cách điện vỡ vụn giòn tan dưới áp lực, tiếng thở dốc nghẹn ngào co rút cơ thể vì lạnh và sốc chấn thương điện của nhân vật.
